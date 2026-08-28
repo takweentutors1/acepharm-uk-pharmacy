@@ -1,5 +1,6 @@
 ---
 import '@acepharm/design-tokens/tokens.css';
+import { CookieConsentBanner } from '@acepharm/ui';
 
 interface Props {
   title?: string;
@@ -73,5 +74,14 @@ const {
         </div>
       </div>
     </footer>
+
+    <script>
+      import { tracker } from '@acepharm/ui';
+      // Initialize tracker on page load
+      tracker.init({
+        cloudflareWebAnalyticsToken: import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN,
+      });
+    </script>
+    <CookieConsentBanner client:idle />
   </body>
 </html>

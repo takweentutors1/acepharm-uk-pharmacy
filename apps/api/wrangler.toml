@@ -7,7 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "acepharm-db"
-database_id = "local-d1-placeholder"
+database_id = "b3ae5b86-7cdb-4c4a-b966-c64a0caef376"
+migrations_dir = "drizzle/migrations"
 
 # Vectorize (Embeddings index for Ace RAG)
 [[vectorize]]
@@ -21,13 +22,44 @@ binding = "AI"
 # KV Namespaces (Rate limits & Response Caching)
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "local-kv-ratelimit-placeholder"
+id = "8b8d9da569bf4df6b03ed4398a0d3a0b"
 
 [[kv_namespaces]]
 binding = "CACHE"
-id = "local-kv-cache-placeholder"
+id = "173f61310b0f45fb85541bc2fc0cf776"
 
 # R2 Buckets (Assets & Exports)
 [[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "acepharm-assets"
+
+# ==========================================
+# Staging Environment Configuration
+# ==========================================
+[env.staging]
+name = "acepharm-api-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "acepharm-db-staging"
+database_id = "be2624a9-de6d-46d2-8a7c-f65e3b124e1a"
+migrations_dir = "drizzle/migrations"
+
+[[env.staging.vectorize]]
+binding = "VECTORIZE"
+index_name = "acepharm-content"
+
+[env.staging.ai]
+binding = "AI"
+
+[[env.staging.kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "945bcb8d14e34a29b716fdbeecd0bdd5"
+
+[[env.staging.kv_namespaces]]
+binding = "CACHE"
+id = "0f795f8a709444acb84b6975174b3baf"
+
+[[env.staging.r2_buckets]]
 binding = "ASSETS"
 bucket_name = "acepharm-assets"

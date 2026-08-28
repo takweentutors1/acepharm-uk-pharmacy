@@ -9,6 +9,7 @@
     "dev:api": "pnpm --filter @acepharm/api dev",
     "build": "pnpm --recursive build",
     "lint": "pnpm --recursive lint",
+    "test": "pnpm --recursive --if-present test",
     "typecheck": "pnpm --recursive typecheck",
     "clean": "pnpm --recursive exec rm -rf node_modules dist .astro .next"
   },

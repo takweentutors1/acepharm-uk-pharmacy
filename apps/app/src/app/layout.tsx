@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AnalyticsProvider } from '@/components/analytics-provider';
+
 export default function RootLayout({
   children,
 }: {
@@ -18,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en-GB">
       <body className="min-h-screen bg-canvas text-ink antialiased font-sans flex flex-col">
-        {children}
+        <AnalyticsProvider>
+          {children}
+        </AnalyticsProvider>
       </body>
     </html>
   );

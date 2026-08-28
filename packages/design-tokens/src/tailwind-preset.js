@@ -1,7 +1,8 @@
 import { colors, radii, spacing, fonts } from './index.js';
 
-/** @type {import('tailwindcss').Config} */
+/** @type {Partial<import('tailwindcss').Config>} */
 export default {
+  content: [],
   theme: {
     extend: {
       colors: {
