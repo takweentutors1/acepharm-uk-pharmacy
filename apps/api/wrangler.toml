@@ -1,0 +1,33 @@
+name = "acepharm-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database (Single System of Record - region pinned to weur)
+[[d1_databases]]
+binding = "DB"
+database_name = "acepharm-db"
+database_id = "local-d1-placeholder"
+
+# Vectorize (Embeddings index for Ace RAG)
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "acepharm-content"
+
+# Workers AI (Free embeddings model)
+[ai]
+binding = "AI"
+
+# KV Namespaces (Rate limits & Response Caching)
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "local-kv-ratelimit-placeholder"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "local-kv-cache-placeholder"
+
+# R2 Buckets (Assets & Exports)
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "acepharm-assets"

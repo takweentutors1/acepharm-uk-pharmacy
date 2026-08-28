@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button } from '@acepharm/ui';
+import { Badge } from '@acepharm/ui';
+---
+
+<BaseLayout>
+  <div class="py-20 sm:py-28 max-w-5xl mx-auto px-4 text-center">
+    <div class="inline-block mb-4">
+      <Badge variant="default">Built exclusively for UK Pharmacy Students</Badge>
+    </div>
+    <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-ink max-w-3xl mx-auto leading-tight">
+      Created by pharmacists. Built for pharmacy students.
+    </h1>
+    <p class="mt-6 text-lg sm:text-xl text-slate max-w-2xl mx-auto leading-relaxed">
+      Curriculum-mapped practice questions, option-by-option clinical rationales, honest analytics, and an AI tutor grounded in AcePharm’s reviewed content.
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-4">
+      <a href="https://app.acepharm.co.uk/register">
+        <Button size="lg" variant="primary">Start revising free — 30 questions/month</Button>
+      </a>
+      <a href="/question-bank">
+        <Button size="lg" variant="outline">Explore question bank</Button>
+      </a>
+    </div>
+  </div>
+</BaseLayout>
