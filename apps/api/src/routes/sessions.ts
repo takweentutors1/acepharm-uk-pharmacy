@@ -14,6 +14,7 @@ import {
   freeTierUsage
 } from '../db/schema';
 import { requireAuth, type AuthContext } from '../middleware/auth';
+import { sendTransactionalEmail, generateUsageWarningEmail } from '../lib/email-service';
 
 const sessionsRouter = new Hono<AuthContext>();
 
@@ -262,6 +263,26 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
           })
           .where(eq(freeTierUsage.id, existingUsage.id))
       );
+
+      // Trigger Usage Warning Email at 25 questions (5 remaining)
+      if (freeTierCount === 25) {
+        const resendApiKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
+        const userEmail = (user as any).email || 'student@acepharm.co.uk';
+        const warningEmail = generateUsageWarningEmail({
+          learnerName: (user as any).displayName || 'Learner',
+          questionsAnswered: 25,
+          remainingQuestions: 5,
+        });
+
+        // Fire-and-forget email dispatch
+        c.executionCtx.waitUntil(
+          sendTransactionalEmail(resendApiKey, {
+            to: userEmail,
+            subject: warningEmail.subject,
+            html: warningEmail.html,
+          })
+        );
+      }
     }
   }
 

@@ -4,6 +4,11 @@ import { eq } from 'drizzle-orm';
 import { subscriptions, users } from '../db/schema';
 import { requireAuth } from '../middleware/auth';
 import type { AuthContext } from '../middleware/auth';
+import { 
+  sendTransactionalEmail, 
+  generateReceiptEmail, 
+  generateCancellationEmail 
+} from '../lib/email-service';
 
 export const stripeRoutes = new Hono<AuthContext>();
 
@@ -130,6 +135,24 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
       })
       .where(eq(subscriptions.id, sub.id));
   }
+
+  // Trigger Resend Cancellation Confirmation Email
+  const resendApiKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
+  const userEmail = (user as any).email || 'student@acepharm.co.uk';
+  const cancelEmail = generateCancellationEmail({
+    learnerName: (user as any).displayName || 'Learner',
+    accessUntilFormatted: periodEnd.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
+  });
+
+  await sendTransactionalEmail(resendApiKey, {
+    to: userEmail,
+    subject: cancelEmail.subject,
+    html: cancelEmail.html,
+  });
 
   return c.json({
     success: true,
