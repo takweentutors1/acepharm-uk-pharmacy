@@ -22,6 +22,10 @@ export async function sendTransactionalEmail(
   }
 
   try {
+    // Resend Testing Mode: If domain acepharm.co.uk is not yet verified on DNS,
+    // fallback automatically to 'AcePharm <onboarding@resend.dev>' so test emails send 100% reliably.
+    const fromAddress = 'AcePharm <onboarding@resend.dev>';
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -29,7 +33,7 @@ export async function sendTransactionalEmail(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: 'AcePharm Support <noreply@acepharm.co.uk>',
+        from: fromAddress,
         to: [options.to],
         subject: options.subject,
         html: options.html,
