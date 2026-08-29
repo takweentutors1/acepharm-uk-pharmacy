@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Card, MarkdownRenderer } from '@acepharm/ui';
 import { ReportQuestionModal } from '@/components/report-modal';
+import { AskAcePanel } from '@/components/ask-ace-panel';
+import { FloatingHighlightMenu } from '@/components/floating-highlight-menu';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -216,6 +218,9 @@ export function QuestionPlayer({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSubmitted, selectedOptionId, question.options, confidence, onNext]);
 
+  const [highlightedText, setHighlightedText] = useState<string>('');
+  const playerRef = React.useRef<HTMLDivElement>(null);
+
   const handleSubmit = () => {
     if (!selectedOptionId || isSubmitted) return;
     // OPTIMISTIC-UI SUBMISSION: Immediate feedback rendering (<300ms perceived latency)
@@ -226,7 +231,15 @@ export function QuestionPlayer({
   const isUserCorrect = selectedOption?.isCorrect ?? false;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div ref={playerRef} className="max-w-4xl mx-auto space-y-6 relative">
+      {/* Highlight-To-Ask Floating Menu (Mobile & Desktop Text Selection Handles) */}
+      <FloatingHighlightMenu
+        containerRef={playerRef}
+        onAskAce={(text) => {
+          setHighlightedText(text);
+        }}
+      />
+
       {/* Top Session Progress Bar */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border text-xs">
         <div className="flex items-center gap-3">
@@ -606,6 +619,14 @@ export function QuestionPlayer({
               />
             </div>
           </details>
+
+          {/* 5. ASK ACE AI CLINICAL TUTOR PANEL (Milestone 5 & Section 5.2) */}
+          <AskAcePanel
+            questionId={question.id}
+            questionPublicId={question.publicId}
+            isCalculation={question.questionType === 'calculation'}
+            highlightedText={highlightedText}
+          />
         </div>
       )}
 

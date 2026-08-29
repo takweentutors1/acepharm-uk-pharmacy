@@ -191,6 +191,7 @@ import { curriculumRouter } from './routes/curriculum';
 import { questionsRouter } from './routes/questions';
 import { sessionsRouter } from './routes/sessions';
 import { analyticsRouter } from './routes/analytics';
+import { aceRouter } from './routes/ace';
 
 admin.route('/curriculum', curriculumRouter);
 admin.route('/questions', questionsRouter);
@@ -201,5 +202,51 @@ app.route('/api/v1/curriculum', curriculumRouter);
 app.route('/api/v1/questions', questionsRouter);
 app.route('/api/v1/sessions', sessionsRouter);
 app.route('/api/v1/analytics', analyticsRouter);
+app.route('/api/v1/ace', aceRouter);
 
-export default app;
+import { runWeeklyInsightCron, generateSingleWeeklyInsight } from './lib/weekly-insight-generator';
+
+// GET Cached Weekly Insight (Never generated on page load - Section 5.2 & 5.3)
+app.get('/api/v1/ace/weekly-insight', async (c) => {
+  const authUser = c.get('user');
+  const userId = authUser?.id || c.req.query('user_id') || 'guest-learner';
+
+  // 1. Try reading from KV Cache (0 perceived latency)
+  if (c.env.CACHE) {
+    try {
+      const cached = await c.env.CACHE.get(`ace_weekly_insight:${userId}`, 'json');
+      if (cached) {
+        return c.json({
+          ...cached,
+          source: 'kv_cache',
+        });
+      }
+    } catch (err) {
+      console.warn('Weekly insight KV cache error:', err);
+    }
+  }
+
+  // 2. Return standard placeholder if cron has not run yet (avoid live heavy generation on page load)
+  return c.json({
+    userId,
+    insightParagraph: 'Complete your first practice sessions this week to receive your scheduled weekly clinical coaching insight from Ace.',
+    confidentlyIncorrectCount: 0,
+    source: 'default_empty',
+  });
+});
+
+export { app };
+
+export default {
+  fetch: app.fetch,
+  async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
+    ctx.waitUntil(
+      (async () => {
+        const db = drizzle(env.DB);
+        const zenApiKey = env.ZEN_API_KEY;
+        const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
+        console.log(`Weekly insight cron completed: processed ${result.processed}, cached ${result.cached}`);
+      })()
+    );
+  },
+};
