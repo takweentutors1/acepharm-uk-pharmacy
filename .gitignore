@@ -9,6 +9,10 @@ dist
 out
 .output
 .wrangler
+.vercel
+*.tsbuildinfo
+*-report*.json
+lighthouse-*.json
 
 # Logs
 npm-debug.log*
