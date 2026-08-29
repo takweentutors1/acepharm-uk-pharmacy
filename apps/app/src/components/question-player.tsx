@@ -383,15 +383,15 @@ export function QuestionPlayer({
             const showResults = isSubmitted;
 
             // Strict Selection Styling: Border & Tint only (No plain generic colors)
-            let optionStyles = 'border-border bg-surface hover:bg-canvas/60 text-ink';
+            let optionStyles = 'border-border bg-surface hover:bg-canvas/60 text-ink focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none';
             if (isSelected && !showResults) {
-              optionStyles = 'border-indigo bg-indigo/5 ring-1 ring-indigo text-ink shadow-sm';
+              optionStyles = 'border-indigo bg-indigo/5 ring-2 ring-indigo text-ink shadow-sm focus-visible:outline-none';
             } else if (showResults) {
               if (opt.isCorrect) {
                 // Multi-sensory WCAG 2.2 AA feedback (Border, Tint, Text, Icon)
-                optionStyles = 'border-teal bg-teal/10 text-ink ring-1 ring-teal shadow-sm';
+                optionStyles = 'border-teal bg-teal/10 text-ink ring-2 ring-teal shadow-sm';
               } else if (isSelected && !opt.isCorrect) {
-                optionStyles = 'border-rose-500 bg-rose-50/70 text-ink ring-1 ring-rose-500 shadow-sm';
+                optionStyles = 'border-rose-500 bg-rose-50/70 text-ink ring-2 ring-rose-500 shadow-sm';
               } else {
                 optionStyles = 'border-border/60 bg-surface opacity-60 text-slate';
               }
@@ -400,8 +400,18 @@ export function QuestionPlayer({
             return (
               <div
                 key={opt.id}
+                role="radio"
+                aria-checked={isSelected}
+                aria-label={`Option ${opt.label}: ${opt.content}`}
+                tabIndex={isSubmitted ? -1 : 0}
+                onKeyDown={(e) => {
+                  if (!isSubmitted && (e.key === ' ' || e.key === 'Enter')) {
+                    e.preventDefault();
+                    setSelectedOptionId(opt.id);
+                  }
+                }}
                 onClick={() => !isSubmitted && setSelectedOptionId(opt.id)}
-                className={`p-4 rounded-card border transition-all ${
+                className={`p-4 rounded-card border transition-all select-none ${
                   !isSubmitted ? 'cursor-pointer' : 'cursor-default'
                 } ${optionStyles}`}
               >
@@ -415,9 +425,9 @@ export function QuestionPlayer({
                     </div>
                   </div>
 
-                  {/* Icon Feedback (Never relies on colour alone) */}
+                  {/* Icon Feedback (Never relies on colour alone for VoiceOver / NVDA & low vision) */}
                   {showResults && (
-                    <div className="shrink-0 pt-0.5">
+                    <div className="shrink-0 pt-0.5" aria-hidden="true">
                       {opt.isCorrect ? (
                         <CheckCircle2 className="w-5 h-5 text-teal" />
                       ) : isSelected && !opt.isCorrect ? (
