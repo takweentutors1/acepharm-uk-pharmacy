@@ -47,7 +47,7 @@ class AnalyticsTracker {
   /**
    * Initializes client telemetry & analytics when consent permits.
    */
-  public init(config: { cloudflareWebAnalyticsToken?: string; sentryDsn?: string } = {}) {
+  public init(config: { cloudflareWebAnalyticsToken?: string; sentryDsn?: string; gaMeasurementId?: string } = {}) {
     if (typeof window === 'undefined' || this.initialized) return;
 
     this.cfToken = config.cloudflareWebAnalyticsToken || null;
@@ -72,12 +72,37 @@ class AnalyticsTracker {
     try {
       if (consent.analytics) {
         this.loadCloudflareWebAnalytics();
+        this.loadGoogleAnalytics();
       }
       if (consent.telemetry) {
         this.loadSentry();
       }
     } catch {
       // Non-negotiable: Analytics initialization failure is silent
+    }
+  }
+
+  private loadGoogleAnalytics() {
+    const gaId = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID) || 'G-ACEPHARMUK';
+    if (!gaId || document.getElementById('ga4-script')) return;
+
+    try {
+      const script = document.createElement('script');
+      script.id = 'ga4-script';
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+      document.head.appendChild(script);
+
+      const win = window as any;
+      win.dataLayer = win.dataLayer || [];
+      const gtag = (...args: any[]) => {
+        win.dataLayer.push(args);
+      };
+      win.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', gaId, { anonymize_ip: true });
+    } catch {
+      // Silent catch
     }
   }
 

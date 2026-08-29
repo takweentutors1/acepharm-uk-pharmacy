@@ -1,0 +1,73 @@
+# robots.txt for AcePharm UK (https://acepharm.co.uk)
+# Explicit AEO/GEO & Search Crawler Policy (Section 14)
+
+# ==============================================================================
+# 1. Global Crawler Directives
+# ==============================================================================
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /question-bank
+Allow: /ace
+Allow: /pricing
+Allow: /about
+Allow: /editorial-standards
+Allow: /faq
+Allow: /contact
+Allow: /blog
+Allow: /privacy
+Allow: /terms
+Allow: /cookie-policy
+Allow: /ai-use-policy
+Allow: /accessibility
+Allow: /llms.txt
+
+# Strictly disallow authenticated learner application and administrative routes
+Disallow: /app/
+Disallow: /admin/
+Disallow: /session/
+Disallow: /api/
+
+# ==============================================================================
+# 2. Known AI Answer & Generative Engine Crawlers (Explicitly Allowed for AEO/GEO)
+# ==============================================================================
+User-agent: GPTBot
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: CCBot
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+
+# ==============================================================================
+# 3. XML Sitemap Reference
+# ==============================================================================
+Sitemap: https://acepharm.co.uk/sitemap.xml

@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button, Card } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="About — AcePharm"
+  description="Pharmacy education deserves better digital tools. AcePharm exists to make pharmacy revision clearer, more focused and easier to sustain."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Pharmacy education deserves better digital tools.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        AcePharm exists to make pharmacy revision clearer, more focused and easier to sustain.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-4xl mx-auto px-4 space-y-12">
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-4">Our Mission</h2>
+      <p class="text-base text-ink-muted leading-relaxed">
+        AcePharm was founded by a UK pharmacist with experience of pharmacy education and the realities of progressing through pharmacy training. The platform is being built around the resources, explanations and learning support pharmacy students should have had all along.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-4">Philosophy</h2>
+      <p class="text-base text-ink-muted leading-relaxed">
+        We believe students learn best when high-quality content, useful feedback and clear direction are brought together. Generic question banks that output raw percentages do not help learners understand their clinical blind spots.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-4">Vision</h2>
+      <p class="text-base text-ink-muted leading-relaxed">
+        Our long-term ambition is to build the UK’s most useful learning platform for pharmacy students and pharmacists, from the first year of the MPharm degree through registration, prescribing and continued professional development.
+      </p>
+    </div>
+
+    <div class="pt-8 text-center">
+      <a href="https://app.acepharm.co.uk/register">
+        <Button size="lg" variant="primary">Explore AcePharm</Button>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

@@ -290,19 +290,38 @@ ${contextBlock}
     let promptTokens = 0;
     let completionTokens = 0;
 
-    try {
-      const result = await generateText({
-        model,
-        system: SYSTEM_PROMPT,
-        prompt: completeUserPrompt,
-      });
+    // 20-Second Timeout with Retry & Graceful Degradation (Section 5.3)
+    const executeWithRetryAndTimeout = async (retries = 1, timeoutMs = 20000): Promise<{ text: string; usage: any }> => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+          const result = await generateText({
+            model,
+            system: SYSTEM_PROMPT,
+            prompt: completeUserPrompt,
+            abortSignal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+          return { text: result.text, usage: result.usage };
+        } catch (err: any) {
+          console.warn(`Zen gateway generation attempt ${attempt + 1} failed:`, err?.message || err);
+          if (attempt === retries) throw err;
+        }
+      }
+      throw new Error('All generation attempts failed');
+    };
+
+    try {
+      const result = await executeWithRetryAndTimeout(1, 20000);
       responseText = result.text;
       promptTokens = (result.usage as any)?.inputTokens ?? (result.usage as any)?.promptTokens ?? Math.ceil(completeUserPrompt.length / 4);
       completionTokens = (result.usage as any)?.outputTokens ?? (result.usage as any)?.completionTokens ?? Math.ceil(responseText.length / 4);
     } catch (err: any) {
-      console.error('Zen gateway generation error:', err);
-      // Graceful provider failure fallback
+      console.warn('Zen gateway generation timed out or failed after retry:', err);
+      // Graceful provider failure fallback (Section 5.3 Non-Negotiable)
       responseText = "I'm having trouble connecting to my clinical AI model right now. Please refer directly to the verified question explanation and BNF references above.";
       promptTokens = Math.ceil(completeUserPrompt.length / 4);
       completionTokens = Math.ceil(responseText.length / 4);

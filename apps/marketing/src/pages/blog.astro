@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Card } from '@acepharm/ui';
+
+// Mock/D1 dynamic articles
+const ARTICLES = [
+  {
+    slug: 'gphc-calculations-essential-methods',
+    title: 'GPhC Calculations: 5 High-Yield Pitfalls and Step-by-Step Fixes',
+    category: 'Calculations',
+    date: '18 September 2026',
+    excerpt: 'Mastering displacement volumes, pediatric mg/kg body weight scaling, and infusion rate conversions with diagnostic precision.',
+  },
+  {
+    slug: 'asthma-bts-sign-vs-nice-guideline-comparison',
+    title: 'Asthma Inhaler Stepping: BTS/SIGN vs NICE Guidance Compared',
+    category: 'Clinical Revision',
+    date: '12 September 2026',
+    excerpt: 'Understanding the practical differences in adult asthma management steps, MART regimens, and preventer counselling points.',
+  },
+  {
+    slug: 'mpharm-active-recall-spaced-repetition',
+    title: 'How to Structure Spaced Repetition for MPharm Final Exams',
+    category: 'MPharm Study',
+    date: '5 September 2026',
+    excerpt: 'Why raw percentage scores mislead learners, and how calibrating confidence against first-attempt accuracy eliminates clinical blind spots.',
+  },
+];
+---
+
+<BaseLayout
+  title="Blog — AcePharm"
+  description="Pharmacy revision, explained clearly. High-yield clinical revision guides, calculation walkthroughs, and study strategies."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Pharmacy revision, explained clearly.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        High-yield clinical revision guides, calculation walkthroughs, and evidence-led study strategies.
+      </p>
+      
+      <div class="mt-8 flex flex-wrap justify-center gap-2">
+        {['MPharm Study', 'Registration Assessment', 'Calculations', 'Clinical Revision', 'Student Wellbeing', 'AcePharm Updates'].map((cat) => (
+          <span class="px-3.5 py-1 rounded-full bg-white border border-border text-xs font-semibold text-ink-muted hover:border-primary cursor-pointer transition-colors shadow-xs">
+            {cat}
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-5xl mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {ARTICLES.map((article) => (
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div class="flex items-center justify-between text-xs text-ink-subtle mb-3">
+              <span class="px-2.5 py-0.5 rounded-full bg-primary-50 text-primary font-bold">{article.category}</span>
+              <span>{article.date}</span>
+            </div>
+            <h3 class="text-base font-bold text-ink hover:text-primary transition-colors cursor-pointer">
+              {article.title}
+            </h3>
+            <p class="text-xs text-ink-muted mt-2 leading-relaxed">
+              {article.excerpt}
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-border-subtle">
+            <span class="text-xs font-bold text-primary flex items-center gap-1 cursor-pointer">
+              Read guide →
+            </span>
+          </div>
+        </Card>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="Editorial Standards — AcePharm"
+  description="How AcePharm protects the quality of its learning content through strict clinical, educational and editorial review."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        How AcePharm protects the quality of its learning content.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        Every question and subtopic note undergoes rigorous review before appearing in the learner question bank.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-4xl mx-auto px-4 space-y-12">
+    <div class="space-y-6">
+      <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
+        <h3 class="text-base font-bold text-ink mb-2">1. Clinical Review</h3>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          Verifies that clinical scenarios reflect contemporary UK pharmacy practice, dosing rules, contraindications and therapeutic drug monitoring protocols aligned with current BNF and NICE guidance.
+        </p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
+        <h3 class="text-base font-bold text-ink mb-2">2. Educational Review</h3>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          Ensures each question tests appropriate cognitive levels (application and clinical evaluation rather than rote trivia) and includes plausible, instructive distractors with complete rationales.
+        </p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
+        <h3 class="text-base font-bold text-ink mb-2">3. Editorial & Governance Review</h3>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          Enforces British English grammar, precision in terminology (e.g. micrograms written in full), and verifies that question generators never approve their own content.
+        </p>
+      </div>
+    </div>
+
+    <div class="pt-8 text-center">
+      <a href="/contact">
+        <Button variant="outline">Report a content concern</Button>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

@@ -10,9 +10,11 @@ import {
   questionAttempts,
   sessions,
   categories,
-  subtopics
+  subtopics,
+  freeTierUsage
 } from '../db/schema';
 import { requireAuth, type AuthContext } from '../middleware/auth';
+import { sendTransactionalEmail, generateUsageWarningEmail } from '../lib/email-service';
 
 const sessionsRouter = new Hono<AuthContext>();
 
@@ -209,6 +211,81 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
     );
   }
 
+  // Track free-tier usage for non-paid users (30 questions lifetime/month limit)
+  let freeTierCount = 0;
+  const [existingUsage] = await db
+    .select()
+    .from(freeTierUsage)
+    .where(eq(freeTierUsage.userId, user.id))
+    .limit(1);
+
+  if (!existingUsage) {
+    const periodStart = now;
+    const periodEnd = new Date(Date.now() + 30 * 86400000);
+    freeTierCount = 1;
+    statements.push(
+      db.insert(freeTierUsage).values({
+        id: `ft-${crypto.randomUUID()}`,
+        userId: user.id,
+        periodStart,
+        periodEnd,
+        questionsAnswered: 1,
+        createdAt: now,
+        updatedAt: now,
+      })
+    );
+  } else {
+    // Check if 30-day anniversary reset applies
+    const isPastPeriod = new Date() > new Date(existingUsage.periodEnd);
+    if (isPastPeriod) {
+      freeTierCount = 1;
+      const periodStart = now;
+      const periodEnd = new Date(Date.now() + 30 * 86400000);
+      statements.push(
+        db
+          .update(freeTierUsage)
+          .set({
+            periodStart,
+            periodEnd,
+            questionsAnswered: 1,
+            updatedAt: now,
+          })
+          .where(eq(freeTierUsage.id, existingUsage.id))
+      );
+    } else {
+      freeTierCount = existingUsage.questionsAnswered + 1;
+      statements.push(
+        db
+          .update(freeTierUsage)
+          .set({
+            questionsAnswered: sql`${freeTierUsage.questionsAnswered} + 1`,
+            updatedAt: now,
+          })
+          .where(eq(freeTierUsage.id, existingUsage.id))
+      );
+
+      // Trigger Usage Warning Email at 25 questions (5 remaining)
+      if (freeTierCount === 25) {
+        const resendApiKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
+        const userEmail = (user as any).email || 'student@acepharm.co.uk';
+        const warningEmail = generateUsageWarningEmail({
+          learnerName: (user as any).displayName || 'Learner',
+          questionsAnswered: 25,
+          remainingQuestions: 5,
+        });
+
+        // Fire-and-forget email dispatch
+        c.executionCtx.waitUntil(
+          sendTransactionalEmail(resendApiKey, {
+            to: userEmail,
+            subject: warningEmail.subject,
+            html: warningEmail.html,
+          })
+        );
+      }
+    }
+  }
+
   // Execute all writes as a single atomic D1 batch transaction
   if (statements.length > 0) {
     await db.batch(statements as any);
@@ -232,6 +309,8 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
     correctOptionId: allOptions.find((o) => o.isCorrect)?.id,
     options: allOptions,
     explanation,
+    freeTierQuestionsAnswered: freeTierCount,
+    isFreeTierLimitReached: freeTierCount >= 30,
   });
 });
 

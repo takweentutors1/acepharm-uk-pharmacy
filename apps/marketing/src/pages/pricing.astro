@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button, Card } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="Pricing — AcePharm"
+  description="Simple pricing. Full access when you need it. No complicated bundles and no hidden feature tiers."
+>
+  {/* Product & Offer JSON-LD Structured Data for AEO/GEO */}
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'AcePharm Revision Platform',
+    description: 'Comprehensive pharmacy revision platform with clinical questions, calculations, and AI tutoring.',
+    brand: {
+      '@type': 'Brand',
+      name: 'AcePharm'
+    },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'AcePharm Monthly',
+        price: '4.99',
+        priceCurrency: 'GBP',
+        availability: 'https://schema.org/InStock',
+        url: 'https://acepharm.co.uk/pricing',
+        priceValidUntil: '2027-12-31'
+      },
+      {
+        '@type': 'Offer',
+        name: 'AcePharm Yearly',
+        price: '49.99',
+        priceCurrency: 'GBP',
+        availability: 'https://schema.org/InStock',
+        url: 'https://acepharm.co.uk/pricing',
+        priceValidUntil: '2027-12-31'
+      }
+    ]
+  })} />
+
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Simple pricing. Full access when you need it.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        No complicated bundles and no hidden feature tiers.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-5xl mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+      {/* Explorer Plan */}
+      <Card className="p-8 bg-white border border-border-subtle rounded-2xl shadow-sm flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-ink">AcePharm Explorer</h3>
+          <div class="mt-4 flex items-baseline gap-1">
+            <span class="text-4xl font-extrabold text-ink">£0</span>
+          </div>
+          <p class="text-xs text-ink-muted mt-2">Free question sampler</p>
+          <ul class="mt-6 space-y-3 text-xs text-ink-muted">
+            <li class="flex items-center gap-2">✓ Sample question collection</li>
+            <li class="flex items-center gap-2">✓ Limited progress overview</li>
+            <li class="flex items-center gap-2">✓ Bookmarks and personal notes</li>
+            <li class="flex items-center gap-2">✓ No card required</li>
+          </ul>
+        </div>
+        <div class="mt-8">
+          <a href="https://app.acepharm.co.uk/register">
+            <Button variant="outline" className="w-full">Start free</Button>
+          </a>
+        </div>
+      </Card>
+
+      {/* Monthly Plan */}
+      <Card className="p-8 bg-white border border-border-subtle rounded-2xl shadow-sm flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-ink">AcePharm Monthly</h3>
+          <div class="mt-4 flex items-baseline gap-1">
+            <span class="text-4xl font-extrabold text-ink">£4.99</span>
+            <span class="text-xs text-ink-muted">/ month</span>
+          </div>
+          <p class="text-xs text-ink-muted mt-2">Flexible access for focused revision</p>
+          <ul class="mt-6 space-y-3 text-xs text-ink-muted">
+            <li class="flex items-center gap-2">✓ Full available question bank</li>
+            <li class="flex items-center gap-2">✓ Full explanations and references</li>
+            <li class="flex items-center gap-2">✓ Comprehensive progress analytics</li>
+            <li class="flex items-center gap-2">✓ Timed and smart mix sessions</li>
+            <li class="flex items-center gap-2">✓ Ask Ace and the full AI toolkit</li>
+            <li class="flex items-center gap-2">✓ Cancel online anytime</li>
+          </ul>
+        </div>
+        <div class="mt-8">
+          <a href="https://app.acepharm.co.uk/register">
+            <Button variant="outline" className="w-full">Choose monthly</Button>
+          </a>
+        </div>
+      </Card>
+
+      {/* Yearly Plan */}
+      <Card className="p-8 bg-primary-50/60 border-2 border-primary rounded-2xl shadow-md flex flex-col justify-between relative">
+        <div class="absolute -top-3 right-6">
+          <span class="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+            Most popular
+          </span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-ink">AcePharm Yearly</h3>
+          <div class="mt-4 flex items-baseline gap-1">
+            <span class="text-4xl font-extrabold text-ink">£49.99</span>
+            <span class="text-xs text-ink-muted">/ year</span>
+          </div>
+          <p class="text-xs text-primary font-bold mt-1">Save £9.89</p>
+          <p class="text-xs text-ink-muted mt-1 leading-relaxed">
+            Best for students who want consistent access throughout the academic year.
+          </p>
+          <ul class="mt-6 space-y-3 text-xs text-ink-muted">
+            <li class="flex items-center gap-2 font-medium text-ink">✓ Everything in monthly</li>
+            <li class="flex items-center gap-2">✓ One annual payment</li>
+            <li class="flex items-center gap-2">✓ No monthly billing interruptions</li>
+            <li class="flex items-center gap-2">✓ Full access for 12 months</li>
+          </ul>
+        </div>
+        <div class="mt-8">
+          <a href="https://app.acepharm.co.uk/register">
+            <Button variant="primary" className="w-full">Choose yearly</Button>
+          </a>
+        </div>
+      </Card>
+    </div>
+
+    {/* Pricing FAQ */}
+    <div class="mt-20 max-w-3xl mx-auto space-y-6">
+      <h2 class="text-2xl font-bold text-ink text-center mb-8">Pricing FAQ</h2>
+      <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <h3 class="font-bold text-ink text-sm">Are the plans different?</h3>
+        <p class="text-xs text-ink-muted mt-2 leading-relaxed">Monthly and yearly subscribers receive the same product access. The only difference is billing frequency and price.</p>
+      </div>
+      <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <h3 class="font-bold text-ink text-sm">Is there a trial?</h3>
+        <p class="text-xs text-ink-muted mt-2 leading-relaxed">Students can explore a limited selection of questions before subscribing. This provides a more useful demonstration than a short trial that may expire before revision begins.</p>
+      </div>
+      <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <h3 class="font-bold text-ink text-sm">Will my subscription renew automatically?</h3>
+        <p class="text-xs text-ink-muted mt-2 leading-relaxed">Yes, unless cancelled. The renewal date and amount are displayed before purchase and in your account.</p>
+      </div>
+      <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <h3 class="font-bold text-ink text-sm">What happens when I cancel?</h3>
+        <p class="text-xs text-ink-muted mt-2 leading-relaxed">Access continues until the end of the current paid period. Your account and learning history remain available, although paid content becomes locked.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

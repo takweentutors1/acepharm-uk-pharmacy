@@ -1,5 +1,6 @@
 ---
 import '@acepharm/design-tokens/tokens.css';
+import '../styles/global.css';
 import { CookieConsentBanner } from '@acepharm/ui';
 
 interface Props {
@@ -26,31 +27,56 @@ const {
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    
+    {/* Organization Structured Data (JSON-LD) for AEO/GEO */}
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'AcePharm',
+      url: 'https://acepharm.co.uk',
+      logo: 'https://acepharm.co.uk/logo.png',
+      description: 'Educational revision platform designed exclusively for UK pharmacy students, foundation trainees, and GPhC registration candidates.',
+      sameAs: [],
+      knowsAbout: [
+        'Pharmacy Education',
+        'GPhC Registration Assessment',
+        'Clinical Pharmacology',
+        'Pharmaceutical Calculations',
+        'BNF Guidelines',
+        'NICE Guidelines'
+      ]
+    })} />
   </head>
-  <body class="bg-canvas text-ink font-sans antialiased min-h-screen flex flex-col">
-    <header class="border-b border-border bg-surface sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2">
-          <span class="text-2xl font-bold tracking-tight text-indigo">AcePharm</span>
+  <body class="bg-canvas text-ink font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-wash selection:text-indigo">
+    <header class="border-b border-border bg-surface/90 backdrop-blur-md sticky top-0 z-50 transition-all">
+      <div class="max-w-container-max mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo to-teal flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:opacity-90 transition-opacity">
+            A
+          </div>
+          <span class="text-xl font-bold tracking-tight text-ink group-hover:text-indigo transition-colors">AcePharm</span>
         </a>
-        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate">
+        <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate">
           <a href="/features" class="hover:text-ink transition-colors">Features</a>
           <a href="/question-bank" class="hover:text-ink transition-colors">Question Bank</a>
-          <a href="/ace" class="hover:text-ink transition-colors">Ace AI</a>
+          <a href="/ace" class="hover:text-ink transition-colors">Ace AI Tutor</a>
           <a href="/pricing" class="hover:text-ink transition-colors">Pricing</a>
+          <a href="/about" class="hover:text-ink transition-colors">About</a>
+          <a href="/faq" class="hover:text-ink transition-colors">FAQ</a>
+          <a href="/contact" class="hover:text-ink transition-colors">Contact</a>
         </nav>
         <div class="flex items-center gap-3">
           <a
             href="https://app.acepharm.co.uk/login"
-            class="text-sm font-medium text-slate hover:text-ink px-3 py-2"
+            class="text-sm font-medium text-slate hover:text-ink px-3 py-2 transition-colors"
           >
             Log in
           </a>
           <a
             href="https://app.acepharm.co.uk/register"
-            class="inline-flex items-center justify-center rounded-btn bg-indigo px-4 py-2 text-sm font-medium text-surface hover:bg-indigo-deep transition-colors shadow-sm"
+            class="inline-flex items-center justify-center rounded-btn bg-indigo px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-deep active:bg-indigo-deep transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo focus-visible:ring-offset-2"
           >
-            Start free
+            Start revising free
           </a>
         </div>
       </div>
@@ -60,17 +86,55 @@ const {
       <slot />
     </main>
 
-    <footer class="border-t border-border bg-surface py-12 mt-16 text-sm text-slate">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between gap-6">
-        <div>
-          <p class="font-bold text-ink text-base">AcePharm</p>
-          <p class="mt-1 text-xs">Created by pharmacists. Built for pharmacy students.</p>
+    <footer class="border-t border-border bg-surface py-16 mt-20 text-sm text-slate">
+      <div class="max-w-container-max mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          <div>
+            <h4 class="font-bold text-ink text-xs uppercase tracking-wider mb-3">Product</h4>
+            <ul class="space-y-1 text-xs">
+              <li><a href="/features" class="inline-block py-1.5 hover:text-ink transition-colors">Features</a></li>
+              <li><a href="/question-bank" class="inline-block py-1.5 hover:text-ink transition-colors">Question Bank</a></li>
+              <li><a href="/ace" class="inline-block py-1.5 hover:text-ink transition-colors">Ace AI Tutor</a></li>
+              <li><a href="/pricing" class="inline-block py-1.5 hover:text-ink transition-colors">Pricing</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-ink text-xs uppercase tracking-wider mb-3">Resources</h4>
+            <ul class="space-y-1 text-xs">
+              <li><a href="/blog" class="inline-block py-1.5 hover:text-ink transition-colors">Revision Guides</a></li>
+              <li><a href="/faq" class="inline-block py-1.5 hover:text-ink transition-colors">FAQ</a></li>
+              <li><a href="/editorial-standards" class="inline-block py-1.5 hover:text-ink transition-colors">Editorial Standards</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-ink text-xs uppercase tracking-wider mb-3">Company</h4>
+            <ul class="space-y-1 text-xs">
+              <li><a href="/about" class="inline-block py-1.5 hover:text-ink transition-colors">About Us</a></li>
+              <li><a href="/contact" class="inline-block py-1.5 hover:text-ink transition-colors">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-ink text-xs uppercase tracking-wider mb-3">Legal</h4>
+            <ul class="space-y-1 text-xs">
+              <li><a href="/terms" class="inline-block py-1.5 hover:text-ink transition-colors">Terms</a></li>
+              <li><a href="/privacy" class="inline-block py-1.5 hover:text-ink transition-colors">Privacy Policy</a></li>
+              <li><a href="/cookie-policy" class="inline-block py-1.5 hover:text-ink transition-colors">Cookie Policy</a></li>
+              <li><a href="/ai-use-policy" class="inline-block py-1.5 hover:text-ink transition-colors">AI Use Policy</a></li>
+              <li><a href="/accessibility" class="inline-block py-1.5 hover:text-ink transition-colors">Accessibility Statement</a></li>
+            </ul>
+          </div>
         </div>
-        <div class="flex gap-8 text-xs">
-          <a href="/about" class="hover:text-ink">About</a>
-          <a href="/editorial-standards" class="hover:text-ink">Editorial Standards</a>
-          <a href="/privacy" class="hover:text-ink">Privacy</a>
-          <a href="/terms" class="hover:text-ink">Terms</a>
+
+        <div class="border-t border-border pt-8 space-y-3">
+          <p class="text-xs text-slate-light leading-relaxed">
+            <strong>Independence disclaimer:</strong> AcePharm is an independent educational platform. It is not affiliated with or endorsed by the General Pharmaceutical Council, universities, NICE, the NHS or any other organisation unless explicitly stated.
+          </p>
+          <p class="text-xs text-slate-light leading-relaxed">
+            <strong>Educational disclaimer:</strong> AcePharm is an educational resource. It does not provide patient-specific medical advice and does not replace official guidance, university teaching, professional supervision, clinical judgement or local policies.
+          </p>
+          <p class="text-xs text-slate-light pt-2">
+            © {new Date().getFullYear()} AcePharm. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import { colors, radii, spacing, fonts } from './index.js';
+import { colors, radii, spacing, fonts, shadows } from './index.js';
 
 /** @type {Partial<import('tailwindcss').Config>} */
 export default {
@@ -7,6 +7,7 @@ export default {
     extend: {
       colors: {
         indigo: colors.indigo,
+        primary: colors.primary,
         ink: colors.ink,
         slate: colors.slate,
         canvas: colors.canvas,
@@ -19,6 +20,7 @@ export default {
         info: colors.info,
       },
       borderRadius: {
+        sm: radii.sm,
         btn: radii.btn,
         input: radii.input,
         card: radii.card,
@@ -35,12 +37,21 @@ export default {
         s8: spacing.s8,
         s9: spacing.s9,
       },
+      boxShadow: {
+        xs: shadows.xs,
+        'card-elevated': shadows.card,
+        'modal': shadows.modal,
+        'toast': shadows.toast,
+        'focus-ring': shadows.focus,
+      },
       fontFamily: {
         sans: fonts.sans,
         mono: fonts.mono,
       },
       maxWidth: {
         measure: '72ch', // 65–75 character measure for question stems
+        'container-max': '1140px',
+        'container-narrow': '760px',
       },
     },
   },

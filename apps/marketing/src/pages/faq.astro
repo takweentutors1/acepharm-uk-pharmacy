@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="FAQ — AcePharm"
+  description="Frequently asked questions about AcePharm question bank, content review, subscriptions and technical support."
+>
+  {/* FAQPage JSON-LD Structured Data for AEO/GEO */}
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'Is AcePharm only for the Registration Assessment?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. AcePharm is being designed to support students throughout the MPharm degree and into foundation training. Available content is clearly labelled by pathway and stage.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Who writes the questions?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Questions are written and reviewed through AcePharm’s editorial process. Each published item has an identifiable authoring and review history.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Are the answers referenced?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Key learning points link to appropriate guidance, formularies, primary sources or other approved references. Review dates are shown where relevant.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Does the AI tutor replace official guidance?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. Ace explains AcePharm’s own reviewed content and cites where each point came from. It does not give patient-specific advice, and it is not a substitute for the BNF, national guidance or your own clinical judgement.'
+        }
+      }
+    ]
+  })} />
+
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Frequently Asked Questions
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        Everything you need to know about the platform, question bank and subscriptions.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-4xl mx-auto px-4 space-y-16">
+    {/* Product */}
+    <div>
+      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Product</h2>
+      <div class="space-y-4">
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">What year of the MPharm is AcePharm for?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">AcePharm is currently built around MPharm years 2 to 4. Content is labelled by topic so you can focus on what your course is covering now.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">How many questions are there?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">The question bank is growing. You can see exactly how many questions are available in each topic from the question bank browser before you start a session.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">Can I choose which topics to practise?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Yes. You can build a session from any combination of topics, question types and difficulty levels, or let AcePharm select a balanced mixture for you.</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Content */}
+    <div>
+      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Content</h2>
+      <div class="space-y-4">
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">How do I know the answers are correct?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Every published question passes clinical, educational and editorial review, and key learning points link to supporting guidance. If you think something is wrong, report it from the question itself — we review every report.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">What happens if guidance changes?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Content has a scheduled review date and is reviewed sooner when guidance changes. If a question you have answered is updated, we will tell you.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">Does the AI tutor replace official guidance?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">No. Ace explains AcePharm’s own reviewed content and cites where each point came from. It does not give patient-specific advice, and it is not a substitute for the BNF, national guidance or your own clinical judgement.</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Account */}
+    <div>
+      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Account & Technical</h2>
+      <div class="space-y-4">
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">Can I use AcePharm on more than one device?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Yes. The platform is designed to work across mobile, tablet and desktop screens. Your progress syncs automatically.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">How do I delete my account?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">From Account settings. We will confirm the effective date by email and explain how to cancel the request if you change your mind.</p>
+        </div>
+        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
+          <h3 class="font-bold text-ink text-sm">Something isn’t working. What should I do?</h3>
+          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Contact us through the Contact page and describe what happened. If it relates to a specific question, use the report option on that question so we capture the details automatically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

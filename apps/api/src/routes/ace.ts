@@ -51,6 +51,27 @@ aceRouter.post('/message', async (c) => {
       }
     }
 
+    // Fair-Use Rate Limiting (60 requests/hour per user)
+    if (c.env.RATE_LIMIT) {
+      try {
+        const rateLimitKey = `rl_ace:${userId}:${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}-${now.getUTCHours()}`;
+        const currentCountStr = await c.env.RATE_LIMIT.get(rateLimitKey);
+        const currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0;
+
+        if (currentCount >= 60) {
+          return c.json({
+            error: 'Fair-use rate limit exceeded. You have reached the maximum of 60 Ace inquiries per hour. Please wait before asking more questions.',
+          }, 429);
+        }
+
+        await c.env.RATE_LIMIT.put(rateLimitKey, String(currentCount + 1), {
+          expirationTtl: 3600, // 1 hour window
+        });
+      } catch (err) {
+        console.warn('Ace rate limit error:', err);
+      }
+    }
+
     // 2. Resolve or create thread
     let threadId = body.threadId;
     if (!threadId) {
@@ -197,4 +218,155 @@ aceRouter.post('/calculation-coach/diagnose', async (c) => {
   );
 
   return c.json({ diagnosis });
+});
+
+import { 
+  getUserFlashcards, 
+  generateFlashcardFromQuestion, 
+  submitFlashcardReview,
+  SM2Grade 
+} from '../lib/sm2-engine';
+
+// 5. Flashcards (SuperMemo-2 Spaced Repetition)
+aceRouter.get('/flashcards', async (c) => {
+  const authUser = c.get('user');
+  const userId = authUser?.id || c.req.query('user_id') || 'guest-learner';
+  const db = drizzle(c.env.DB);
+
+  const result = await getUserFlashcards(db, userId);
+  return c.json(result);
+});
+
+aceRouter.post('/flashcards/generate', async (c) => {
+  const authUser = c.get('user');
+  const body = await c.req.json<{ questionId: string; userId?: string }>();
+  if (!body.questionId) return c.json({ error: 'Missing questionId' }, 400);
+
+  const userId = authUser?.id || body.userId || 'guest-learner';
+  const db = drizzle(c.env.DB);
+  const zenApiKey = c.env.ZEN_API_KEY;
+
+  const card = await generateFlashcardFromQuestion(db, userId, body.questionId, zenApiKey);
+  return c.json({ card }, 201);
+});
+
+aceRouter.post('/flashcards/:id/review', async (c) => {
+  const cardId = c.req.param('id');
+  const body = await c.req.json<{ grade: SM2Grade }>();
+  if (!body.grade) return c.json({ error: 'Missing grade (again | hard | good | easy)' }, 400);
+
+  const db = drizzle(c.env.DB);
+  const updatedCard = await submitFlashcardReview(db, cardId, body.grade);
+
+  if (!updatedCard) return c.json({ error: 'Flashcard not found' }, 404);
+  return c.json({ card: updatedCard });
+});
+
+import { 
+  seedConsultationScenario, 
+  generatePatientExchange, 
+  evaluateConsultationTranscript, 
+  type SimulationExchange, 
+  type RubricCriterion 
+} from '../lib/consultation-simulator';
+import { simulatorScenarios, simulatorAttempts } from '../db/schema';
+
+// 6. Consultation Simulator (Section 5.2 - 4 Exchanges, 6-Point Rubric)
+aceRouter.get('/simulator/scenarios', async (c) => {
+  const db = drizzle(c.env.DB);
+  await seedConsultationScenario(db);
+
+  const scenarios = await db
+    .select()
+    .from(simulatorScenarios)
+    .where(eq(simulatorScenarios.active, true));
+
+  return c.json({
+    scenarios: scenarios.map((s) => ({
+      id: s.id,
+      title: s.title,
+      description: s.description,
+      personaName: s.personaName,
+      personaRole: s.personaRole,
+      scenarioContext: s.scenarioContext,
+      rubric: JSON.parse(s.rubricJson),
+    })),
+  });
+});
+
+aceRouter.post('/simulator/exchange', async (c) => {
+  const body = await c.req.json<{
+    scenarioId: string;
+    transcript: SimulationExchange[];
+  }>();
+
+  if (!body.scenarioId || !body.transcript) {
+    return c.json({ error: 'Missing scenarioId or transcript' }, 400);
+  }
+
+  const db = drizzle(c.env.DB);
+  const [scenario] = await db
+    .select()
+    .from(simulatorScenarios)
+    .where(eq(simulatorScenarios.id, body.scenarioId))
+    .limit(1);
+
+  if (!scenario) return c.json({ error: 'Scenario not found' }, 404);
+
+  const zenApiKey = c.env.ZEN_API_KEY;
+  const patientReply = await generatePatientExchange(
+    scenario.scenarioContext,
+    scenario.personaName,
+    scenario.personaRole,
+    body.transcript,
+    zenApiKey
+  );
+
+  return c.json({ reply: patientReply });
+});
+
+aceRouter.post('/simulator/evaluate', async (c) => {
+  const authUser = c.get('user');
+  const body = await c.req.json<{
+    scenarioId: string;
+    transcript: SimulationExchange[];
+    userId?: string;
+  }>();
+
+  if (!body.scenarioId || !body.transcript) {
+    return c.json({ error: 'Missing scenarioId or transcript' }, 400);
+  }
+
+  const db = drizzle(c.env.DB);
+  const [scenario] = await db
+    .select()
+    .from(simulatorScenarios)
+    .where(eq(simulatorScenarios.id, body.scenarioId))
+    .limit(1);
+
+  if (!scenario) return c.json({ error: 'Scenario not found' }, 404);
+
+  const rubric: RubricCriterion[] = JSON.parse(scenario.rubricJson);
+  const zenApiKey = c.env.ZEN_API_KEY;
+
+  const evaluation = await evaluateConsultationTranscript(rubric, body.transcript, zenApiKey);
+  const userId = authUser?.id || body.userId || 'guest-learner';
+
+  // Save attempt in D1
+  const attemptId = `sim-att-${crypto.randomUUID()}`;
+  try {
+    await db.insert(simulatorAttempts).values({
+      id: attemptId,
+      userId,
+      scenarioId: body.scenarioId,
+      transcriptJson: JSON.stringify(body.transcript),
+      score: evaluation.score,
+      feedbackJson: JSON.stringify(evaluation),
+      completedAt: new Date(),
+    });
+  } catch (err) {
+    console.warn('Simulator attempt insert warning:', err);
+  }
+
+  return c.json({ evaluation, attemptId });
 });

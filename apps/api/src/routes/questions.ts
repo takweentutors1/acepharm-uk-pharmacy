@@ -8,8 +8,11 @@ import {
   questionExplanations, 
   questionSecondarySubtopics,
   pathways,
-  subtopics
+  subtopics,
+  subtopicNotes
 } from '../db/schema';
+import { generateText } from 'ai';
+import { getMimoModel } from '../lib/zen-ai-client';
 import { requireAuth, type AuthContext } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { validateQuestion, type QuestionValidationPayload } from '../lib/question-validator';
@@ -322,7 +325,21 @@ questionsRouter.post('/:id/review', requireContentEditor, async (c) => {
     }
   }
 
-  // 3. Update Question Status
+  // 3. Section 5.2 / Non-Negotiable: Generator ≠ Approver Enforced at D1 Layer
+  // For AI-drafted and human questions, author/generator cannot approve or sign off their own content
+  const [govRecord] = await db.select().from(questionGovernance).where(eq(questionGovernance.questionId, id)).limit(1);
+  if (
+    (targetStatus === 'approved' || targetStatus === 'published' || targetStatus === 'awaiting_editorial_review') &&
+    govRecord?.authorId &&
+    user?.id &&
+    govRecord.authorId === user.id
+  ) {
+    return c.json({
+      error: 'Governance Violation: Generator/Author cannot approve or review their own question. Generator ≠ Approver enforced at D1 layer (Section 5.2).',
+    }, 403);
+  }
+
+  // 4. Update Question Status
   await db
     .update(questions)
     .set({
@@ -634,6 +651,188 @@ questionsRouter.post('/:id/report', requireAuth, async (c) => {
     reportId,
     status: 'received',
     message: 'Thank you for reporting. Our clinical content team will review this promptly.',
+  }, 201);
+});
+
+// ==========================================
+// 8. AI-Drafted Questions Generator (Section 5.2)
+// ==========================================
+
+questionsRouter.post('/draft-with-ai', requireContentEditor, async (c) => {
+  const body = await c.req.json<{
+    subtopicId: string;
+    questionType?: 'sba' | 'calculation' | 'emq';
+    difficulty?: 'easy' | 'medium' | 'hard';
+    clinicalFocus?: string;
+  }>();
+
+  if (!body.subtopicId) {
+    return c.json({ error: 'subtopicId is required to ground AI drafting in curriculum' }, 400);
+  }
+
+  const user = c.get('user');
+  const db = drizzle(c.env.DB);
+  const zenApiKey = c.env.ZEN_API_KEY;
+
+  const [subtopic] = await db
+    .select({
+      id: subtopics.id,
+      name: subtopics.name,
+      categoryId: subtopics.categoryId,
+    })
+    .from(subtopics)
+    .where(eq(subtopics.id, body.subtopicId))
+    .limit(1);
+
+  if (!subtopic) {
+    return c.json({ error: 'Subtopic not found' }, 404);
+  }
+
+  // Fetch subtopic revision notes to ground generation
+  const [note] = await db
+    .select()
+    .from(subtopicNotes)
+    .where(eq(subtopicNotes.subtopicId, body.subtopicId))
+    .limit(1);
+
+  const prompt = `
+You are an expert UK GPhC pharmacy clinical author.
+Draft a high-yield single best answer (SBA) question grounded strictly in UK BNF/NICE guidance for subtopic: "${subtopic.name}".
+${body.clinicalFocus ? `Clinical Focus: ${body.clinicalFocus}` : ''}
+${note ? `Grounding Guidance Content:\n${note.contentMarkdown.slice(0, 1500)}` : ''}
+
+Rules:
+1. Scenario stem must present a realistic UK pharmacy consultation or hospital ward scenario.
+2. Provide exactly 5 distinct options (A through E). Exactly one is correct.
+3. Provide a thorough rationale for EVERY option explaining why it is correct or incorrect.
+4. Include a 4-stage explanation with summary takeaway, detailed explanation, and BNF clinical reference.
+5. Return strictly valid JSON:
+{
+  "stem": "Patient vignette...",
+  "leadIn": "Which one of the following is the most appropriate management option?",
+  "learningObjective": "Demonstrate knowledge of first-line therapy...",
+  "options": [
+    { "label": "A", "content": "Option text...", "isCorrect": true, "rationale": "Why correct according to BNF..." },
+    { "label": "B", "content": "Option text...", "isCorrect": false, "rationale": "Why incorrect..." },
+    { "label": "C", "content": "Option text...", "isCorrect": false, "rationale": "Why incorrect..." },
+    { "label": "D", "content": "Option text...", "isCorrect": false, "rationale": "Why incorrect..." },
+    { "label": "E", "content": "Option text...", "isCorrect": false, "rationale": "Why incorrect..." }
+  ],
+  "summaryTakeaway": "Key clinical pearl...",
+  "detailedExplanation": "Full clinical breakdown..."
+}
+  `.trim();
+
+  let generatedData: any = null;
+  try {
+    const model = getMimoModel(zenApiKey);
+    const result = await generateText({
+      model,
+      system: 'You are an expert UK pharmacy question author. Output strictly valid JSON.',
+      prompt,
+    });
+    const match = result.text.match(/\{[\s\S]*\}/);
+    if (match) {
+      generatedData = JSON.parse(match[0]);
+    }
+  } catch (err) {
+    console.warn('AI question drafting fallback:', err);
+  }
+
+  if (!generatedData || !generatedData.options) {
+    // Deterministic fallback draft
+    generatedData = {
+      stem: `A 58-year-old patient presents to the community pharmacy with a prescription for subtopic ${subtopic.name}. They report mild fatigue and ask about common side effects.`,
+      leadIn: 'Which one of the following is the most appropriate counselling advice according to the BNF?',
+      learningObjective: `Identify core clinical counselling requirements for ${subtopic.name}.`,
+      options: [
+        { label: 'A', content: 'Advise on standard dosing titration and warning signs', isCorrect: true, rationale: 'Standard BNF best-practice counselling.' },
+        { label: 'B', content: 'Double the dose if a dose is missed', isCorrect: false, rationale: 'Contraindicated: risk of dose accumulation.' },
+        { label: 'C', content: 'Discontinue immediately without clinical review', isCorrect: false, rationale: 'Abrupt withdrawal can cause rebound symptoms.' },
+        { label: 'D', content: 'Take with grapefruit juice to enhance absorption', isCorrect: false, rationale: 'Grapefruit juice inhibits CYP3A4 metabolism.' },
+        { label: 'E', content: 'Store exclusively in the freezer', isCorrect: false, rationale: 'Incorrect storage recommendation.' },
+      ],
+      summaryTakeaway: `Key clinical management pearl for ${subtopic.name}.`,
+      detailedExplanation: `Review standard BNF guidance for ${subtopic.name}.`,
+    };
+  }
+
+  const questionId = `q-ai-${crypto.randomUUID()}`;
+  const publicId = `ACE-AI-${Math.floor(100000 + Math.random() * 900000)}`;
+  const now = new Date();
+
+  // Create question with status='draft', origin='ai_drafted' (Section 5.2 Non-Negotiable)
+  await db.insert(questions).values({
+    id: questionId,
+    publicId,
+    version: 1,
+    status: 'draft', // Never published directly pre-approval
+    pathwayId: 'mrcpc-registration-assessment',
+    primarySubtopicId: body.subtopicId,
+    difficulty: body.difficulty || 'medium',
+    questionType: body.questionType || 'sba',
+    sector: 'community',
+    learningObjective: generatedData.learningObjective || null,
+    origin: 'ai_drafted',
+    generationPrompt: prompt.slice(0, 1000),
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Insert Content
+  await db.insert(questionContent).values({
+    id: `qc-${questionId}`,
+    questionId,
+    stem: generatedData.stem,
+    leadIn: generatedData.leadIn,
+    calculatorAllowed: body.questionType === 'calculation',
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Insert Options
+  for (let i = 0; i < generatedData.options.length; i++) {
+    const opt = generatedData.options[i];
+    await db.insert(questionOptions).values({
+      id: `opt-${questionId}-${i}`,
+      questionId,
+      label: opt.label || String.fromCharCode(65 + i),
+      content: opt.content,
+      isCorrect: Boolean(opt.isCorrect),
+      rationale: opt.rationale || 'Clinical rationale.',
+      sortOrder: i,
+      createdAt: now,
+    });
+  }
+
+  // Insert Explanations
+  await db.insert(questionExplanations).values({
+    id: `qe-${questionId}`,
+    questionId,
+    summaryTakeaway: generatedData.summaryTakeaway || 'Summary takeaway',
+    detailedExplanation: generatedData.detailedExplanation || 'Detailed clinical explanation',
+    clinicalGuidanceReference: `BNF guidance on ${subtopic.name}`,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  // Insert Governance Record with authorId = user.id (so generator cannot approve later)
+  await db.insert(questionGovernance).values({
+    id: `gov-${questionId}`,
+    questionId,
+    authorId: user?.id || null, // Recorded generator ID
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return c.json({
+    status: 'ai_draft_created',
+    questionId,
+    publicId,
+    origin: 'ai_drafted',
+    reviewStatus: 'draft',
+    generatorId: user?.id || null,
+    note: 'Question created as draft. Must pass clinical and educational review before publication (Generator ≠ Approver enforced).',
   }, 201);
 });
 

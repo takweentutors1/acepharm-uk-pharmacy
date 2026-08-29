@@ -14,13 +14,32 @@ export type Bindings = {
   ZEN_API_KEY?: string;
 };
 
+import { rateLimiter } from './middleware/rate-limit';
+
 const app = new Hono<AuthContext>();
+
+// Global Security & CSP Headers
+app.use('*', async (c, next) => {
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  c.header(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://*.firebaseapp.com; connect-src 'self' https://*.workers.dev https://*.pages.dev https://api.acepharm.co.uk https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://opencode.ai; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
+  );
+  await next();
+});
 
 app.use('*', cors({
   origin: ['https://acepharm.co.uk', 'https://app.acepharm.co.uk', 'http://localhost:3000', 'http://localhost:3001'],
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
+
+// Apply Rate Limiting to sensitive Auth & User endpoints (60 req/min)
+app.use('/api/v1/auth/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_auth' }));
+app.use('/api/v1/user/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_user' }));
 
 // Public health check
 app.get('/health', (c) => {
@@ -193,6 +212,9 @@ import { sessionsRouter } from './routes/sessions';
 import { analyticsRouter } from './routes/analytics';
 import { aceRouter } from './routes/ace';
 
+import { blogRoutes } from './routes/blog';
+import { stripeRoutes } from './routes/stripe';
+
 admin.route('/curriculum', curriculumRouter);
 admin.route('/questions', questionsRouter);
 
@@ -203,6 +225,8 @@ app.route('/api/v1/questions', questionsRouter);
 app.route('/api/v1/sessions', sessionsRouter);
 app.route('/api/v1/analytics', analyticsRouter);
 app.route('/api/v1/ace', aceRouter);
+app.route('/api/v1/blog', blogRoutes);
+app.route('/api/v1/stripe', stripeRoutes);
 
 import { runWeeklyInsightCron, generateSingleWeeklyInsight } from './lib/weekly-insight-generator';
 
@@ -235,6 +259,17 @@ app.get('/api/v1/ace/weekly-insight', async (c) => {
   });
 });
 
+import { executeD1BackupToR2 } from './lib/backup-service';
+
+// Admin Manual Backup Trigger & Test Endpoint
+admin.post('/backup/trigger', requireRole(['super_admin', 'finance_admin']), async (c) => {
+  const result = await executeD1BackupToR2(c.env.DB, c.env.ASSETS);
+  return c.json({
+    status: 'success',
+    ...result,
+  });
+});
+
 export { app };
 
 export default {
@@ -242,10 +277,30 @@ export default {
   async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
     ctx.waitUntil(
       (async () => {
-        const db = drizzle(env.DB);
-        const zenApiKey = env.ZEN_API_KEY;
-        const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
-        console.log(`Weekly insight cron completed: processed ${result.processed}, cached ${result.cached}`);
+        const cron = event.cron;
+        console.log(`[Scheduled Cron Triggered]: ${cron}`);
+
+        // 1. Daily 03:00 UTC D1 Automated Backup to R2
+        if (cron === '0 3 * * *' || cron.includes('3')) {
+          try {
+            const backupResult = await executeD1BackupToR2(env.DB, env.ASSETS);
+            console.log(`[Daily D1 Backup Success]: Saved snapshot ${backupResult.backupKey} (${backupResult.sizeBytes} bytes)`);
+          } catch (err) {
+            console.error('[Daily D1 Backup Error]:', err);
+          }
+        }
+
+        // 2. Weekly 04:00 UTC Monday Insight Generator
+        if (cron === '0 4 * * 1' || cron.includes('4')) {
+          try {
+            const db = drizzle(env.DB);
+            const zenApiKey = env.ZEN_API_KEY;
+            const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
+            console.log(`[Weekly Insight Cron Success]: processed ${result.processed}, cached ${result.cached}`);
+          } catch (err) {
+            console.error('[Weekly Insight Cron Error]:', err);
+          }
+        }
       })()
     );
   },
