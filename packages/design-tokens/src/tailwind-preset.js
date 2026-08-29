@@ -7,6 +7,7 @@ export default {
     extend: {
       colors: {
         indigo: colors.indigo,
+        primary: colors.primary,
         ink: colors.ink,
         slate: colors.slate,
         canvas: colors.canvas,
@@ -37,6 +38,7 @@ export default {
         s9: spacing.s9,
       },
       boxShadow: {
+        xs: shadows.xs,
         'card-elevated': shadows.card,
         'modal': shadows.modal,
         'toast': shadows.toast,

@@ -9,17 +9,37 @@ export const colors = {
     wash: 'var(--indigo-wash, #F1F2FC)',
     light: 'var(--indigo-light, #E0E7FF)',
   },
-  ink: 'var(--ink, #111827)',
+  // Semantic alias for the primary action colour, exposed as a numeric
+  // Tailwind scale (50/100/200/.../900) since brand indigo (#4F46E5) and
+  // its deep variant (#3730A3) already sit exactly at Tailwind's own
+  // indigo-600/800 — the gaps are filled with the same standard scale.
+  primary: {
+    DEFAULT: 'var(--indigo, #4F46E5)',
+    50: 'var(--indigo-wash, #F1F2FC)',
+    100: 'var(--indigo-light, #E0E7FF)',
+    200: 'var(--indigo-200, #C7D2FE)',
+    800: 'var(--indigo-deep, #3730A3)',
+    900: 'var(--indigo-900, #312E81)',
+  },
+  ink: {
+    DEFAULT: 'var(--ink, #111827)',
+    muted: 'var(--slate, #64748B)',
+    subtle: 'var(--slate-light, #94A3B8)',
+  },
   slate: {
     DEFAULT: 'var(--slate, #64748B)',
     light: 'var(--slate-light, #94A3B8)',
     lighter: 'var(--slate-lighter, #CBD5E1)',
   },
   canvas: 'var(--canvas, #F8FAFC)',
-  surface: 'var(--surface, #FFFFFF)',
+  surface: {
+    DEFAULT: 'var(--surface, #FFFFFF)',
+    raised: 'var(--canvas, #F8FAFC)',
+  },
   border: {
     DEFAULT: 'var(--border, #E2E8F0)',
     light: 'var(--border-light, #E5E7EB)',
+    subtle: 'var(--border-light, #E5E7EB)',
   },
   teal: {
     DEFAULT: 'var(--teal, #0F766E)',
@@ -65,6 +85,7 @@ export const spacing = {
 };
 
 export const shadows = {
+  xs: 'var(--shadow-xs, 0 1px 2px 0 rgba(17, 24, 39, 0.04))',
   sm: 'var(--shadow-sm, 0 0 0 3px rgba(79, 70, 229, 0.13))',
   card: 'var(--shadow-card, 0 24px 60px -28px rgba(17, 24, 39, 0.28))',
   modal: 'var(--shadow-modal, 0 30px 70px -20px rgba(17, 24, 39, 0.5))',
