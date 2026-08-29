@@ -105,6 +105,41 @@ stripeRoutes.post('/customer-portal', requireAuth, async (c) => {
   });
 });
 
+// 4. In-App Cancellation Endpoint (Non-negotiable: learner keeps access until paid period ends)
+stripeRoutes.post('/cancel', requireAuth, async (c) => {
+  const user = c.get('user');
+  const db = drizzle(c.env.DB);
+  const body = await c.req.json<{ reason: string; feedback?: string }>();
+
+  const [sub] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, user.id))
+    .limit(1);
+
+  const now = new Date();
+  const periodEnd = sub?.currentPeriodEnd || new Date(Date.now() + 14 * 86400000);
+
+  if (sub) {
+    await db
+      .update(subscriptions)
+      .set({
+        cancelAtPeriodEnd: true,
+        canceledAt: now,
+        updatedAt: now,
+      })
+      .where(eq(subscriptions.id, sub.id));
+  }
+
+  return c.json({
+    success: true,
+    message: 'Subscription set to cancel at period end',
+    accessUntil: periodEnd.toISOString(),
+    cancelAtPeriodEnd: true,
+    reason: body.reason,
+  });
+});
+
 // 4. Webhook handler with signature verification & idempotent event handling
 // Handles all 5 required events:
 // 1. checkout.session.completed

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button, Card, Badge } from '@acepharm/ui';
 import { StreakTracker } from '@/components/streak-tracker';
 import { CategoryResetModal } from '@/components/category-reset-modal';
+import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
 import { 
   Play, 
   Target, 
@@ -18,11 +19,13 @@ import {
   Stethoscope,
   BarChart3,
   SlidersHorizontal,
-  FileSpreadsheet
+  FileSpreadsheet,
+  CreditCard
 } from 'lucide-react';
 
 export default function StudentDashboardPage() {
   const [selectedResetCategory, setSelectedResetCategory] = useState<{ id: string; name: string; count: number } | null>(null);
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
 
   const categoriesOverview = [
     { id: 'cat-cv', name: 'Cardiovascular System', total: 28, attempted: 16, accuracy: 75, status: 'Secure' },
@@ -202,6 +205,25 @@ export default function StudentDashboardPage() {
             ))}
           </div>
         </Card>
+
+        {/* Subscription & Account Self-Service Footer Panel */}
+        <div className="p-4 bg-surface border border-border rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-canvas text-primary">
+              <CreditCard className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="font-bold text-ink">Subscription Management</p>
+              <p className="text-slate">Manage your £4.99/mo or £49.99/yr plan, update payment methods, or cancel anytime.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowCancellationModal(true)}
+            className="text-slate hover:text-danger text-xs font-semibold underline transition-colors"
+          >
+            Cancel Subscription
+          </button>
+        </div>
       </main>
 
       {/* Explicit Category Reset Modal */}
@@ -217,6 +239,16 @@ export default function StudentDashboardPage() {
           }}
         />
       )}
+
+      {/* Two-Screen In-App Cancellation Flow Modal */}
+      <CancellationFlowModal
+        isOpen={showCancellationModal}
+        onClose={() => setShowCancellationModal(false)}
+        currentPeriodEnd={new Date(Date.now() + 14 * 86400000)}
+        onCancellationComplete={() => {
+          console.log('Subscription cancellation scheduled at period end.');
+        }}
+      />
     </div>
   );
 }
