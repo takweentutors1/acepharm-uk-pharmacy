@@ -12,7 +12,7 @@ export const STRIPE_PLANS = {
   MONTHLY: {
     id: 'monthly_pro',
     name: 'AcePharm Monthly',
-    priceId: 'price_acepharm_monthly_499',
+    priceId: 'price_1U9ixsE4ZQJ9iwGZ7rF40bDe',
     unitAmountPence: 499,
     currency: 'gbp',
     interval: 'month',
@@ -20,7 +20,7 @@ export const STRIPE_PLANS = {
   YEARLY: {
     id: 'yearly_pro',
     name: 'AcePharm Yearly',
-    priceId: 'price_acepharm_yearly_4999',
+    priceId: 'price_1U9j0pE4ZQJ9iwGZ0At7aZH8',
     unitAmountPence: 4999,
     currency: 'gbp',
     interval: 'year',
