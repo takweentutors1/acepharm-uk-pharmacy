@@ -14,18 +14,24 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { auth } from '@/lib/firebase';
+import { 
+  applyActionCode, 
+  verifyPasswordResetCode, 
+  confirmPasswordReset 
+} from 'firebase/auth';
+
 function AuthActionHandlerContent() {
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode'); // 'verifyEmail', 'resetPassword', 'recoverEmail'
   const oobCode = searchParams.get('oobCode'); // Firebase action one-time code
-  const apiKey = searchParams.get('apiKey');
   const continueUrl = searchParams.get('continueUrl') || '/';
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [userEmail, setUserEmail] = useState<string>('trainee@acepharm.co.uk');
+  const [userEmail, setUserEmail] = useState<string>('');
 
   // State for password reset
   const [newPassword, setNewPassword] = useState('');
@@ -33,9 +39,7 @@ function AuthActionHandlerContent() {
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
 
   useEffect(() => {
-    // Smart mode detector & action parser
     if (!mode || !oobCode) {
-      // If accessed without parameters, show generic auth helper
       setLoading(false);
       return;
     }
@@ -43,28 +47,26 @@ function AuthActionHandlerContent() {
     const verifyCode = async () => {
       try {
         if (mode === 'verifyEmail') {
-          // Handle email verification
-          setTimeout(() => {
-            setSuccess(true);
-            setSuccessMessage('Your email address has been verified successfully. Your AcePharm learner account is now fully active!');
-            setLoading(false);
-          }, 800);
+          // Apply email verification code directly in Firebase
+          await applyActionCode(auth, oobCode);
+          setSuccess(true);
+          setSuccessMessage('Your email address has been verified successfully. Your AcePharm learner account is now fully active!');
+          setLoading(false);
         } else if (mode === 'resetPassword') {
-          // Handle password reset verification
-          setTimeout(() => {
-            setLoading(false);
-          }, 600);
+          // Verify reset code and get associated email
+          const email = await verifyPasswordResetCode(auth, oobCode);
+          setUserEmail(email);
+          setLoading(false);
         } else if (mode === 'recoverEmail') {
-          // Handle email recovery
-          setTimeout(() => {
-            setSuccess(true);
-            setSuccessMessage('Your email recovery request has been processed.');
-            setLoading(false);
-          }, 600);
+          await applyActionCode(auth, oobCode);
+          setSuccess(true);
+          setSuccessMessage('Your email recovery request has been processed.');
+          setLoading(false);
         } else {
           setLoading(false);
         }
       } catch (err: any) {
+        console.error('Firebase action error:', err);
         setError(err?.message || 'The action link is invalid, expired, or has already been used.');
         setLoading(false);
       }
@@ -83,17 +85,19 @@ function AuthActionHandlerContent() {
       setError('Passwords do not match. Please re-enter.');
       return;
     }
+    if (!oobCode) {
+      setError('Missing authentication reset code. Please request a new link.');
+      return;
+    }
 
     setIsSubmittingPassword(true);
     setError(null);
 
     try {
-      // Simulate/call Firebase confirmPasswordReset(auth, oobCode, newPassword)
-      setTimeout(() => {
-        setIsSubmittingPassword(false);
-        setSuccess(true);
-        setSuccessMessage('Your password has been changed successfully. You can now log in with your new password.');
-      }, 1000);
+      await confirmPasswordReset(auth, oobCode, newPassword);
+      setIsSubmittingPassword(false);
+      setSuccess(true);
+      setSuccessMessage('Your password has been changed successfully. You can now log in with your new password.');
     } catch (err: any) {
       setIsSubmittingPassword(false);
       setError(err?.message || 'Failed to update password. Please request a new reset link.');
