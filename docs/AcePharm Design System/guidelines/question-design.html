@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Design — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.q-demo { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 2rem; margin-bottom: 2rem; max-width: 760px; }
+.q-stem { font-size: 18px; line-height: 1.72; margin-bottom: 1.5rem; }
+.q-lead { font-size: 18px; font-weight: 600; line-height: 1.55; margin: 1rem 0; }
+.opt { display: flex; gap: var(--space-3); width: 100%; text-align: left; padding: 15px 17px; border: 1px solid var(--color-border); border-radius: 13px; background: white; cursor: pointer; margin-bottom: 0.75rem; align-items: flex-start; }
+.opt-mark { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--color-border); display: grid; place-items: center; font-size: 13.5px; font-weight: 600; font-family: var(--font-mono); flex: none; background: var(--color-canvas); }
+.opt:hover { border-color: var(--color-indigo); }
+.opt[aria-pressed="true"] { border-color: var(--color-indigo); background: var(--color-indigo-wash); box-shadow: inset 0 0 0 1px var(--color-indigo); }
+.opt[aria-pressed="true"] .opt-mark { background: var(--color-indigo); color: white; border-color: var(--color-indigo); }
+.opt.correct { border-color: var(--color-success); background: var(--color-success-wash); }
+.opt.correct .opt-mark { background: var(--color-success); color: white; border-color: var(--color-success); }
+.opt-text { flex: 1; }
+.feedback { border-radius: 13px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid; }
+.feedback.ok { background: var(--color-success-wash); border-color: var(--color-success-border); }
+.feedback.ok h3 { color: var(--color-success); }
+.feedback.no { background: var(--color-danger-wash); border-color: var(--color-danger-border); }
+.feedback.no h3 { color: var(--color-danger); }
+.feedback h3 { font-size: 20px; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Components" viewport="700x320" subtitle="Question stem, options, feedback states" name="Question Design" -->
+<h1>Question Component</h1>
+
+<div class="q-demo">
+  <div class="q-stem">A 62-year-old woman presents with a three-week history of worsening breathlessness on exertion. She has a background of hypertension, managed with amlodipine, and completed three weeks of antibiotics for community-acquired pneumonia two weeks ago.</div>
+  
+  <div class="q-lead">Select the best answer:</div>
+  
+  <button class="opt" aria-pressed="false">
+    <div class="opt-mark">A</div>
+    <div class="opt-text">Order a chest X-ray and echocardiogram</div>
+  </button>
+  
+  <button class="opt" aria-pressed="true">
+    <div class="opt-mark" style="background: var(--color-indigo); color: white;">B</div>
+    <div class="opt-text">Increase amlodipine dose and review in two weeks</div>
+  </button>
+  
+  <button class="opt" aria-pressed="false">
+    <div class="opt-mark">C</div>
+    <div class="opt-text">Prescribe a course of ACE inhibitor and reassess</div>
+  </button>
+  
+  <button class="opt" aria-pressed="false">
+    <div class="opt-mark">D</div>
+    <div class="opt-text">Repeat antibiotic course for possible relapse</div>
+  </button>
+  
+  <button class="opt" aria-pressed="false">
+    <div class="opt-mark">E</div>
+    <div class="opt-text">Refer for urgent cardiology assessment</div>
+  </button>
+</div>
+
+<h2 style="margin-top: 2rem;">Feedback States</h2>
+
+<div class="feedback ok">
+  <h3>✓ Correct</h3>
+  <p>You identified the key clinical factor — the pattern suggests heart failure, and initial imaging is appropriate before escalating antihypertensive therapy.</p>
+</div>
+
+<div class="feedback no">
+  <h3>✗ Not quite</h3>
+  <p>The important clue was the timeline: breathlessness after pneumonia, with no prior cardiac history. The approach should be diagnostic first.</p>
+</div>
+</body>
+</html>

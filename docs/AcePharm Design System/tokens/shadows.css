@@ -1,0 +1,28 @@
+/* ============================================================
+   ACEPHARM DESIGN SYSTEM — SHADOW TOKENS
+   Elevation system: subtle, card, modal, floating
+   ============================================================ */
+
+:root {
+  /* ========== SHADOW SYSTEM ========== */
+  /* Subtle: small hover effects, focus rings */
+  --shadow-sm: 0 0 0 3px rgba(79, 70, 229, 0.13);
+
+  /* Card: elevated content blocks (hero visuals, etc) */
+  --shadow-card: 0 24px 60px -28px rgba(17, 24, 39, 0.28);
+
+  /* Modal: overlays and dialogs */
+  --shadow-modal: 0 30px 70px -20px rgba(17, 24, 39, 0.5);
+
+  /* Toast: floating notifications */
+  --shadow-toast: 0 12px 30px -8px rgba(0, 0, 0, 0.4);
+
+  /* Focus ring: keyboard navigation, focus-visible */
+  --shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.13);
+}
+
+/* ========== UTILITY CLASSES ========== */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-card { box-shadow: var(--shadow-card); }
+.shadow-modal { box-shadow: var(--shadow-modal); }
+.shadow-toast { box-shadow: var(--shadow-toast); }

@@ -1,31 +1,48 @@
 :root {
-  /* Core palette */
+  /* ========== PRIMARY PALETTE ========== */
   --indigo: #4F46E5;
   --indigo-deep: #3730A3;
   --indigo-wash: #F1F2FC;
+  --indigo-light: #E0E7FF;
+
+  --teal: #0F766E;
+  --teal-light: #EFFAF8;
+
+  /* ========== SEMANTIC PALETTE ========== */
+  --success: #15803D;
+  --success-wash: #F0FDF4;
+  --success-border: #CDEBD6;
+
+  --danger: #B91C1C;
+  --danger-wash: #FEF2F2;
+  --danger-border: #FBD5D5;
+
+  --warning: #B45309;
+  --warning-wash: #FFFBEB;
+  --warning-border: #FDE9C8;
+
+  --info: #0369A1;
+
+  /* ========== NEUTRAL PALETTE ========== */
   --ink: #111827;
   --slate: #64748B;
+  --slate-light: #94A3B8;
+  --slate-lighter: #CBD5E1;
+
   --canvas: #F8FAFC;
   --surface: #FFFFFF;
   --border: #E2E8F0;
+  --border-light: #E5E7EB;
 
-  /* Supporting / Status */
-  --teal: #0F766E;
-  --success: #15803D;
-  --warning: #B45309;
-  --danger: #B91C1C;
-  --info: #0369A1;
-  --success-wash: #F0FDF4;
-  --danger-wash: #FEF2F2;
-  --warning-wash: #FFFBEB;
-
-  /* Border radius */
+  /* ========== CORNER RADII ========== */
+  --r-sm: 8px;
   --r-btn: 11px;
   --r-input: 10px;
   --r-card: 15px;
   --r-panel: 22px;
+  --r-full: 999px;
 
-  /* 8-point Spacing scale */
+  /* ========== SPACING SCALE (8px-based) ========== */
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -36,7 +53,40 @@
   --s8: 64px;
   --s9: 96px;
 
-  /* Typography */
+  /* ========== SHADOW SYSTEM ========== */
+  --shadow-sm: 0 0 0 3px rgba(79, 70, 229, 0.13);
+  --shadow-card: 0 24px 60px -28px rgba(17, 24, 39, 0.28);
+  --shadow-modal: 0 30px 70px -20px rgba(17, 24, 39, 0.5);
+  --shadow-toast: 0 12px 30px -8px rgba(0, 0, 0, 0.4);
+  --shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.13);
+
+  /* ========== TYPOGRAPHY ========== */
   --sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+
+  --size-display: clamp(36px, 4.6vw, 53px);
+  --size-h1: clamp(32px, 4vw, 48px);
+  --size-h2: clamp(27px, 3.2vw, 38px);
+  --size-h3: clamp(20px, 2vw, 26px);
+  --size-h4: 19px;
+  --size-body-lg: 18px;
+  --size-body: 16px;
+  --size-small: 14px;
+  --size-micro: 13px;
+  --size-eyebrow: 13px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --lh-tight: 1.15;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.6;
+  --lh-loose: 1.72;
+
+  --ls-tight: -0.035em;
+  --ls-normal: -0.02em;
+  --ls-wide: 0.09em;
+  --ls-extra-wide: 0.12em;
 }

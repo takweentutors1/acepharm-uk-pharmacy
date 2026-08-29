@@ -1,0 +1,83 @@
+/* ============================================================
+   ACEPHARM DESIGN SYSTEM — COLOR TOKENS
+   Base colours: primary, semantic, neutral
+   ============================================================ */
+
+:root {
+  /* ========== PRIMARY PALETTE ========== */
+  /* Indigo: primary action, highlights, interactive states */
+  --color-indigo: #4F46E5;
+  --color-indigo-deep: #3730A3;
+  --color-indigo-wash: #F1F2FC;
+  --color-indigo-light: #E0E7FF;
+
+  /* Teal: secondary accent, calm states */
+  --color-teal: #0F766E;
+  --color-teal-light: #EFFAF8;
+
+  /* ========== SEMANTIC PALETTE ========== */
+  /* Success: correct answers, positive indicators */
+  --color-success: #15803D;
+  --color-success-wash: #F0FDF4;
+  --color-success-border: #CDEBD6;
+
+  /* Danger: incorrect answers, destructive actions, errors */
+  --color-danger: #B91C1C;
+  --color-danger-wash: #FEF2F2;
+  --color-danger-border: #FBD5D5;
+
+  /* Warning: caution, attention-needed */
+  --color-warning: #B45309;
+  --color-warning-wash: #FFFBEB;
+  --color-warning-border: #FDE9C8;
+
+  /* Info: information, secondary messaging */
+  --color-info: #0369A1;
+
+  /* ========== NEUTRAL PALETTE ========== */
+  /* Text & foreground */
+  --color-ink: #111827;
+  --color-slate: #64748B;
+  --color-slate-light: #94A3B8;
+  --color-slate-lighter: #CBD5E1;
+
+  /* Backgrounds */
+  --color-canvas: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-light: #E5E7EB;
+
+  /* ========== SEMANTIC ALIASES ========== */
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-slate);
+  --color-text-muted: var(--color-slate-light);
+  --color-text-inverse: #FFFFFF;
+
+  --color-bg-primary: var(--color-surface);
+  --color-bg-secondary: var(--color-canvas);
+  --color-bg-tertiary: var(--color-indigo-wash);
+
+  --color-action-primary: var(--color-indigo);
+  --color-action-primary-hover: var(--color-indigo-deep);
+  --color-action-secondary: var(--color-teal);
+
+  --color-feedback-success: var(--color-success);
+  --color-feedback-error: var(--color-danger);
+  --color-feedback-warning: var(--color-warning);
+  --color-feedback-info: var(--color-info);
+}
+
+/* ========== UTILITY CLASSES ========== */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
+
+.bg-primary { background-color: var(--color-bg-primary); }
+.bg-secondary { background-color: var(--color-bg-secondary); }
+.bg-tertiary { background-color: var(--color-bg-tertiary); }
+
+.border-default { border-color: var(--color-border); }
+.border-success { border-color: var(--color-success-border); }
+.border-danger { border-color: var(--color-danger-border); }
+.border-warning { border-color: var(--color-warning-border); }
+.border-indigo { border-color: var(--color-indigo); }

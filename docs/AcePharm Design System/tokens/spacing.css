@@ -1,0 +1,85 @@
+/* ============================================================
+   ACEPHARM DESIGN SYSTEM — SPACING TOKENS
+   8px-based scale: 4, 8, 12, 16, 24, 32, 48, 64, 96px
+   ============================================================ */
+
+:root {
+  /* ========== SPACING SCALE ========== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* ========== SEMANTIC ALIASES ========== */
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-3);
+  --spacing-lg: var(--space-4);
+  --spacing-xl: var(--space-5);
+  --spacing-2xl: var(--space-6);
+  --spacing-3xl: var(--space-7);
+  --spacing-4xl: var(--space-8);
+  --spacing-5xl: var(--space-9);
+
+  /* ========== CORNER RADII ========== */
+  --radius-sm: 8px;
+  --radius-button: 11px;
+  --radius-input: 10px;
+  --radius-card: 15px;
+  --radius-panel: 22px;
+  --radius-full: 999px;
+
+  /* ========== SECTION PADDING ========== */
+  --section-padding: var(--space-9) 0;
+  --section-padding-sm: var(--space-8) 0;
+
+  /* ========== CONTAINER WIDTHS ========== */
+  --width-full: 100%;
+  --width-screen: 100vw;
+  --width-container-max: 1140px;
+  --width-container-narrow: 760px;
+  --width-measure: 68ch;
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Padding */
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+
+/* Margins */
+.m-1 { margin: var(--space-1); }
+.m-2 { margin: var(--space-2); }
+.m-3 { margin: var(--space-3); }
+.m-4 { margin: var(--space-4); }
+.m-5 { margin: var(--space-5); }
+.m-6 { margin: var(--space-6); }
+
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+/* Gap */
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }

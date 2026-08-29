@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ace UI — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.ace-demo { background: white; border: 1px solid #DDDEF9; border-radius: var(--radius-card); background: linear-gradient(180deg, #FAFAFE, white); padding: 1.5rem; max-width: 500px; }
+.ace-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); }
+.ace-orb { width: 30px; height: 30px; border-radius: 50%; flex: none; background: conic-gradient(from 180deg, var(--color-indigo), var(--color-teal), #8B5CF6, var(--color-indigo)); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.11); animation: orb 9s linear infinite; }
+@keyframes orb { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ace-orb { animation: none; } }
+.ace-thread { max-height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-4); }
+.ace-msg { display: flex; gap: 10px; align-items: flex-start; margin-bottom: var(--space-2); }
+.ace-msg.you { justify-content: flex-end; }
+.ace-bubble { background: white; border: 1px solid var(--color-border); border-radius: 4px 14px 14px 14px; padding: 13px 16px; font-size: 15px; line-height: 1.65; max-width: 82%; }
+.ace-bubble.you { background: var(--color-indigo); color: white; border-color: var(--color-indigo); border-radius: 14px 4px 14px 14px; }
+.ace-bubble p { margin-bottom: 10px; }
+.ace-bubble p:last-child { margin-bottom: 0; }
+.ace-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.ace-chip { background: white; border: 1px solid #DDDEF9; color: var(--color-indigo-deep); border-radius: 999px; padding: 8px 14px; font-size: 13.5px; cursor: pointer; min-height: 38px; }
+.ace-chip:hover { background: var(--color-indigo-wash); }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Components" viewport="700x320" subtitle="Ask Ace panel with thread and quick prompts" name="Ace UI" -->
+<h1>Ace — AI Tutor</h1>
+
+<div class="ace-demo">
+  <div class="ace-head">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="ace-orb"></div>
+      <div>
+        <div style="font-weight: 600; color: var(--color-text-primary);">Ask Ace</div>
+        <div style="font-size: 12px; color: var(--color-text-secondary);">Grounded in this question</div>
+      </div>
+    </div>
+    <span style="background: var(--color-indigo-wash); color: var(--color-indigo-deep); padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;">Beta</span>
+  </div>
+  
+  <div class="ace-thread">
+    <div class="ace-msg you">
+      <div class="ace-bubble you">Why is chest X-ray the first step here?</div>
+    </div>
+    <div class="ace-msg">
+      <div class="ace-bubble">
+        <p>Post-pneumonia breathlessness needs imaging to rule out complications — effusion, abscess, or empyema — before assuming heart failure.</p>
+        <p>The brief timeline (symptoms within a month of infection) makes infectious or inflammatory causes more likely than primary cardiac disease.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="ace-chips">
+    <button class="ace-chip">Break this down</button>
+    <button class="ace-chip">Why not D?</button>
+    <button class="ace-chip">Test me</button>
+  </div>
+</div>
+</body>
+</html>

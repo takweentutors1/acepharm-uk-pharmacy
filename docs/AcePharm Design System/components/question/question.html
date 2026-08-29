@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Components — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.conf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 2rem; }
+.conf-btn { padding: 11px 8px; border: 1px solid var(--color-border); border-radius: 10px; background: white; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: center; min-height: 44px; }
+.conf-btn:hover { border-color: var(--color-indigo); }
+.conf-btn.selected { border-color: var(--color-indigo); background: var(--color-indigo-wash); color: var(--color-indigo-deep); box-shadow: inset 0 0 0 1px var(--color-indigo); }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Components" viewport="700x240" subtitle="Confidence selector, progress ring, response feedback" name="Question Elements" -->
+<h1>Question Components</h1>
+
+<h2 style="font-size: 18px; margin-bottom: 1rem;">Confidence Selector</h2>
+<p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">How confident are you in your answer?</p>
+<div class="conf-grid">
+  <button class="conf-btn">Guessing</button>
+  <button class="conf-btn">Unsure</button>
+  <button class="conf-btn selected">Fairly sure</button>
+  <button class="conf-btn">Certain</button>
+</div>
+
+<h2 style="font-size: 18px; margin-bottom: 1rem;">Response Feedback</h2>
+<div style="background: var(--color-success-wash); border: 1px solid var(--color-success-border); border-radius: 13px; padding: 1rem; margin-bottom: 1rem;">
+  <h3 style="font-size: 20px; color: var(--color-success); margin-bottom: 0.5rem;">✓ Correct</h3>
+  <p>You identified the key clinical principle.</p>
+</div>
+
+<div style="background: var(--color-danger-wash); border: 1px solid var(--color-danger-border); border-radius: 13px; padding: 1rem;">
+  <h3 style="font-size: 20px; color: var(--color-danger); margin-bottom: 0.5rem;">✗ Not quite</h3>
+  <p>The important clue was in the patient's renal function.</p>
+</div>
+</body>
+</html>

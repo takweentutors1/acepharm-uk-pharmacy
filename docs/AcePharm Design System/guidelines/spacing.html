@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacing — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.spacing-demo { display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.space-unit { display: flex; flex-direction: column; }
+.space-bar { background: var(--color-indigo); border-radius: 4px; margin-bottom: 0.5rem; }
+.space-label { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Spacing" viewport="700x180" subtitle="4px-based scale for padding, margin, gaps" name="Spacing Scale" -->
+<h1>Spacing System</h1>
+<p style="margin-bottom: 2rem; color: var(--color-text-secondary);">8px-based scale: each unit is 4px. Used for padding, margins, gaps, and section spacing.</p>
+
+<div class="spacing-demo">
+  <div class="space-unit"><div class="space-bar" style="width: 4px; height: 20px;"></div><div class="space-label">4px (s1)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 8px; height: 20px;"></div><div class="space-label">8px (s2)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 12px; height: 20px;"></div><div class="space-label">12px (s3)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 16px; height: 20px;"></div><div class="space-label">16px (s4)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 24px; height: 20px;"></div><div class="space-label">24px (s5)</div></div>
+</div>
+
+<div class="spacing-demo">
+  <div class="space-unit"><div class="space-bar" style="width: 32px; height: 20px;"></div><div class="space-label">32px (s6)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 48px; height: 20px;"></div><div class="space-label">48px (s7)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 64px; height: 20px;"></div><div class="space-label">64px (s8)</div></div>
+  <div class="space-unit"><div class="space-bar" style="width: 96px; height: 20px;"></div><div class="space-label">96px (s9)</div></div>
+</div>
+</body>
+</html>

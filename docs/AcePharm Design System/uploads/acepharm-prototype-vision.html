@@ -1,0 +1,2949 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AcePharm — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — from Developer Brief Section 13
+   ============================================================ */
+:root{
+  --indigo:#4F46E5; --indigo-deep:#3730A3; --indigo-wash:#F1F2FC;
+  --ink:#111827; --slate:#64748B; --canvas:#F8FAFC; --surface:#FFFFFF; --border:#E2E8F0;
+  --teal:#0F766E; --success:#15803D; --warning:#B45309; --danger:#B91C1C; --info:#0369A1;
+  --success-wash:#F0FDF4; --danger-wash:#FEF2F2; --warning-wash:#FFFBEB;
+  --r-btn:11px; --r-input:10px; --r-card:15px; --r-panel:22px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SF Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--canvas);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img,svg{display:block;max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:4px}
+#feedback-live:focus,#feedback-live:focus-visible{outline:none}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1140px;margin:0 auto;padding:0 var(--s5)}
+.wrap-narrow{max-width:760px;margin:0 auto;padding:0 var(--s5)}
+.sec{padding:var(--s9) 0}
+.sec-sm{padding:var(--s8) 0}
+@media(max-width:768px){.sec{padding:var(--s7) 0}.sec-sm{padding:var(--s6) 0}}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{line-height:1.15;letter-spacing:-0.02em;font-weight:600}
+.display{font-size:clamp(36px,4.6vw,53px);font-weight:600;letter-spacing:-0.035em}
+h1{font-size:clamp(32px,4vw,48px)}
+h2{font-size:clamp(27px,3.2vw,38px)}
+h3{font-size:clamp(20px,2vw,26px)}
+h4{font-size:19px}
+.lede{font-size:19px;color:var(--slate);line-height:1.65}
+.body-lg{font-size:18px;line-height:1.7}
+.small{font-size:14px}
+.micro{font-size:13px;color:var(--slate)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--indigo)}
+.muted{color:var(--slate)}
+.measure{max-width:68ch}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  min-height:44px;padding:11px 20px;border-radius:var(--r-btn);border:1px solid transparent;
+  font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--indigo);color:#fff}
+.btn-primary:hover{background:var(--indigo-deep)}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.btn-secondary:hover{border-color:var(--slate)}
+.btn-ghost{background:transparent;color:var(--slate);padding:10px 12px}
+.btn-ghost:hover{color:var(--ink)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-lg{min-height:52px;padding:14px 26px;font-size:16px}
+.btn-sm{min-height:38px;padding:8px 14px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-block{width:100%}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:var(--s5)}
+.card-flush{padding:0;overflow:hidden}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-panel);padding:var(--s6)}
+.grid{display:grid;gap:var(--s4)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ---------- pills / labels ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--slate)}
+.pill-indigo{background:var(--indigo-wash);border-color:#DDDEF9;color:var(--indigo-deep)}
+.pill-teal{background:#EFFAF8;border-color:#CCEAE6;color:var(--teal)}
+.pill-warn{background:var(--warning-wash);border-color:#FDE9C8;color:var(--warning)}
+.pill-danger{background:var(--danger-wash);border-color:#FBD5D5;color:var(--danger)}
+.pill-success{background:var(--success-wash);border-color:#CDEBD6;color:var(--success)}
+
+/* ---------- forms ---------- */
+.field{margin-bottom:var(--s4)}
+.label{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+.input,.select{width:100%;min-height:46px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--r-input);background:var(--surface);font-size:15px}
+.input:focus,.select:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.13)}
+.hint{font-size:13px;color:var(--slate);margin-top:6px}
+.err{font-size:13px;color:var(--danger);margin-top:6px;display:flex;gap:6px;align-items:flex-start}
+.check{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;line-height:1.5;cursor:pointer;padding:4px 0}
+.check input{width:19px;height:19px;margin-top:2px;accent-color:var(--indigo);flex:none;cursor:pointer}
+
+/* choice tiles */
+.choice{display:flex;align-items:center;gap:var(--s3);width:100%;text-align:left;min-height:56px;padding:14px 16px;
+  border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;transition:border-color .15s,background .15s}
+.choice:hover{border-color:var(--indigo)}
+.choice[aria-pressed="true"]{border-color:var(--indigo);background:var(--indigo-wash);box-shadow:inset 0 0 0 1px var(--indigo)}
+.choice-stack{display:flex;flex-direction:column;gap:10px}
+
+/* ---------- misc ---------- */
+.rule{height:1px;background:var(--border);border:0;margin:var(--s6) 0}
+.stack{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:var(--s3)}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.wrapf{flex-wrap:wrap}
+.gap2{gap:var(--s2)}.gap3{gap:var(--s3)}.gap4{gap:var(--s4)}.gap5{gap:var(--s5)}
+.mt2{margin-top:var(--s2)}.mt3{margin-top:var(--s3)}.mt4{margin-top:var(--s4)}.mt5{margin-top:var(--s5)}.mt6{margin-top:var(--s6)}
+.mb2{margin-bottom:var(--s2)}.mb3{margin-bottom:var(--s3)}.mb4{margin-bottom:var(--s4)}.mb5{margin-bottom:var(--s5)}.mb6{margin-bottom:var(--s6)}
+.tc{text-align:center}
+.hide{display:none !important}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+table.tbl th,table.tbl td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+table.tbl th{font-weight:600;font-size:13px;color:var(--indigo-deep);background:var(--indigo-wash);text-transform:uppercase;letter-spacing:.04em}
+.tbl-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+.tbl-scroll table.tbl th:first-child,.tbl-scroll table.tbl td:first-child{padding-left:16px}
+
+/* ============================================================
+   MARKETING
+   ============================================================ */
+.mkt-nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.mkt-nav .wrap{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:-.02em;cursor:pointer;background:none;border:0}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),var(--teal));display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700;flex:none}
+.nav-links{display:flex;gap:var(--s5);align-items:center}
+.nav-links a{color:var(--slate);text-decoration:none;font-size:15px;font-weight:500}
+.nav-links a:hover{color:var(--ink)}
+@media(max-width:920px){.nav-links{display:none}}
+
+.hero{position:relative;overflow:hidden;padding:var(--s9) 0 var(--s8)}
+.hero-glow{position:absolute;inset:auto 0 auto 50%;transform:translateX(-50%);top:-380px;width:1100px;height:700px;
+  background:radial-gradient(ellipse at center,rgba(79,70,229,.16),rgba(15,118,110,.07) 45%,transparent 70%);pointer-events:none;filter:blur(8px)}
+.hero .wrap{position:relative}
+.hero-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:var(--s8);align-items:center}
+@media(max-width:1000px){.hero-grid{grid-template-columns:1fr;gap:var(--s7)}}
+
+/* hero product visual — the signature element */
+.hv{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-panel);padding:var(--s5);
+  box-shadow:0 24px 60px -28px rgba(17,24,39,.28);position:relative}
+.hv-row{display:flex;gap:var(--s3);margin-top:var(--s4)}
+.hv-tile{flex:1;border:1px solid var(--border);border-radius:12px;padding:13px 14px;background:var(--canvas)}
+.hv-lab{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate)}
+.hv-val{font-size:22px;font-weight:600;margin-top:3px;letter-spacing:-.02em}
+.hv-rec{margin-top:var(--s3);border:1px solid #DDDEF9;background:var(--indigo-wash);border-radius:12px;padding:14px 15px}
+.hv-spark{margin-top:var(--s3);border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--canvas)}
+.hv-anim{opacity:0;transform:translateY(14px);animation:hvIn .7s cubic-bezier(.22,.85,.3,1) forwards}
+@keyframes hvIn{to{opacity:1;transform:none}}
+.spark-path{stroke-dasharray:340;stroke-dashoffset:340;animation:draw 1.5s .5s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){
+  .hv-anim{animation:none;opacity:1;transform:none}
+  .spark-path{animation:none;stroke-dashoffset:0}
+  *{transition:none !important}
+}
+
+.trust{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface)}
+.loop-step{position:relative;padding-left:var(--s6)}
+.loop-num{position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:8px;background:var(--indigo-wash);color:var(--indigo-deep);
+  display:grid;place-items:center;font-size:13px;font-weight:600;font-family:var(--mono)}
+
+.price-card{border:1px solid var(--border);border-radius:var(--r-panel);padding:var(--s6);background:var(--surface);position:relative;display:flex;flex-direction:column}
+.price-card.feature{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)}
+.badge-top{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--indigo);color:#fff;
+  font-size:12px;font-weight:600;padding:5px 14px;border-radius:999px;white-space:nowrap}
+.price-amt{font-size:44px;font-weight:600;letter-spacing:-.03em}
+.tick{display:flex;gap:10px;align-items:flex-start;font-size:15px;padding:5px 0}
+.tick svg{flex:none;margin-top:4px;color:var(--success)}
+
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;background:none;border:0;text-align:left;padding:20px 0;font-size:17px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;gap:var(--s4);align-items:center}
+.faq-a{padding:0 0 20px;color:var(--slate);max-width:70ch}
+
+.mkt-footer{background:var(--ink);color:#CBD5E1;padding:var(--s8) 0 var(--s6)}
+.mkt-footer h5{color:#fff;font-size:13px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:var(--s3);font-weight:600}
+.mkt-footer a{display:block;color:#94A3B8;text-decoration:none;font-size:14.5px;padding:4px 0}
+.mkt-footer a:hover{color:#fff}
+
+/* ============================================================
+   APPLICATION
+   ============================================================ */
+.app{min-height:100vh;display:flex;flex-direction:column}
+.app-top{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--border)}
+.app-top .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.app-nav{display:flex;gap:var(--s1);align-items:center}
+.app-nav button{background:none;border:0;padding:9px 13px;border-radius:9px;font-size:14.5px;font-weight:500;color:var(--slate);cursor:pointer}
+.app-nav button:hover{background:var(--canvas);color:var(--ink)}
+.app-nav button[aria-current="page"]{background:var(--indigo-wash);color:var(--indigo-deep)}
+@media(max-width:820px){.app-nav{display:none}}
+.app-body{flex:1;padding:var(--s6) 0 var(--s9)}
+
+.mobile-tabs{display:none;position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--surface);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.mobile-tabs .inner{display:flex}
+.mobile-tabs button{flex:1;background:none;border:0;padding:8px 4px;font-size:11px;color:var(--slate);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px}
+.mobile-tabs button[aria-current="page"]{color:var(--indigo)}
+@media(max-width:820px){.mobile-tabs{display:block}.app-body{padding-bottom:88px}}
+
+.dash-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--s4);align-items:start}
+@media(max-width:940px){.dash-grid{grid-template-columns:1fr}}
+
+.ring{--p:0;width:78px;height:78px;border-radius:50%;flex:none;
+  background:conic-gradient(var(--indigo) calc(var(--p)*1%),var(--border) 0);
+  display:grid;place-items:center;position:relative}
+.ring::after{content:'';position:absolute;inset:8px;background:var(--surface);border-radius:50%}
+.ring span{position:relative;z-index:1;font-size:15px;font-weight:600}
+
+.bar{height:8px;background:var(--border);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--indigo);border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar.teal i{background:var(--teal)}
+.bar.warn i{background:var(--warning)}
+.bar.danger i{background:var(--danger)}
+.bar.success i{background:var(--success)}
+
+.topic-row{display:grid;grid-template-columns:1fr 180px 132px;gap:var(--s4);align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
+.topic-row:last-child{border-bottom:0}
+@media(max-width:700px){.topic-row{grid-template-columns:1fr 120px;gap:var(--s3)}.topic-row .bar-cell{grid-column:1/-1}}
+
+/* ---------- question session ---------- */
+.q-top{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--border)}
+.q-top-inner{max-width:1240px;margin:0 auto;padding:var(--s3) var(--s5);display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
+.q-progress{flex:1;max-width:320px}
+.q-layout{max-width:1240px;margin:0 auto;padding:var(--s6) var(--s5) var(--s9);display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:var(--s6);align-items:start}
+@media(max-width:1080px){.q-layout{grid-template-columns:1fr;padding-bottom:120px}.q-util{order:2}.desktop-only{display:none}}
+.q-main{max-width:760px}
+.q-stem{font-size:18px;line-height:1.72}
+.q-stem p{margin-bottom:var(--s3)}
+.q-lead{font-size:18px;font-weight:600;line-height:1.55;margin:var(--s4) 0 var(--s4)}
+
+.opt{display:flex;gap:var(--s3);width:100%;text-align:left;padding:15px 17px;border:1px solid var(--border);border-radius:13px;
+  background:var(--surface);cursor:pointer;transition:border-color .15s,background .15s;align-items:flex-start;min-height:56px}
+.opt:hover:not(:disabled){border-color:var(--indigo)}
+.opt:disabled{cursor:default}
+.opt-mark{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;
+  font-size:13.5px;font-weight:600;font-family:var(--mono);flex:none;background:var(--canvas)}
+.opt[aria-pressed="true"]{border-color:var(--indigo);background:var(--indigo-wash);box-shadow:inset 0 0 0 1px var(--indigo)}
+.opt[aria-pressed="true"] .opt-mark{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.opt.correct{border-color:var(--success);background:var(--success-wash);box-shadow:inset 0 0 0 1px var(--success)}
+.opt.correct .opt-mark{background:var(--success);color:#fff;border-color:var(--success)}
+.opt.wrong{border-color:var(--danger);background:var(--danger-wash);box-shadow:inset 0 0 0 1px var(--danger)}
+.opt.wrong .opt-mark{background:var(--danger);color:#fff;border-color:var(--danger)}
+.opt.struck{opacity:.42}
+.opt.struck .opt-text{text-decoration:line-through}
+.opt-flag{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;margin-top:6px}
+.opt-flag.ok{color:var(--success)}
+.opt-flag.no{color:var(--danger)}
+.opt-text{flex:1}
+
+.conf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+@media(max-width:560px){.conf-grid{grid-template-columns:repeat(2,1fr)}}
+.conf-btn{padding:11px 8px;border:1px solid var(--border);border-radius:10px;background:var(--surface);font-size:13.5px;
+  font-weight:500;cursor:pointer;text-align:center;min-height:44px}
+.conf-btn:hover{border-color:var(--indigo)}
+.conf-btn[aria-pressed="true"]{border-color:var(--indigo);background:var(--indigo-wash);color:var(--indigo-deep);box-shadow:inset 0 0 0 1px var(--indigo)}
+
+.feedback{border-radius:13px;padding:var(--s4) var(--s5);margin-bottom:var(--s5);border:1px solid}
+.feedback.ok{background:var(--success-wash);border-color:#CDEBD6}
+.feedback.no{background:var(--danger-wash);border-color:#FBD5D5}
+.feedback h3{font-size:20px;display:flex;align-items:center;gap:9px}
+.feedback.ok h3{color:var(--success)}
+.feedback.no h3{color:var(--danger)}
+
+.exp h4{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--indigo-deep);margin-bottom:var(--s2);font-weight:600}
+.exp section{padding:var(--s5) 0;border-bottom:1px solid var(--border)}
+.exp section:last-child{border-bottom:0}
+.exp p{margin-bottom:var(--s3);line-height:1.72}
+.exp p:last-child{margin-bottom:0}
+.remember{background:var(--indigo-wash);border-left:4px solid var(--indigo);border-radius:0 12px 12px 0;padding:var(--s4) var(--s5)}
+.working{background:var(--canvas);border:1px solid var(--border);border-radius:12px;padding:var(--s4);font-family:var(--mono);font-size:14.5px;line-height:2}
+.opt-analysis{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.opt-analysis.is-correct{border-color:#CDEBD6;background:var(--success-wash)}
+.ref{display:flex;gap:var(--s3);padding:13px 0;border-bottom:1px solid var(--border)}
+.ref:last-child{border-bottom:0}
+
+.disclosure{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.disclosure > button{width:100%;background:var(--canvas);border:0;padding:14px 17px;text-align:left;font-size:15px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:var(--s3);min-height:52px}
+.disclosure .dbody{padding:var(--s5);border-top:1px solid var(--border)}
+.notes-body h5{font-size:15px;margin:var(--s4) 0 var(--s2)}
+.notes-body h5:first-child{margin-top:0}
+.notes-body p,.notes-body li{font-size:15px;line-height:1.7;color:var(--ink)}
+.notes-body ul{padding-left:var(--s5);margin-bottom:var(--s3)}
+
+.navgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.navgrid button{aspect-ratio:1;border:1px solid var(--border);border-radius:9px;background:var(--surface);
+  font-size:13.5px;font-weight:600;font-family:var(--mono);cursor:pointer;display:grid;place-items:center;position:relative;min-height:40px}
+.navgrid button.done{background:var(--indigo-wash);border-color:#DDDEF9;color:var(--indigo-deep)}
+.navgrid button.cur{border-color:var(--indigo);box-shadow:inset 0 0 0 2px var(--indigo)}
+.navgrid button .dot{position:absolute;top:3px;right:3px;font-size:9px;line-height:1}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--slate)}
+.legend i{width:15px;height:15px;border-radius:5px;border:1px solid var(--border);display:inline-grid;place-items:center;flex:none;font-size:9px;font-style:normal}
+
+.q-sticky{display:none}
+@media(max-width:1080px){
+  .q-sticky{display:block;position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--surface);
+    border-top:1px solid var(--border);padding:12px var(--s4) max(12px,env(safe-area-inset-bottom))}
+}
+.q-desktop-submit{display:block}
+@media(max-width:1080px){.q-desktop-submit{display:none}}
+
+/* ---------- confidence quadrants ---------- */
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.quad > div{background:var(--surface);padding:var(--s4);min-height:118px}
+.quad .qv{font-size:30px;font-weight:600;letter-spacing:-.02em}
+.quad .qk{font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--s2)}
+.quad .qd{font-size:13px;color:var(--slate);line-height:1.5;margin-top:4px}
+.quad .flag{background:var(--danger-wash)}
+.quad .flag .qk{color:var(--danger)}
+
+/* ---------- modal / toast ---------- */
+.overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:100;display:grid;place-items:center;padding:var(--s4);overflow-y:auto}
+.modal{background:var(--surface);border-radius:var(--r-panel);padding:var(--s6);max-width:520px;width:100%;
+  box-shadow:0 30px 70px -20px rgba(17,24,39,.5);margin:auto}
+@media(max-width:560px){.modal{padding:var(--s5)}}
+.toast-host{position:fixed;bottom:var(--s5);left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:calc(100% - 32px);max-width:440px}
+.toast{background:var(--ink);color:#fff;padding:12px 18px;border-radius:11px;font-size:14.5px;box-shadow:0 12px 30px -8px rgba(0,0,0,.4);animation:tIn .25s}
+@keyframes tIn{from{opacity:0;transform:translateY(10px)}}
+@media(max-width:820px){.toast-host{bottom:88px}}
+
+/* ---------- proto banner ---------- */
+.proto{background:var(--ink);color:#fff;font-size:13px;padding:9px var(--s4);display:flex;
+  align-items:center;justify-content:center;gap:var(--s4);flex-wrap:wrap;text-align:center}
+.proto b{font-weight:600}
+.proto button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;
+  padding:4px 11px;border-radius:7px;font-size:12.5px;cursor:pointer;min-height:30px}
+.proto button:hover{background:rgba(255,255,255,.24)}
+
+.steps{display:flex;gap:6px;margin-bottom:var(--s5)}
+.steps i{height:4px;flex:1;border-radius:999px;background:var(--border)}
+.steps i.on{background:var(--indigo)}
+
+.empty{text-align:center;padding:var(--s7) var(--s4);border:1px dashed var(--border);border-radius:var(--r-card);background:var(--surface)}
+.locked{position:relative;border:1px solid var(--border);border-radius:var(--r-card);padding:var(--s6);text-align:center;background:var(--canvas)}
+/* ===== VISION LAYER — Ace UI ===== */
+.ace{border:1px solid #DDDEF9;border-radius:var(--r-card);background:linear-gradient(180deg,#FAFAFE,var(--surface));padding:var(--s5);margin-top:var(--s4)}
+.ace-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding-bottom:var(--s4);border-bottom:1px solid var(--border);margin-bottom:var(--s4)}
+.ace-orb{width:30px;height:30px;border-radius:50%;flex:none;background:conic-gradient(from 180deg,var(--indigo),var(--teal),#8B5CF6,var(--indigo));
+  box-shadow:0 0 0 3px rgba(79,70,229,.11);animation:orb 9s linear infinite}
+.ace-orb.sm{width:24px;height:24px}
+@keyframes orb{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ace-orb{animation:none}}
+.ace-thread{max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:var(--s3);padding-right:4px}
+.ace-msg{display:flex;gap:10px;align-items:flex-start}
+.ace-msg.you{justify-content:flex-end}
+.ace-bubble{background:var(--surface);border:1px solid var(--border);border-radius:4px 14px 14px 14px;padding:13px 16px;font-size:15px;line-height:1.65;max-width:82%}
+.ace-bubble.you{background:var(--indigo);color:#fff;border-color:var(--indigo);border-radius:14px 4px 14px 14px}
+.ace-bubble p{margin-bottom:10px}
+.ace-bubble p:last-child{margin-bottom:0}
+.ace-bubble ol,.ace-bubble ul{padding-left:20px;margin-bottom:10px}
+.ace-bubble li{margin-bottom:5px}
+.ace-cite{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--slate);line-height:1.45}
+.ace-cite svg{flex:none;margin-top:2px}
+@media(max-width:620px){.ace{padding:var(--s4)}.ace-bubble{max-width:100%;padding:12px 14px}.ace-msg.you .ace-bubble{max-width:88%}.ace-thread{max-height:none}}
+.ace-dots{display:inline-flex;gap:5px;padding:3px 0}
+.ace-dots i{width:7px;height:7px;border-radius:50%;background:var(--slate);animation:bounce 1.2s infinite}
+.ace-dots i:nth-child(2){animation-delay:.15s}.ace-dots i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.ace-chips{display:flex;flex-wrap:wrap;gap:7px;margin:var(--s4) 0}
+.ace-chip{background:var(--surface);border:1px solid #DDDEF9;color:var(--indigo-deep);border-radius:999px;
+  padding:8px 14px;font-size:13.5px;cursor:pointer;min-height:38px}
+.ace-chip:hover{background:var(--indigo-wash)}
+.ace-input{display:flex;gap:var(--s2)}
+.ace-input .input{flex:1}
+.ace-input .btn{min-width:48px;padding:11px 14px}
+.sel-ace{position:absolute;z-index:90;background:var(--ink);color:#fff;border:0;border-radius:9px;
+  padding:8px 13px;font-size:13px;cursor:pointer;box-shadow:0 8px 22px -6px rgba(0,0,0,.45);white-space:nowrap}
+
+.ace-cta{border:1px dashed #C7C9F5;border-radius:var(--r-card);background:linear-gradient(135deg,#FAFAFE,#F3FAF9);
+  padding:var(--s4) var(--s5);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);flex-wrap:wrap;margin-top:var(--s4)}
+
+.ai-tile{border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);padding:var(--s5);
+  display:flex;flex-direction:column;transition:border-color .15s,transform .15s;cursor:pointer;text-align:left;width:100%}
+.ai-tile:hover{border-color:var(--indigo);transform:translateY(-2px)}
+.ai-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;margin-bottom:var(--s3);
+  background:var(--indigo-wash);color:var(--indigo-deep)}
+
+.plan-day{border:1px solid var(--border);border-radius:12px;padding:var(--s4);background:var(--surface)}
+.plan-day.today{border-color:var(--indigo);box-shadow:inset 0 0 0 1px var(--indigo)}
+.plan-day.done{background:var(--success-wash);border-color:#CDEBD6}
+
+.card-flip{border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);padding:var(--s6);
+  min-height:230px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer}
+
+.chat-sim{border:1px solid var(--border);border-radius:var(--r-card);background:var(--canvas);padding:var(--s5);
+  max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:var(--s3)}
+.sim-msg{display:flex;gap:11px;align-items:flex-start;max-width:88%}
+.sim-msg.me{align-self:flex-end;flex-direction:row-reverse}
+.sim-av{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:13px;font-weight:600}
+.sim-av.pt{background:#FDE9C8;color:var(--warning)}
+.sim-av.me{background:var(--indigo);color:#fff}
+.sim-bub{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 15px;font-size:15px;line-height:1.6}
+.sim-msg.me .sim-bub{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.rubric-row{display:flex;gap:var(--s3);align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
+.rubric-row:last-child{border-bottom:0}
+
+.glow-panel{position:relative;border-radius:var(--r-panel);padding:var(--s7);overflow:hidden;
+  background:linear-gradient(135deg,#1E1B4B,#312E81 45%,#0F766E);color:#fff}
+.glow-panel h2,.glow-panel h3{color:#fff}
+.glow-panel::before{content:'';position:absolute;top:-140px;right:-100px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.19),transparent 65%)}
+.glow-panel > *{position:relative}
+.glow-card{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.17);border-radius:14px;padding:var(--s4)}
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast-host" id="toasts" aria-live="polite"></div>
+<div id="modal-host"></div>
+<script>
+/* ==========================================================
+   AcePharm interactive prototype
+   State is held in memory only — refreshing resets everything.
+   ========================================================== */
+
+const S = {
+  route:'home',
+  signedIn:false,
+  name:'',
+  plan:'free',            // free | monthly | yearly
+  onboarding:{stage:'',goal:'',date:'',target:20,uni:''},
+  onbStep:0,
+  firstAttempts:{},       // qid -> {correct, confidence}  (permanent)
+  attempts:[],            // every attempt (clearable)
+  bookmarks:new Set(),
+  notes:{},
+  reported:new Set(),
+  hideOptionsDefault:false,
+  freeUsed:0,
+  session:null,
+  builder:{topics:['cv','resp','mh','pall'],mode:'learn',count:5,difficulty:'mixed'},
+  lastSummary:null
+};
+const FREE_LIMIT = 30;
+
+/* ---------------- content: 5 questions ---------------- */
+const SUBTOPIC_NOTES = {
+  cv_htn:{name:'Hypertension',body:`
+    <h5>Treatment steps (NICE NG136)</h5>
+    <p><b>Step 1</b> — Under 55 and not of Black African or African-Caribbean family origin, or has type 2 diabetes: ACE inhibitor or ARB. Aged 55 and over, or of Black African or African-Caribbean family origin without diabetes: calcium channel blocker.</p>
+    <p><b>Step 2</b> — Combine ACEi/ARB with a CCB, or either with a thiazide-like diuretic.</p>
+    <p><b>Step 3</b> — ACEi/ARB + CCB + thiazide-like diuretic.</p>
+    <p><b>Step 4 (resistant hypertension)</b> — Confirm adherence and measurement technique first. Then: potassium 4.5 mmol/L or below, add low-dose spironolactone 25 mg; potassium above 4.5 mmol/L, add an alpha-blocker or beta-blocker.</p>
+    <h5>Targets</h5>
+    <div class="tbl-scroll"><table class="tbl"><tr><th>Group</th><th>Clinic</th><th>ABPM/HBPM</th></tr>
+    <tr><td>Under 80</td><td>&lt;140/90</td><td>&lt;135/85</td></tr>
+    <tr><td>80 and over</td><td>&lt;150/90</td><td>&lt;145/85</td></tr>
+    <tr><td>Type 2 diabetes</td><td>&lt;140/90</td><td>&lt;135/85</td></tr></table></div>
+    <h5>Watch for</h5>
+    <ul><li>ACE inhibitor cough affects around 15% — switch to an ARB, do not treat the cough</li>
+    <li>Amlodipine ankle oedema is vasodilatory, not fluid overload — a diuretic will not fix it</li>
+    <li>Spironolactone plus an ACE inhibitor carries real hyperkalaemia risk — check U&Es within a month</li></ul>`},
+  resp_asthma:{name:'Asthma in adults',body:`
+    <h5>Reliever overuse is the key safety signal</h5>
+    <p>Use of three or more short-acting beta-agonist inhalers a year — roughly more than one a month — indicates poorly controlled asthma and a materially increased risk of a fatal attack. The National Review of Asthma Deaths identified high SABA use alongside low inhaled corticosteroid use as a recurring feature in preventable deaths.</p>
+    <h5>Before escalating treatment, always check</h5>
+    <ul><li>Inhaler technique — the commonest reason for apparent treatment failure</li>
+    <li>Adherence, judged by preventer collection intervals rather than self-report</li>
+    <li>Trigger exposure and comorbidities such as rhinitis, reflux and obesity</li>
+    <li>The diagnosis itself</li></ul>
+    <h5>Current direction of guidance</h5>
+    <p>SABA-only treatment is no longer recommended. Guidance is built around ICS/formoterol combination inhalers used as an anti-inflammatory reliever, or as maintenance and reliever therapy.</p>`},
+  cv_warf:{name:'Warfarin',body:`
+    <h5>Mechanism</h5>
+    <p>Warfarin inhibits vitamin K epoxide reductase, impairing synthesis of clotting factors II, VII, IX and X, and proteins C and S. Full effect takes 48–72 hours because circulating factors must first be cleared.</p>
+    <h5>Interactions</h5>
+    <p><b>INR increased by:</b> metronidazole, azole antifungals, macrolides, ciprofloxacin, amiodarone, trimethoprim, SSRIs, omeprazole, cranberry juice, acute alcohol binge.</p>
+    <p><b>INR decreased by:</b> rifampicin, carbamazepine, St John's wort, high vitamin K intake, chronic alcohol use.</p>
+    <p><b>Bleeding risk raised without changing the INR:</b> NSAIDs, aspirin, clopidogrel, SSRIs.</p>
+    <p>The broad rule is that enzyme inhibitors raise the INR and inducers lower it — but always check, since several interactions are not CYP-mediated.</p>
+    <h5>Counselling</h5>
+    <ul><li>Keep vitamin K intake consistent rather than avoiding greens</li>
+    <li>Carry the anticoagulant alert card</li>
+    <li>Check before any new medicine, including anything bought over the counter</li></ul>`},
+  pall_opioid:{name:'Opioid conversion',body:`
+    <h5>The breakthrough dose</h5>
+    <p>The rescue dose is <b>one sixth of the total daily dose</b>, given as an immediate-release preparation, as required. This is the most frequently examined calculation in palliative care.</p>
+    <p>Example: morphine MR 60 mg twice daily is 120 mg total daily. Breakthrough is 120 ÷ 6 = 20 mg.</p>
+    <h5>Conversion factors (BNF)</h5>
+    <div class="tbl-scroll"><table class="tbl"><tr><th>From</th><th>To</th><th>Factor</th></tr>
+    <tr><td>Oral codeine</td><td>Oral morphine</td><td>Divide by 10</td></tr>
+    <tr><td>Oral morphine</td><td>Oral oxycodone</td><td>Divide by 1.5–2</td></tr>
+    <tr><td>Oral morphine</td><td>Subcutaneous morphine</td><td>Divide by 2</td></tr>
+    <tr><td>Oral morphine</td><td>Subcutaneous diamorphine</td><td>Divide by 3</td></tr></table></div>
+    <h5>Universal points</h5>
+    <ul><li>Prescribe a laxative for every patient started on a strong opioid — tolerance to constipation does not develop</li>
+    <li>In renal impairment, morphine metabolites accumulate; consider oxycodone, or alfentanil and fentanyl in severe impairment</li></ul>`},
+  mh_lithium:{name:'Lithium',body:`
+    <h5>Monitoring</h5>
+    <p>Levels are taken <b>12 hours after the dose</b>, conventionally a morning sample after the previous evening's dose. Target is generally 0.4–1.0 mmol/L.</p>
+    <div class="tbl-scroll"><table class="tbl"><tr><th>Test</th><th>Frequency</th></tr>
+    <tr><td>Serum lithium</td><td>Weekly after initiation or dose change until stable, then every 3 months</td></tr>
+    <tr><td>Renal function</td><td>Every 6 months</td></tr>
+    <tr><td>Thyroid function</td><td>Every 6 months</td></tr>
+    <tr><td>Calcium</td><td>Every 6 months</td></tr></table></div>
+    <h5>Toxicity</h5>
+    <p>A <b>fine</b> tremor is common at therapeutic levels. A <b>coarse</b> tremor is a warning sign of toxicity, alongside vomiting, diarrhoea, ataxia and drowsiness.</p>
+    <p>Precipitants: dehydration, sodium depletion, and the interacting group — <b>D</b>iuretics, <b>A</b>CE inhibitors and ARBs, <b>N</b>SAIDs, <b>M</b>etronidazole — all of which reduce renal lithium clearance.</p>`}
+};
+
+const QUESTIONS = [
+ {
+  id:'ACP-CV-0012', subtopic:'cv_htn', category:'Cardiovascular', categoryKey:'cv',
+  topic:'Hypertension', difficulty:'Medium', type:'SBA', sector:'GP',
+  secondary:['Renal — electrolyte disturbances'],
+  reviewed:'14 May 2026',
+  stem:`<p>A 62-year-old man attends for a medication review. He has taken amlodipine 10 mg once daily, ramipril 10 mg once daily and indapamide 2.5 mg once daily for six months, with good adherence.</p>
+        <p>His average home blood pressure reading is 152/94 mmHg. Recent bloods show potassium 4.1 mmol/L and eGFR 78 mL/min/1.73m².</p>`,
+  lead:'What is the most appropriate next step in his management?',
+  options:[
+   {l:'A',t:'Add bisoprolol 2.5 mg once daily',c:false,r:'A beta-blocker is the step 4 option when potassium is <em>above</em> 4.5 mmol/L, or where spironolactone is unsuitable. Neither applies here.'},
+   {l:'B',t:'Add doxazosin 1 mg once daily',c:false,r:'Same reasoning — an alpha-blocker is reserved for patients whose potassium exceeds 4.5 mmol/L or who cannot tolerate spironolactone.'},
+   {l:'C',t:'Add losartan 50 mg once daily',c:false,r:'Combining an ACE inhibitor with an ARB is not recommended: no additional benefit, and substantially increased risk of hyperkalaemia, hypotension and renal impairment.'},
+   {l:'D',t:'Add spironolactone 25 mg once daily',c:true,r:'This is resistant hypertension — blood pressure above target despite optimal doses of three agents from different classes. NICE NG136 recommends low-dose spironolactone at step 4 when potassium is 4.5 mmol/L or below. His potassium is 4.1 mmol/L and renal function is adequate.'},
+   {l:'E',t:'Increase indapamide to 5 mg once daily',c:false,r:'The licensed dose of indapamide for hypertension is 2.5 mg daily. He is already at the maximum.'}
+  ],
+  concise:'This is resistant hypertension — blood pressure remaining above target despite optimal doses of three antihypertensives from different classes, with confirmed adherence.',
+  expanded:'NICE NG136 defines step 4 treatment by serum potassium. At 4.5 mmol/L or below, low-dose spironolactone is recommended; above that, an alpha-blocker or beta-blocker is used instead. His potassium of 4.1 mmol/L and eGFR of 78 place him firmly in the spironolactone group. Because spironolactone alongside an ACE inhibitor carries a genuine hyperkalaemia risk, U&Es should be rechecked within a month of starting and after any dose increase.',
+  remember:'At step 4, the serum potassium decides the drug. 4.5 mmol/L or below points to spironolactone; above it points to an alpha- or beta-blocker.',
+  apply:'The deciding factors here were confirmed adherence on three optimally dosed agents, a potassium of 4.1 mmol/L, and adequate renal function — together they make spironolactone both indicated and safe to start with monitoring.',
+  trap:'It is tempting to reach for a fourth conventional agent or to push the diuretic dose. Indapamide 2.5 mg is already the licensed maximum for hypertension, so increasing it is not an option.',
+  refs:[
+   {t:'Hypertension in adults: diagnosis and management',o:'NICE NG136',s:'Section 1.4 — step 4 treatment',y:'2023'},
+   {t:'Spironolactone',o:'BNF',s:'Indications and monitoring',y:'Current'}
+  ]
+ },
+ {
+  id:'ACP-RE-0031', subtopic:'resp_asthma', category:'Respiratory', categoryKey:'resp',
+  topic:'Asthma in adults', difficulty:'Easy', type:'SBA', sector:'Community',
+  secondary:['Responding to symptoms — red flags'],
+  reviewed:'2 June 2026',
+  stem:`<p>A 24-year-old woman collects her sixth salbutamol inhaler in the past nine months. She has an inhaled corticosteroid on repeat but has not ordered it for five months. She says her chest has been "a bit tight" recently.</p>`,
+  lead:'What is the most appropriate action?',
+  options:[
+   {l:'A',t:'Advise her to use the salbutamol more regularly to prevent symptoms',c:false,r:'Regular scheduled reliever use does not treat the underlying airway inflammation and may worsen control.'},
+   {l:'B',t:'Recommend an over-the-counter cough preparation',c:false,r:'The symptom is uncontrolled asthma, not a cough needing symptomatic treatment. This would delay appropriate care.'},
+   {l:'C',t:'Reassure her, as salbutamol is safe in high doses',c:false,r:'The risk here is not direct salbutamol toxicity but what the overuse signals about her disease control.'},
+   {l:'D',t:'Refer her for an urgent asthma review',c:true,r:'Two red flags are present together: reliever overuse and five months of preventer underuse. This pattern is strongly associated with fatal and near-fatal asthma and needs prompt review.'},
+   {l:'E',t:'Supply the inhaler and advise a routine review at her next appointment',c:false,r:'A routine review is too slow given the risk profile. This warrants urgent action.'}
+  ],
+  concise:'Using more than one reliever inhaler a month indicates poor control and is strongly associated with fatal and near-fatal asthma. Alongside five months without her preventer, her airway inflammation is untreated.',
+  expanded:'Six salbutamol inhalers in nine months works out at roughly one every six weeks, and any patient using three or more a year should trigger review. The second signal matters just as much: she has an inhaled corticosteroid on repeat but has not collected it since the spring. The National Review of Asthma Deaths identified precisely this combination — high reliever use with low preventer use — as a recurring feature in deaths that were judged preventable. The community pharmacy is often the only place this pattern is visible, because it appears in dispensing records long before it appears in a consultation.',
+  remember:'Three or more reliever inhalers a year is a marker of poorly controlled asthma and increased mortality risk, regardless of how well the patient says they feel.',
+  apply:'Her own description of a "bit tight" chest understates the picture. The dispensing record is the more reliable signal, and it points to urgent rather than routine review.',
+  trap:'The temptation is to treat the presenting request. The safety issue is not the inhaler she is asking for — it is the one she has stopped collecting.',
+  refs:[
+   {t:'Asthma: diagnosis, monitoring and chronic asthma management',o:'NICE / BTS / SIGN NG245',s:'Monitoring and review',y:'2024'},
+   {t:'Why asthma still kills — National Review of Asthma Deaths',o:'Royal College of Physicians',s:'Key findings',y:'2014'}
+  ]
+ },
+ {
+  id:'ACP-CV-0104', subtopic:'cv_warf', category:'Cardiovascular', categoryKey:'cv',
+  topic:'Warfarin', difficulty:'Medium', type:'SBA', sector:'Community',
+  secondary:['Clinical skills — drug interactions'],
+  reviewed:'20 April 2026',
+  stem:`<p>A 70-year-old woman stabilised on warfarin for atrial fibrillation, with a target INR of 2.5, presents with a prescription for a course of antibiotics for a dental infection. Her INR was 2.4 last week.</p>`,
+  lead:'Which antibiotic is most likely to cause a clinically significant rise in her INR?',
+  options:[
+   {l:'A',t:'Amoxicillin',c:false,r:'Amoxicillin may modestly affect the INR by altering gut flora that produce vitamin K, but the effect is small and inconsistent by comparison.'},
+   {l:'B',t:'Cefalexin',c:false,r:'Cefalexin has minimal interaction with warfarin.'},
+   {l:'C',t:'Doxycycline',c:false,r:'Occasional INR rises have been reported, but the effect is far less pronounced and less predictable than with metronidazole.'},
+   {l:'D',t:'Flucloxacillin',c:false,r:'Flucloxacillin is notable for the opposite effect — it has been reported to <em>reduce</em> the INR, sometimes for weeks after the course finishes.'},
+   {l:'E',t:'Metronidazole',c:true,r:'Metronidazole is a potent inhibitor of CYP2C9, the enzyme responsible for metabolising the more active S-enantiomer of warfarin. It can raise the INR substantially and rapidly.'}
+  ],
+  concise:'Metronidazole potently inhibits CYP2C9, which metabolises the more active S-enantiomer of warfarin. The result is a rapid and often substantial rise in INR.',
+  expanded:'Warfarin is a racemic mixture, and the S-enantiomer is roughly five times more potent than the R-form. It is cleared almost entirely by CYP2C9, so anything inhibiting that enzyme has an outsized effect on anticoagulation. Metronidazole is among the strongest inhibitors encountered in routine practice. Where it cannot be avoided — and for a dental infection it is often the right clinical choice — the INR should be monitored closely and a warfarin dose reduction anticipated rather than waited for. Flucloxacillin is worth knowing as the mirror image: it lowers the INR, and the effect can persist well beyond the end of the course.',
+  remember:'Metronidazole, azole antifungals, macrolides and ciprofloxacin all raise the INR. Flucloxacillin and rifampicin lower it.',
+  apply:'She is stable at 2.4 with a target of 2.5, so there is little headroom before she moves into a range where bleeding risk rises. The interaction should be anticipated at the point of dispensing, not discovered at her next clinic appointment.',
+  refs:[
+   {t:'Warfarin sodium — interactions',o:'BNF Appendix 1',s:'Anticoagulants',y:'Current'},
+   {t:'Atrial fibrillation: diagnosis and management',o:'NICE NG196',s:'Anticoagulation',y:'2021'}
+  ]
+ },
+ {
+  id:'ACP-PA-0007', subtopic:'pall_opioid', category:'Cancer & Palliative Care', categoryKey:'pall',
+  topic:'Opioid conversion', difficulty:'Easy', type:'Calculation', sector:'Hospital',
+  secondary:[],
+  reviewed:'11 March 2026',
+  numeric:{answer:15, unit:'mg', dp:0},
+  stem:`<p>A patient is taking morphine sulfate modified-release 45 mg twice daily. Her pain is otherwise controlled.</p>`,
+  lead:'What is the appropriate breakthrough dose of immediate-release oral morphine?',
+  options:[
+   {l:'A',t:'5 mg',c:false,r:'This is one eighteenth of the daily dose and would be inadequate for breakthrough pain.'},
+   {l:'B',t:'10 mg',c:false,r:'Approximately one ninth of the daily dose. This commonly results from dividing the single modified-release dose rather than the daily total.'},
+   {l:'C',t:'15 mg',c:true,r:'Total daily dose is 45 mg × 2 = 90 mg. The breakthrough dose is one sixth of that: 90 ÷ 6 = 15 mg immediate-release morphine as required.'},
+   {l:'D',t:'22.5 mg',c:false,r:'This is one quarter of the daily dose — considerably more than the recommended one sixth.'},
+   {l:'E',t:'45 mg',c:false,r:'Half the total daily dose given as a single breakthrough dose would be a dangerous overdose.'}
+  ],
+  concise:'The breakthrough dose is one sixth of the total daily dose of morphine.',
+  working:[
+   'Total daily dose  =  45 mg × 2  =  90 mg',
+   'Breakthrough      =  90 ÷ 6',
+   'Answer            =  15 mg immediate-release morphine, as required'
+  ],
+  expanded:'The one-sixth rule applies to the <em>total</em> daily dose, which is the most common place this calculation goes wrong — dividing the 45 mg modified-release dose instead of the 90 mg daily total gives 7.5 mg and leaves the patient under-treated. If she goes on to need several breakthrough doses a day, the regular dose should be reassessed by adding the breakthrough used over 24 hours to the regular dose, then recalculating a new breakthrough figure from the new total.',
+  remember:'Breakthrough dose = total daily dose ÷ 6. Always work from the daily total, never from a single modified-release dose.',
+  apply:'Her pain is otherwise controlled, so the regular dose does not need changing. Only the rescue dose is being calculated here.',
+  trap:'Dividing 45 by 6 rather than 90 by 6. Write out the total daily dose as a separate line before dividing.',
+  refs:[
+   {t:'Prescribing in palliative care',o:'BNF',s:'Pain management — breakthrough doses',y:'Current'},
+   {t:'Palliative care for adults: strong opioids for pain relief',o:'NICE CG140',s:'Maintenance therapy',y:'2016'}
+  ]
+ },
+ {
+  id:'ACP-MH-0019', subtopic:'mh_lithium', category:'Mental Health', categoryKey:'mh',
+  topic:'Lithium', difficulty:'Easy', type:'SBA', sector:'Community',
+  secondary:[],
+  reviewed:'28 May 2026',
+  stem:`<p>A patient taking lithium asks when she should attend for her blood test. She takes her dose at 10 pm each night.</p>`,
+  lead:'When should the sample be taken?',
+  options:[
+   {l:'A',t:'At any time of day, as lithium levels are stable',c:false,r:'Lithium concentration varies considerably through the dosing interval, so timing matters greatly.'},
+   {l:'B',t:'Immediately before her evening dose',c:false,r:'This would be roughly a 24-hour trough and would read falsely low, risking an inappropriate dose increase.'},
+   {l:'C',t:'Two hours after her evening dose',c:false,r:'A sample near peak concentration would read falsely high and could prompt an unnecessary dose reduction.'},
+   {l:'D',t:'At about 10 am the following morning',c:true,r:'Lithium levels must be taken 12 hours after the dose. A 10 pm dose means a sample at approximately 10 am the next morning.'},
+   {l:'E',t:'Twenty-four hours after her last dose',c:false,r:'As with option B, this is a full trough level and is not the standardised sampling point.'}
+  ],
+  concise:'Lithium levels are taken 12 hours after the dose. A 10 pm dose means a sample at about 10 am the following morning.',
+  expanded:'Standardising to 12 hours matters because the published reference range of 0.4–1.0 mmol/L is defined for that sampling point. A sample taken too early sits closer to the peak and reads falsely high; taken too late it approaches the trough and reads falsely low. Either error can lead to a dose change the patient did not need, and with a narrow therapeutic index drug that is a meaningful risk in both directions.',
+  remember:'Lithium levels are always a 12-hour post-dose sample. Renal function, thyroid function and calcium are checked every six months alongside.',
+  apply:'The practical counselling point is to give her the actual time rather than the rule — "book your test for around 10 in the morning" is far more likely to be followed than "twelve hours post-dose".',
+  refs:[
+   {t:'Bipolar disorder: assessment and management',o:'NICE CG185',s:'Monitoring lithium',y:'2023'},
+   {t:'Safer lithium therapy',o:'NPSA Patient Safety Alert',s:'Monitoring requirements',y:'2009'}
+  ]
+ }
+];
+
+const CATEGORIES = {
+  cv:{name:'Cardiovascular',total:2}, resp:{name:'Respiratory',total:1},
+  mh:{name:'Mental Health',total:1}, pall:{name:'Cancer & Palliative Care',total:1}
+};
+const CONF = [
+  {k:'guessing',label:'Guessing'},{k:'unsure',label:'Unsure'},
+  {k:'fairly',label:'Fairly sure'},{k:'certain',label:'Certain'}
+];
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg){
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)},2600);
+}
+function go(route){ S.route=route; window.scrollTo(0,0); render(); }
+function closeModal(){ $('#modal-host').innerHTML=''; }
+function icon(n,cls){
+  const p={
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    arrow:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+    bm:'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    chart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    chev:'<polyline points="6 9 12 15 18 9"/>',
+    alert:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+  }[n]||'';
+  return `<svg class="${cls||''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+}
+
+/* ==========================================================
+   MARKETING
+   ========================================================== */
+function protoBar(){
+  return `<div class="proto">
+    <span><b>Prototype</b> — clickable model of the AcePharm developer brief. Data is in-memory; refreshing resets it.</span>
+    <span class="row gap2">
+      ${S.signedIn?`<button onclick="resetAll()">Reset</button>`:`<button onclick="quickDemo()">Skip to dashboard</button>`}
+      <button onclick="go('home')">Marketing site</button>
+    </span>
+  </div>`;
+}
+function mktNav(){
+  return `<nav class="mkt-nav"><div class="wrap">
+    <button class="logo" onclick="go('home')"><span class="logo-mark">A</span>AcePharm</button>
+    <div class="nav-links">
+      <a href="#product">Product</a><a href="#loop">Question Bank</a>
+      <a href="#pricing">Pricing</a><a onclick="go('pricingPage')" style="cursor:pointer">Plans</a>
+    </div>
+    <div class="row gap2">
+      ${S.signedIn
+        ? `<button class="btn btn-primary btn-sm" onclick="go('dashboard')">Go to dashboard</button>`
+        : `<button class="btn btn-ghost btn-sm" onclick="go('signin')">Log in</button>
+           <button class="btn btn-primary btn-sm" onclick="go('signup')">Start revising free</button>`}
+    </div>
+  </div></nav>`;
+}
+function heroVisual(){
+  return `<div class="hv hv-anim" aria-label="Preview of the AcePharm dashboard">
+    <div class="row-between">
+      <div>
+        <div class="micro">Good evening</div>
+        <div style="font-size:20px;font-weight:600;letter-spacing:-.02em">Aisha</div>
+      </div>
+      <span class="pill pill-teal">4 study days</span>
+    </div>
+    <div class="hv-row">
+      <div class="hv-tile"><div class="hv-lab">Daily target</div><div class="hv-val num">12<span style="font-size:14px;color:var(--slate);font-weight:400"> / 20</span></div></div>
+      <div class="hv-tile"><div class="hv-lab">First-attempt</div><div class="hv-val num">68<span style="font-size:14px;color:var(--slate);font-weight:400">%</span></div></div>
+    </div>
+    <div class="hv-rec">
+      <div class="micro" style="color:var(--indigo-deep);font-weight:600">Recommended next</div>
+      <div style="font-weight:600;margin-top:2px">Respiratory medicines · 15 questions</div>
+      <div class="micro mt2">Recommended because this is your weakest topic and 22 questions are unseen.</div>
+    </div>
+    <div class="hv-row">
+      <div class="hv-tile"><div class="hv-lab">Weakest</div><div style="font-weight:600;font-size:14.5px;margin-top:3px">Asthma and COPD</div></div>
+      <div class="hv-tile"><div class="hv-lab">Strongest</div><div style="font-weight:600;font-size:14.5px;margin-top:3px">Calculations</div></div>
+    </div>
+    <div class="hv-spark">
+      <div class="row-between mb3"><span class="hv-lab">This week</span><span class="micro">+9% on last week</span></div>
+      <svg viewBox="0 0 300 62" style="width:100%;height:62px" aria-hidden="true">
+        <polyline class="spark-path" fill="none" stroke="var(--indigo)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          points="4,50 46,44 88,46 130,34 172,30 214,20 256,14 296,9"/>
+        <circle cx="296" cy="9" r="4" fill="var(--indigo)"/>
+      </svg>
+    </div>
+    <button class="btn btn-primary btn-block mt4" onclick="quickDemo()">Resume ${icon('arrow')}</button>
+  </div>`;
+}
+function viewHome(){
+  const faqs=[
+    ['Is AcePharm only for the Registration Assessment?','No. AcePharm is being designed to support students throughout the MPharm degree and into foundation training. Available content is clearly labelled by pathway and stage.'],
+    ['Who writes the questions?','Questions are written and reviewed through AcePharm\u2019s editorial process. Each published item has an identifiable authoring and review history.'],
+    ['Are the answers referenced?','Key learning points link to appropriate guidance, formularies, primary sources or other approved references. Review dates are shown where relevant.'],
+    ['Can I use AcePharm on my phone?','Yes. The platform is designed to work across mobile, tablet and desktop screens.'],
+    ['Can I cancel at any time?','Yes. Monthly subscriptions can be cancelled online. Access continues until the end of the paid billing period.']
+  ];
+  return `${protoBar()}${mktNav()}
+  <header class="hero"><div class="hero-glow"></div><div class="wrap"><div class="hero-grid">
+    <div>
+      <div class="eyebrow mb3">Created by pharmacists. Built for pharmacy students.</div>
+      <h1 class="display">Pharmacy revision that shows you exactly what to study next.</h1>
+      <p class="lede mt4 measure">AcePharm brings pharmacy-specific questions, clear explanations and progress analytics into one focused platform designed for UK pharmacy students.</p>
+      <div class="row wrapf gap3 mt5">
+        <button class="btn btn-primary btn-lg" onclick="go('signup')">Start revising free</button>
+        <button class="btn btn-secondary btn-lg" onclick="startSession(true)">Try a sample question</button>
+      </div>
+      <p class="micro mt3">No card required. Upgrade only when you are ready.</p>
+      <p class="micro mt2" style="color:var(--teal);font-weight:500">Built for MPharm students and the next generation of pharmacists.</p>
+    </div>
+    ${heroVisual()}
+  </div></div></header>
+
+  <section class="trust"><div class="wrap" style="padding-top:var(--s6);padding-bottom:var(--s6)">
+    <p class="eyebrow tc mb5">Trusted revision. Evidence-led learning.</p>
+    <div class="grid g4">
+      ${[['Pharmacy-specific','Designed around UK pharmacy education and practice.'],
+         ['Reviewed content','Questions and explanations reviewed through a defined editorial process.'],
+         ['Clear references','See the evidence and guidance supporting key learning points.'],
+         ['Built for progress','Recommendations that tell you what to revise next.']]
+        .map(([h,b])=>`<div><h4 style="font-size:16px">${h}</h4><p class="small muted mt2">${b}</p></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec" id="product"><div class="wrap">
+    <div style="max-width:620px"><h2>Revision should not feel like guesswork.</h2>
+    <p class="lede mt4">Pharmacy students often have plenty of material but no clear way to decide what deserves attention. Notes become scattered, question banks show percentages without explaining what to do next, and revision plans quickly fall behind.</p>
+    <p class="lede mt3">AcePharm brings the important parts together, so every session has a purpose.</p></div>
+    <div class="grid g3 mt6">
+      ${[['Too much to cover','Turn a large curriculum into manageable, focused sessions.'],
+         ['No clear view of progress','See what you understand, what needs work and what is improving.'],
+         ['Explanations that stop too early','Learn why the answer is correct, why the alternatives are not and what to remember next time.']]
+        .map(([h,b])=>`<div class="card"><h4>${h}</h4><p class="muted mt3">${b}</p></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec-sm" id="loop" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"><div class="wrap">
+    <div class="eyebrow mb3">More than a question bank</div>
+    <h2>A complete learning loop.</h2>
+    <div class="grid g4 mt6">
+      ${[['Practise','Answer pharmacy questions by topic, module or assessment pathway.'],
+         ['Understand','Review concise explanations, learning points and relevant references.'],
+         ['Analyse','See patterns across accuracy, confidence, timing and curriculum coverage.'],
+         ['Improve','Receive a focused recommendation for your next revision session.']]
+        .map(([h,b],i)=>`<div class="loop-step"><span class="loop-num">${i+1}</span><h4 style="font-size:17px">${h}</h4><p class="small muted mt2">${b}</p></div>`).join('')}
+    </div>
+    <p class="lede mt6" style="color:var(--teal)">Every answer should help make the next study decision easier.</p>
+  </div></section>
+
+  <section class="sec"><div class="wrap"><div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s8);align-items:center" class="split">
+    <div>
+      <h2>Understand the answer properly.</h2>
+      <p class="lede mt4">Work through focused practice or timed sessions. Rate your confidence before submitting, compare your reasoning with the explanation, and revisit difficult questions when you need to.</p>
+      <div class="row wrapf gap2 mt5">
+        ${['Single best answer','Pharmacy calculations','Timed or untimed','Confidence rating','Bookmark and notes','Question flagging','Keyboard shortcuts','Referenced learning points']
+          .map(t=>`<span class="pill">${t}</span>`).join('')}
+      </div>
+      <button class="btn btn-primary mt5" onclick="startSession(true)">Try a sample question</button>
+    </div>
+    <div class="card">
+      <div class="micro mb3" style="font-weight:600;color:var(--indigo-deep)">STRUCTURE OF EVERY EXPLANATION</div>
+      ${[['Why this is correct','The key factor in this scenario is…'],
+         ['Why the other answers are not preferred','Option B would be appropriate when…'],
+         ['What to remember','In patients with…, always check…'],
+         ['Evidence','Guidance and source information, with review date.']]
+        .map(([h,b])=>`<div style="padding:13px 0;border-bottom:1px solid var(--border)"><div style="font-weight:600;font-size:14.5px">${h}</div><div class="small muted mt2">${b}</div></div>`).join('')}
+    </div>
+  </div></div></section>
+
+  <section class="sec-sm" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"><div class="wrap">
+    <div class="eyebrow mb3">Progress you can use</div>
+    <h2>See more than a percentage.</h2>
+    <p class="lede mt4 measure">AcePharm looks at your topic performance, first-attempt accuracy, confidence, speed and revision history. It then turns those patterns into practical next steps.</p>
+    <div class="grid g4 mt6">
+      ${[['Topic mastery','See which areas are developing and which need another focused session.'],
+         ['Confidence calibration','Find topics where you feel certain but frequently select the wrong answer.'],
+         ['Coverage','Understand how much of your selected curriculum you have practised.'],
+         ['Weekly direction','Receive a short, realistic recommendation for the week ahead.']]
+        .map(([h,b])=>`<div class="card"><h4 style="font-size:16px">${h}</h4><p class="small muted mt3">${b}</p></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <h2 class="mb5">One platform. A clearer way to revise.</h2>
+    <div class="tbl-scroll"><table class="tbl">
+      <tr><th>Capability</th><th>AcePharm</th><th>Static notes</th><th>Generic AI chat</th><th>Basic question bank</th></tr>
+      ${[['Pharmacy-specific learning pathways','Yes','Limited','No','Sometimes'],
+         ['Structured practice questions','Yes','No','Inconsistent','Yes'],
+         ['Reviewed explanations','Yes','Varies','No','Varies'],
+         ['Supporting references','Yes','Varies','May be unreliable','Varies'],
+         ['Personal progress history','Yes','No','No','Basic'],
+         ['Confidence analysis','Yes','No','No','Rare'],
+         ['Personalised next session','Yes','No','Limited','Rare']]
+        .map(r=>`<tr><td style="font-weight:500">${r[0]}</td>
+          <td style="color:var(--success);font-weight:600">${r[1]==='Yes'?icon('check')+' Yes':r[1]}</td>
+          <td class="muted">${r[2]}</td><td class="muted">${r[3]}</td><td class="muted">${r[4]}</td></tr>`).join('')}
+    </table></div>
+    <p class="micro mt4">Comparison reflects the intended AcePharm product experience. Features are only marked as available once released.</p>
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap"><div class="panel tc" style="background:var(--indigo-wash);border-color:#DDDEF9">
+    <h2>Built with pharmacy students, not simply for them.</h2>
+    <p class="lede mt4" style="max-width:560px;margin-left:auto;margin-right:auto">AcePharm is being developed alongside the students who will use it. If you would like to shape what gets built next, join the testing group.</p>
+    <button class="btn btn-primary btn-lg mt5" onclick="toast('Prototype only — this would open the testing group form.')">Join the student testing group</button>
+  </div></div></section>
+
+  <section class="sec" id="pricing"><div class="wrap">
+    <div class="tc" style="max-width:600px;margin:0 auto">
+      <h2>Premium revision without premium-student pricing.</h2>
+      <p class="lede mt4">Start with the free question sampler. Upgrade when you are ready for full access.</p>
+    </div>
+    <div class="grid g2 mt6" style="max-width:800px;margin-left:auto;margin-right:auto;gap:var(--s5)">
+      <div class="price-card">
+        <div class="pill mb4" style="align-self:flex-start">Monthly</div>
+        <div class="price-amt num">£4.99</div><div class="muted small">per month</div>
+        <p class="muted mt4" style="flex:1">Flexible access for focused periods of revision.</p>
+        <button class="btn btn-secondary btn-block mt5" onclick="go('signup')">Choose monthly</button>
+      </div>
+      <div class="price-card feature">
+        <div class="badge-top">Most popular</div>
+        <div class="pill pill-indigo mb4" style="align-self:flex-start">Yearly</div>
+        <div class="price-amt num">£49.99</div><div class="muted small">per year</div>
+        <p class="muted mt4">One payment for a full year of revision.</p>
+        <p class="small mt3" style="color:var(--teal);font-weight:600;flex:1">Save £9.89 compared with paying monthly for twelve months.</p>
+        <button class="btn btn-primary btn-block mt5" onclick="go('signup')">Choose yearly</button>
+      </div>
+    </div>
+    <p class="micro tc mt5">Clear renewal information. Cancel online. Your completed progress remains available if your subscription ends.</p>
+  </div></section>
+
+  <section class="sec-sm" style="background:var(--surface);border-top:1px solid var(--border)"><div class="wrap-narrow">
+    <h2 class="mb5">Frequently asked questions</h2>
+    ${faqs.map((f,i)=>`<div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(${i})" aria-expanded="false" id="fq${i}">${f[0]}${icon('chev')}</button>
+      <div class="faq-a hide" id="fa${i}">${f[1]}</div></div>`).join('')}
+  </div></section>
+
+  <section class="sec"><div class="wrap tc">
+    <h2>Your next revision session is already waiting.</h2>
+    <p class="lede mt4" style="max-width:560px;margin:var(--s4) auto 0">Create your free account, choose your learning goal and begin with a focused set of pharmacy questions.</p>
+    <div class="row gap3 mt5" style="justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary btn-lg" onclick="go('signup')">Start revising free</button>
+      <button class="btn btn-secondary btn-lg" onclick="go('pricingPage')">View pricing</button>
+    </div>
+    <p class="micro mt3">No card required for free access.</p>
+  </div></section>
+
+  <footer class="mkt-footer"><div class="wrap">
+    <div class="grid g4" style="gap:var(--s6)">
+      <div>
+        <div class="logo" style="color:#fff"><span class="logo-mark">A</span>AcePharm</div>
+        <p class="small mt3" style="color:#94A3B8;max-width:230px">Created by pharmacists. Built for pharmacy students.</p>
+      </div>
+      <div><h5>Product</h5><a>Question Bank</a><a>Progress</a><a onclick="go('pricingPage')" style="cursor:pointer">Pricing</a></div>
+      <div><h5>Company</h5><a>About AcePharm</a><a>Editorial Standards</a><a>Contact</a></div>
+      <div><h5>Legal</h5><a>Terms</a><a>Privacy</a><a>Cookie Policy</a><a>Accessibility</a></div>
+    </div>
+    <div style="border-top:1px solid #1F2937;margin-top:var(--s6);padding-top:var(--s5)">
+      <p class="small" style="color:#94A3B8;max-width:760px">AcePharm is an independent educational platform. It is not affiliated with or endorsed by the General Pharmaceutical Council, universities, NICE, the NHS or any other organisation unless explicitly stated.</p>
+      <p class="micro mt3" style="color:#64748B">© 2026 AcePharm. All rights reserved.</p>
+    </div>
+  </div></footer>
+  <style>@media(max-width:900px){.split{grid-template-columns:1fr !important;gap:var(--s6) !important}}/* ===== VISION LAYER — Ace UI ===== */
+.ace{border:1px solid #DDDEF9;border-radius:var(--r-card);background:linear-gradient(180deg,#FAFAFE,var(--surface));padding:var(--s5);margin-top:var(--s4)}
+.ace-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding-bottom:var(--s4);border-bottom:1px solid var(--border);margin-bottom:var(--s4)}
+.ace-orb{width:30px;height:30px;border-radius:50%;flex:none;background:conic-gradient(from 180deg,var(--indigo),var(--teal),#8B5CF6,var(--indigo));
+  box-shadow:0 0 0 3px rgba(79,70,229,.11);animation:orb 9s linear infinite}
+.ace-orb.sm{width:24px;height:24px}
+@keyframes orb{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ace-orb{animation:none}}
+.ace-thread{max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:var(--s3);padding-right:4px}
+.ace-msg{display:flex;gap:10px;align-items:flex-start}
+.ace-msg.you{justify-content:flex-end}
+.ace-bubble{background:var(--surface);border:1px solid var(--border);border-radius:4px 14px 14px 14px;padding:13px 16px;font-size:15px;line-height:1.65;max-width:82%}
+.ace-bubble.you{background:var(--indigo);color:#fff;border-color:var(--indigo);border-radius:14px 4px 14px 14px}
+.ace-bubble p{margin-bottom:10px}
+.ace-bubble p:last-child{margin-bottom:0}
+.ace-bubble ol,.ace-bubble ul{padding-left:20px;margin-bottom:10px}
+.ace-bubble li{margin-bottom:5px}
+.ace-cite{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--slate);line-height:1.45}
+.ace-cite svg{flex:none;margin-top:2px}
+@media(max-width:620px){.ace{padding:var(--s4)}.ace-bubble{max-width:100%;padding:12px 14px}.ace-msg.you .ace-bubble{max-width:88%}.ace-thread{max-height:none}}
+.ace-dots{display:inline-flex;gap:5px;padding:3px 0}
+.ace-dots i{width:7px;height:7px;border-radius:50%;background:var(--slate);animation:bounce 1.2s infinite}
+.ace-dots i:nth-child(2){animation-delay:.15s}.ace-dots i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.ace-chips{display:flex;flex-wrap:wrap;gap:7px;margin:var(--s4) 0}
+.ace-chip{background:var(--surface);border:1px solid #DDDEF9;color:var(--indigo-deep);border-radius:999px;
+  padding:8px 14px;font-size:13.5px;cursor:pointer;min-height:38px}
+.ace-chip:hover{background:var(--indigo-wash)}
+.ace-input{display:flex;gap:var(--s2)}
+.ace-input .input{flex:1}
+.ace-input .btn{min-width:48px;padding:11px 14px}
+.sel-ace{position:absolute;z-index:90;background:var(--ink);color:#fff;border:0;border-radius:9px;
+  padding:8px 13px;font-size:13px;cursor:pointer;box-shadow:0 8px 22px -6px rgba(0,0,0,.45);white-space:nowrap}
+
+.ace-cta{border:1px dashed #C7C9F5;border-radius:var(--r-card);background:linear-gradient(135deg,#FAFAFE,#F3FAF9);
+  padding:var(--s4) var(--s5);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);flex-wrap:wrap;margin-top:var(--s4)}
+
+.ai-tile{border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);padding:var(--s5);
+  display:flex;flex-direction:column;transition:border-color .15s,transform .15s;cursor:pointer;text-align:left;width:100%}
+.ai-tile:hover{border-color:var(--indigo);transform:translateY(-2px)}
+.ai-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;margin-bottom:var(--s3);
+  background:var(--indigo-wash);color:var(--indigo-deep)}
+
+.plan-day{border:1px solid var(--border);border-radius:12px;padding:var(--s4);background:var(--surface)}
+.plan-day.today{border-color:var(--indigo);box-shadow:inset 0 0 0 1px var(--indigo)}
+.plan-day.done{background:var(--success-wash);border-color:#CDEBD6}
+
+.card-flip{border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);padding:var(--s6);
+  min-height:230px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer}
+
+.chat-sim{border:1px solid var(--border);border-radius:var(--r-card);background:var(--canvas);padding:var(--s5);
+  max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:var(--s3)}
+.sim-msg{display:flex;gap:11px;align-items:flex-start;max-width:88%}
+.sim-msg.me{align-self:flex-end;flex-direction:row-reverse}
+.sim-av{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:13px;font-weight:600}
+.sim-av.pt{background:#FDE9C8;color:var(--warning)}
+.sim-av.me{background:var(--indigo);color:#fff}
+.sim-bub{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 15px;font-size:15px;line-height:1.6}
+.sim-msg.me .sim-bub{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.rubric-row{display:flex;gap:var(--s3);align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
+.rubric-row:last-child{border-bottom:0}
+
+.glow-panel{position:relative;border-radius:var(--r-panel);padding:var(--s7);overflow:hidden;
+  background:linear-gradient(135deg,#1E1B4B,#312E81 45%,#0F766E);color:#fff}
+.glow-panel h2,.glow-panel h3{color:#fff}
+.glow-panel::before{content:'';position:absolute;top:-140px;right:-100px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.19),transparent 65%)}
+.glow-panel > *{position:relative}
+.glow-card{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.17);border-radius:14px;padding:var(--s4)}
+
+</style>`;
+}
+function toggleFaq(i){
+  const a=$('#fa'+i), q=$('#fq'+i), open=!a.classList.contains('hide');
+  a.classList.toggle('hide'); q.setAttribute('aria-expanded',String(!open));
+}
+function viewPricingPage(){
+  return `${protoBar()}${mktNav()}
+  <div class="sec"><div class="wrap">
+    <div class="tc" style="max-width:620px;margin:0 auto">
+      <h1>Simple pricing. Full access when you need it.</h1>
+      <p class="lede mt4">No complicated bundles and no hidden feature tiers.</p>
+    </div>
+    <div class="grid g3 mt6" style="gap:var(--s5);align-items:stretch">
+      ${[
+        {n:'AcePharm Explorer',p:'£0',s:'',f:['Sample question collection','Limited progress overview','Bookmarks and notes','No card required'],cta:'Start free',feat:false},
+        {n:'AcePharm Monthly',p:'£4.99',s:'per month',f:['Full available question bank','Full explanations and references','Progress analytics','Timed sessions','Cancel online'],cta:'Choose monthly',feat:false},
+        {n:'AcePharm Yearly',p:'£49.99',s:'per year',f:['Everything in monthly','One annual payment','Save £9.89','No monthly interruptions'],cta:'Choose yearly',feat:true}
+      ].map(c=>`<div class="price-card ${c.feat?'feature':''}">
+        ${c.feat?'<div class="badge-top">Most popular</div>':''}
+        <h4>${c.n}</h4>
+        <div class="price-amt num mt3">${c.p}</div><div class="muted small">${c.s||'&nbsp;'}</div>
+        <div class="mt5" style="flex:1">${c.f.map(x=>`<div class="tick">${icon('check')}<span>${x}</span></div>`).join('')}</div>
+        <button class="btn ${c.feat?'btn-primary':'btn-secondary'} btn-block mt5" onclick="go('signup')">${c.cta}</button>
+      </div>`).join('')}
+    </div>
+    <div class="panel mt6" style="max-width:760px;margin-left:auto;margin-right:auto">
+      <h3 class="mb4">Pricing questions</h3>
+      ${[['Are the plans different?','Monthly and yearly subscribers receive the same product access. The only difference is billing frequency and price.'],
+         ['Is there a trial?','Students can explore a limited selection of questions before subscribing. This provides a more useful demonstration than a short trial that may expire before revision begins.'],
+         ['Will my subscription renew automatically?','Yes, unless cancelled. The renewal date and amount are displayed before purchase and in your account.'],
+         ['What happens when I cancel?','Access continues until the end of the current paid period. Your account and learning history remain available, although paid content becomes locked.']]
+        .map(([q,a])=>`<div style="padding:15px 0;border-bottom:1px solid var(--border)"><div style="font-weight:600">${q}</div><p class="muted small mt2">${a}</p></div>`).join('')}
+    </div>
+  </div></div>`;
+}
+
+
+/* ==========================================================
+   AUTH + ONBOARDING
+   ========================================================== */
+function authShell(inner){
+  return `${protoBar()}${mktNav()}<div class="sec"><div style="max-width:440px;margin:0 auto;padding:0 var(--s4)">${inner}</div></div>`;
+}
+function viewSignup(){
+  return authShell(`<div class="panel">
+    <h1 style="font-size:28px">Start revising with clarity.</h1>
+    <p class="muted mt3">Create your free AcePharm account and complete your first pharmacy session.</p>
+    <div class="mt5">
+      <div class="field"><label class="label" for="su-name">First name</label><input class="input" id="su-name" value="Aisha"></div>
+      <div class="field"><label class="label" for="su-email">Email address</label><input class="input" id="su-email" type="email" value="aisha@student.ac.uk"></div>
+      <div class="field"><label class="label" for="su-pw">Password</label><input class="input" id="su-pw" type="password" value="pharmacy2026">
+        <div class="hint">At least 10 characters.</div>
+        <div class="bar success mt2"><i style="width:80%"></i></div>
+        <div class="micro mt2">Password strength: strong</div>
+      </div>
+      <label class="check mb2"><input type="checkbox" id="su-terms"> <span>I agree to the AcePharm Terms and acknowledge the Privacy Policy.</span></label>
+      <label class="check"><input type="checkbox" id="su-mkt"> <span>Send me useful revision guidance and AcePharm product updates.</span></label>
+      <div id="su-err"></div>
+      <button class="btn btn-primary btn-block btn-lg mt5" onclick="doSignup()">Create free account</button>
+      <p class="micro tc mt4">Already have an account? <a onclick="go('signin')" style="color:var(--indigo);cursor:pointer">Log in</a></p>
+    </div>
+  </div>`);
+}
+function doSignup(){
+  const name=$('#su-name').value.trim(), terms=$('#su-terms').checked;
+  if(!name){ $('#su-err').innerHTML=`<div class="err">${icon('alert')} Enter your first name.</div>`; return; }
+  if(!terms){ $('#su-err').innerHTML=`<div class="err">${icon('alert')} You need to agree to the Terms before continuing.</div>`; return; }
+  S.name=name; S.signedIn=true; S.onbStep=1; go('onboarding');
+}
+function viewSignin(){
+  return authShell(`<div class="panel">
+    <h1 style="font-size:28px">Welcome back.</h1>
+    <p class="muted mt3">Continue from where you left off.</p>
+    <div class="mt5">
+      <div class="field"><label class="label">Email address</label><input class="input" value="aisha@student.ac.uk"></div>
+      <div class="field"><label class="label">Password</label><input class="input" type="password" value="pharmacy2026"></div>
+      <button class="btn btn-primary btn-block btn-lg mt3" onclick="quickDemo()">Log in</button>
+      <p class="micro tc mt4">New here? <a onclick="go('signup')" style="color:var(--indigo);cursor:pointer">Create an account</a></p>
+    </div>
+  </div>`);
+}
+const ONB=[
+ {q:'Where are you in your pharmacy journey?',k:'stage',o:['MPharm Year 1','MPharm Year 2','MPharm Year 3','MPharm Year 4','Foundation trainee pharmacist','Qualified pharmacist']},
+ {q:'What would you most like AcePharm to help with?',k:'goal',o:['Keep up with university study','Prepare for an upcoming assessment','Improve clinical knowledge','Improve calculations','Build a regular revision habit','Explore the platform']},
+ {q:'Are you working towards a date?',k:'date',o:['My exams are in 8 weeks','My exams are in 6 months','I do not have a date yet']},
+ {q:'Choose a manageable starting target.',k:'target',o:['5 questions — quick start','10 questions — light','20 questions — recommended','40 questions — intensive']},
+ {q:'Would you like to connect your university?',k:'uni',o:['University of Manchester','King\u2019s College London','Cardiff University','Prefer not to say'],
+  note:'This can improve curriculum recommendations and may allow access to university-specific content in the future. It is optional.'}
+];
+function viewOnboarding(){
+  const i=S.onbStep-1, step=ONB[i];
+  if(S.onbStep>ONB.length) return viewOnbDone();
+  return authShell(`<div class="panel">
+    <div class="steps">${ONB.map((_,n)=>`<i class="${n<S.onbStep?'on':''}"></i>`).join('')}</div>
+    <div class="micro mb3">Step ${S.onbStep} of ${ONB.length}</div>
+    <h2 style="font-size:25px">${step.q}</h2>
+    ${step.note?`<p class="muted small mt3">${step.note}</p>`:''}
+    <div class="choice-stack mt5">
+      ${step.o.map(o=>{
+        const sel=S.onboarding[step.k]===o;
+        return `<button class="choice" aria-pressed="${sel}" onclick="pickOnb('${step.k}',${JSON.stringify(o).replace(/"/g,'&quot;')})">
+          <span style="flex:1">${o}</span>${sel?icon('check'):''}</button>`;
+      }).join('')}
+    </div>
+    <div class="row-between mt5">
+      <button class="btn btn-ghost" onclick="skipOnb()">Skip for now</button>
+      <button class="btn btn-primary" onclick="nextOnb()" ${S.onboarding[step.k]?'':'disabled'}>Continue ${icon('arrow')}</button>
+    </div>
+  </div>`);
+}
+function pickOnb(k,v){ S.onboarding[k]=v; if(k==='target') S.onboarding.target=parseInt(v)||20; render(); }
+function nextOnb(){ S.onbStep++; render(); window.scrollTo(0,0); }
+function skipOnb(){ S.onbStep++; render(); window.scrollTo(0,0); }
+function viewOnbDone(){
+  return authShell(`<div class="panel tc">
+    <div style="width:56px;height:56px;border-radius:16px;background:var(--success-wash);color:var(--success);display:grid;place-items:center;margin:0 auto var(--s4)">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 style="font-size:26px">Your first session is ready.</h2>
+    <p class="muted mt3">We have created a short starting session to help AcePharm understand your current strengths.</p>
+    <button class="btn btn-primary btn-block btn-lg mt5" onclick="startSession()">Begin ${QUESTIONS.length}-question starter session</button>
+    <button class="btn btn-secondary btn-block mt3" onclick="go('dashboard')">Go to dashboard</button>
+  </div>`);
+}
+function quickDemo(){
+  S.signedIn=true; if(!S.name) S.name='Aisha';
+  if(!S.onboarding.stage){ S.onboarding={stage:'MPharm Year 3',goal:'Prepare for an upcoming assessment',date:'My exams are in 8 weeks',target:20,uni:'University of Manchester'}; }
+  S.onbStep=99; go('dashboard');
+}
+function resetAll(){
+  S.signedIn=false; S.name=''; S.plan='free'; S.firstAttempts={}; S.attempts=[];
+  S.bookmarks=new Set(); S.notes={}; S.reported=new Set(); S.freeUsed=0;
+  S.session=null; S.lastSummary=null; S.onbStep=0; S.onboarding={stage:'',goal:'',date:'',target:20,uni:''};
+  go('home'); toast('Prototype reset.');
+}
+
+/* ==========================================================
+   APP SHELL
+   ========================================================== */
+function appShell(inner,current){
+  const tabs=[['dashboard','Dashboard','home'],['builder','Practise','book'],['progress','Progress','chart'],['library','Library','bm'],['account','Account','note']];
+  return `${protoBar()}
+  <div class="app">
+    <div class="app-top"><div class="wrap">
+      <button class="logo" onclick="go('dashboard')"><span class="logo-mark">A</span>AcePharm</button>
+      <div class="app-nav">${tabs.map(t=>`<button ${current===t[0]?'aria-current="page"':''} onclick="go('${t[0]}')">${t[1]}</button>`).join('')}</div>
+      <div class="row gap2">
+        ${S.plan==='free'?`<span class="pill">${Math.max(0,FREE_LIMIT-S.freeUsed)} free left</span>
+          <button class="btn btn-primary btn-sm" onclick="openUpgrade()">Upgrade</button>`
+         :`<span class="pill pill-success">${icon('check')} Full access</span>`}
+      </div>
+    </div></div>
+    <div class="app-body"><div class="wrap">${inner}</div></div>
+    <div class="mobile-tabs"><div class="inner">
+      ${tabs.map(t=>`<button ${current===t[0]?'aria-current="page"':''} onclick="go('${t[0]}')">${icon(t[2])}<span>${t[1]}</span></button>`).join('')}
+    </div></div>
+  </div>`;
+}
+
+/* ---------------- stats helpers ---------------- */
+function firstAttemptStats(){
+  const ids=Object.keys(S.firstAttempts);
+  const correct=ids.filter(id=>S.firstAttempts[id].correct).length;
+  return {n:ids.length,correct,pct:ids.length?Math.round(correct/ids.length*100):0};
+}
+function practiceStats(){
+  const n=S.attempts.length, c=S.attempts.filter(a=>a.correct).length;
+  return {n,correct:c,pct:n?Math.round(c/n*100):0};
+}
+function categoryStats(){
+  const out={};
+  Object.entries(CATEGORIES).forEach(([k,v])=>{
+    const qs=QUESTIONS.filter(q=>q.categoryKey===k);
+    const seen=qs.filter(q=>S.firstAttempts[q.id]);
+    const right=seen.filter(q=>S.firstAttempts[q.id].correct).length;
+    out[k]={name:v.name,total:qs.length,seen:seen.length,
+      pct:seen.length?Math.round(right/seen.length*100):null,
+      coverage:Math.round(seen.length/qs.length*100)};
+  });
+  return out;
+}
+function statusLabel(pct,seen){
+  if(!seen) return {t:'Not started',cls:''};
+  if(pct===null) return {t:'First pass',cls:''};
+  if(pct<50) return {t:'Needs attention',cls:'pill-danger'};
+  if(pct<75) return {t:'Developing',cls:'pill-warn'};
+  return {t:'Secure',cls:'pill-success'};
+}
+function recommendation(){
+  const cats=categoryStats();
+  const scored=Object.entries(cats).filter(([,c])=>c.seen>0).sort((a,b)=>(a[1].pct)-(b[1].pct));
+  if(!scored.length){
+    return {title:'Mixed starter session',count:QUESTIONS.length,
+      reason:'Recommended as a starting point — completing it lets AcePharm work out where you are strongest and weakest.',mins:8};
+  }
+  const [k,c]=scored[0];
+  const unseen=c.total-c.seen;
+  return {title:c.name,count:Math.max(1,c.total),key:k,
+    reason:`Recommended because this is currently your weakest topic at ${c.pct}% first-attempt accuracy${unseen?` and ${unseen} question${unseen>1?'s are':' is'} still unseen`:''}.`,
+    mins:Math.max(3,c.total*2)};
+}
+
+
+/* ==========================================================
+   DASHBOARD
+   ========================================================== */
+function viewDashboard(){
+  const fa=firstAttemptStats(), cats=categoryStats(), rec=recommendation();
+  const target=S.onboarding.target||20;
+  const done=Math.min(fa.n,target);
+  const pctRing=Math.round(done/target*100);
+  const ranked=Object.entries(cats).filter(([,c])=>c.seen>0).sort((a,b)=>a[1].pct-b[1].pct);
+  const weak=ranked.slice(0,3), strong=[...ranked].reverse().slice(0,2);
+  const hour=new Date().getHours();
+  const greet=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  const support = S.session ? 'Your last session is waiting where you left it.'
+    : fa.n===0 ? 'Ready for a focused 15 minutes?'
+    : S.onboarding.date && S.onboarding.date.includes('8 weeks') ? 'Your assessment is 56 days away.'
+    : 'You have made a strong start this week.';
+
+  const left = `
+    <div class="card mb4">
+      <div class="row-between">
+        <div><h2 style="font-size:26px">${greet}, ${esc(S.name||'there')}.</h2>
+        <p class="muted mt2">${support}</p></div>
+      </div>
+    </div>
+
+    ${S.session?`<div class="card mb4" style="border-color:var(--indigo)">
+      <div class="row-between wrapf gap3">
+        <div><div class="eyebrow">Continue where you left off</div>
+        <div style="font-weight:600;margin-top:4px">${S.session.label} — ${S.session.index} of ${S.session.qs.length} questions completed</div></div>
+        <button class="btn btn-primary" onclick="go('session')">Resume</button>
+      </div></div>`:''}
+
+    <div class="card mb4" style="border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)">
+      <div class="eyebrow mb3">Recommended next</div>
+      <h3>${rec.title}</h3>
+      <p class="muted mt2">${rec.count}-question focused review</p>
+      <div class="row wrapf gap2 mt4">
+        <span class="pill">Approx. ${rec.mins} minutes</span>
+        <span class="pill">Mixed difficulty</span>
+        <span class="pill">Learn mode</span>
+      </div>
+      <div class="mt4" style="background:var(--indigo-wash);border-radius:11px;padding:13px 15px">
+        <p class="small" style="color:var(--indigo-deep)">${rec.reason}</p>
+      </div>
+      <div class="row gap3 mt4 wrapf">
+        <button class="btn btn-primary" onclick="startSession(false,'${rec.key||''}')">Start session</button>
+        <button class="btn btn-secondary" onclick="go('builder')">Choose something else</button>
+      </div>
+    </div>
+
+    <div class="card mb4">
+      <div class="row-between mb4"><h3 style="font-size:19px">Topic performance</h3>
+        <button class="btn btn-ghost btn-sm" onclick="go('progress')">View progress</button></div>
+      ${fa.n===0?`<div class="empty">
+          <h4>Not enough information yet</h4>
+          <p class="muted small mt2" style="max-width:380px;margin:8px auto 0">Complete questions across at least three topics to identify meaningful strengths and weaknesses.</p>
+          <button class="btn btn-primary mt4" onclick="startSession()">Start baseline session</button></div>`
+       : Object.entries(cats).map(([k,c])=>{
+          const st=statusLabel(c.pct,c.seen);
+          const cls=c.pct===null?'':c.pct<50?'danger':c.pct<75?'warn':'success';
+          return `<div class="topic-row">
+            <div><div style="font-weight:500">${c.name}</div>
+              <div class="micro">${c.seen} of ${c.total} attempted</div></div>
+            <div class="bar-cell"><div class="bar ${cls}"><i style="width:${c.pct||0}%"></i></div></div>
+            <div style="text-align:right"><span class="pill ${st.cls}">${st.t}</span></div>
+          </div>`;
+        }).join('')}
+    </div>`;
+
+  const right = `
+    <div class="card mb4">
+      <div class="eyebrow mb4">Daily goal</div>
+      <div class="row gap4">
+        <div class="ring" style="--p:${pctRing}"><span class="num">${done}/${target}</span></div>
+        <div><div style="font-weight:600" class="num">${done} / ${target} questions</div>
+          <p class="small muted mt2">${done>=target?'Daily goal complete.':`${target-done} more questions will complete today\u2019s goal.`}</p></div>
+      </div>
+    </div>
+
+    <div class="card mb4">
+      <div class="eyebrow mb4">This week</div>
+      <div class="grid g2" style="gap:var(--s3)">
+        ${[['Questions',fa.n],['First-attempt',fa.pct+'%'],['Study days',fa.n?1:0],['Explanations',S.attempts.filter(a=>a.opened).length]]
+          .map(([l,v])=>`<div><div class="micro">${l}</div><div class="num" style="font-size:23px;font-weight:600;letter-spacing:-.02em">${v}</div></div>`).join('')}
+      </div>
+      ${fa.n?`<p class="micro mt4">Compared against your own previous week.</p>`:''}
+    </div>
+
+    <div class="card mb4">
+      <div class="eyebrow mb3">Needs attention</div>
+      ${weak.length?weak.map(([k,c])=>`<div class="row-between" style="padding:9px 0;border-bottom:1px solid var(--border)">
+          <span class="small">${c.name}</span><span class="pill pill-danger num">${c.pct}%</span></div>`).join('')
+        +`<button class="btn btn-secondary btn-block mt4 btn-sm" onclick="startSession(false,'${weak[0][0]}')">Practise weak areas</button>`
+        :`<p class="small muted">Complete a session and your weakest topics will appear here.</p>`}
+    </div>
+
+    ${strong.length?`<div class="card mb4">
+      <div class="eyebrow mb3">Going well</div>
+      ${strong.map(([k,c])=>`<div class="row-between" style="padding:9px 0"><span class="small">${c.name}</span><span class="pill pill-success num">${c.pct}%</span></div>`).join('')}
+      <p class="micro mt3">Strong topics still need occasional review to remain secure.</p>
+    </div>`:''}
+
+    <div class="card mb4">
+      <div class="eyebrow mb3">Saved for later</div>
+      ${S.bookmarks.size? [...S.bookmarks].slice(0,3).map(id=>{
+          const q=QUESTIONS.find(x=>x.id===id);
+          return `<div style="padding:9px 0;border-bottom:1px solid var(--border)">
+            <div class="small" style="font-weight:500">${q.topic}</div><div class="micro mono">${q.id}</div></div>`;}).join('')
+        : `<p class="small muted">Questions you bookmark will appear here for quick review.</p>`}
+    </div>
+
+    <div class="card">
+      <div class="eyebrow mb3">Subscription</div>
+      ${S.plan==='free'
+        ? `<p class="small">You have <b class="num">${Math.max(0,FREE_LIMIT-S.freeUsed)}</b> free questions remaining this month.</p>
+           <button class="btn btn-secondary btn-block btn-sm mt3" onclick="openUpgrade()">View full access</button>`
+        : `<p class="small">${S.plan==='yearly'?'Yearly':'Monthly'} plan renews on 3 August 2027.</p>
+           <button class="btn btn-ghost btn-sm mt2" onclick="go('account')">Manage subscription</button>`}
+    </div>`;
+
+  return appShell(`<div class="dash-grid"><div>${left}</div><div>${right}</div></div>`,'dashboard');
+}
+
+/* ==========================================================
+   SESSION BUILDER
+   ========================================================== */
+function viewBuilder(){
+  const b=S.builder;
+  const chip=(on,label,fn)=>`<button class="pill ${on?'pill-indigo':''}" style="cursor:pointer;min-height:36px" onclick="${fn}">${on?icon('check'):''} ${label}</button>`;
+  return appShell(`<div style="max-width:720px">
+    <h1 style="font-size:30px">Build a question session</h1>
+    <p class="muted mt3">Choose what to practise, or take the recommended mix.</p>
+
+    <div class="card mt5" style="border-color:var(--indigo);background:var(--indigo-wash)">
+      <div class="row-between wrapf gap3">
+        <div><div style="font-weight:600">Smart Mix</div>
+          <p class="small mt2" style="color:var(--indigo-deep)">A balanced selection of weak and unseen questions.</p></div>
+        <button class="btn btn-primary" onclick="startSession()">Use Smart Mix</button>
+      </div>
+    </div>
+
+    <div class="card mt4">
+      <div class="field">
+        <label class="label">Learning pathway</label>
+        <select class="select"><option>MPharm revision</option>
+        <option disabled>Foundation training — coming later</option>
+        <option disabled>Registration Assessment — coming later</option></select>
+      </div>
+
+      <div class="field">
+        <label class="label">Topics</label>
+        <div class="row wrapf gap2">
+          ${Object.entries(CATEGORIES).map(([k,c])=>{
+            const n=QUESTIONS.filter(q=>q.categoryKey===k).length;
+            return chip(b.topics.includes(k),`${c.name} (${n})`,`toggleTopic('${k}')`);
+          }).join('')}
+        </div>
+        ${b.topics.length?'':`<div class="err mt3">${icon('alert')} Select at least one topic to continue.</div>`}
+      </div>
+
+      <div class="field">
+        <label class="label">Difficulty</label>
+        <div class="row wrapf gap2">
+          ${['Mixed','Easy','Medium','Hard'].map(d=>chip(b.difficulty===d.toLowerCase(),d,`setB('difficulty','${d.toLowerCase()}')`)).join('')}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Mode</label>
+        <div class="choice-stack">
+          ${[['learn','Learn','Receive the explanation after each answer.'],
+             ['timed','Timed','Complete the session under a timer, then review all answers.']]
+            .map(([k,t,d])=>`<button class="choice" aria-pressed="${b.mode===k}" onclick="setB('mode','${k}')">
+              <span style="flex:1"><span style="font-weight:600">${t}</span><br><span class="micro">${d}</span></span>
+              ${b.mode===k?icon('check'):''}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Number of questions</label>
+        <div class="row wrapf gap2">${[5].map(n=>chip(b.count===n,n+' questions',`setB('count',${n})`)).join('')}
+          <span class="micro" style="align-self:center">Prototype contains 5 questions in total.</span></div>
+      </div>
+
+      <div class="row-between mt5 wrapf gap3">
+        <span class="micro">${matchCount()} question${matchCount()===1?'':'s'} match your filters.</span>
+        <button class="btn btn-primary btn-lg" onclick="startSession()" ${matchCount()?'':'disabled'}>Start session</button>
+      </div>
+      ${matchCount()?'':`<div class="err mt3">${icon('alert')} No questions match this combination. Remove a filter or include previously answered questions.</div>`}
+    </div>
+  </div>`,'builder');
+}
+function matchCount(){
+  const b=S.builder;
+  return QUESTIONS.filter(q=>b.topics.includes(q.categoryKey) &&
+    (b.difficulty==='mixed'||q.difficulty.toLowerCase()===b.difficulty)).length;
+}
+function toggleTopic(k){
+  const t=S.builder.topics, i=t.indexOf(k);
+  i>=0?t.splice(i,1):t.push(k); render();
+}
+function setB(k,v){ S.builder[k]=v; render(); }
+
+
+/* ==========================================================
+   QUESTION SESSION
+   ========================================================== */
+function startSession(sampleOnly,catKey){
+  let qs;
+  if(sampleOnly){ qs=[QUESTIONS[0]]; }
+  else if(catKey){ qs=QUESTIONS.filter(q=>q.categoryKey===catKey); if(!qs.length) qs=QUESTIONS.slice(); }
+  else {
+    const b=S.builder;
+    qs=QUESTIONS.filter(q=>b.topics.includes(q.categoryKey) &&
+      (b.difficulty==='mixed'||q.difficulty.toLowerCase()===b.difficulty));
+    if(!qs.length) qs=QUESTIONS.slice();
+  }
+  S.session={qs,index:0,selected:null,confidence:null,submitted:false,struck:[],
+    label: sampleOnly?'Sample question':(catKey?CATEGORIES[catKey].name+' practice':'Smart Mix practice'),
+    mode:S.builder.mode,results:[],start:Date.now(),qStart:Date.now(),sample:!!sampleOnly,
+    hideOptions:S.hideOptionsDefault};
+  if(!S.signedIn && sampleOnly){ S.signedIn=false; }
+  go('session');
+}
+function currentQ(){ return S.session.qs[S.session.index]; }
+
+function viewSession(){
+  const s=S.session; if(!s) return viewDashboard();
+  const q=currentQ();
+  const pct=Math.round((s.index+(s.submitted?1:0))/s.qs.length*100);
+  const answered=s.results.length;
+
+  return `${protoBar()}
+  <div class="q-top"><div class="q-top-inner">
+    <div class="row gap3" style="min-width:0">
+      <span class="logo-mark">A</span>
+      <div style="min-width:0">
+        <div style="font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.label}</div>
+        <div class="micro num">Question ${s.index+1} of ${s.qs.length}</div>
+      </div>
+    </div>
+    <div class="q-progress"><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="row gap2">
+      ${s.mode==='timed'?`<span class="pill mono num" id="timer">00:00</span>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="confirmEnd()">End session</button>
+    </div>
+  </div></div>
+
+  <div class="q-layout">
+    <div class="q-main">
+      <div class="row wrapf gap2 mb4">
+        <span class="pill pill-indigo">${q.type}</span>
+        <span class="pill">${q.difficulty}</span>
+        <span class="pill">${q.category}</span>
+        <span class="pill">${q.sector}</span>
+      </div>
+
+      <div class="q-stem">${q.stem}</div>
+      <p class="q-lead">${q.lead}</p>
+
+      ${s.hideOptions && !s.submitted ? `
+        <div class="empty mb4">
+          <p class="small">Options hidden. Work out your answer, then reveal them.</p>
+          <button class="btn btn-secondary mt3" onclick="S.session.hideOptions=false;render()">Show options</button>
+        </div>` : `
+        <div class="choice-stack mb5" id="opts">
+          ${q.options.map((o,i)=>optionHTML(q,o,i)).join('')}
+        </div>`}
+
+      ${!s.submitted && !s.hideOptions ? `
+        <div class="card mb4">
+          <div class="row-between mb3">
+            <h4 style="font-size:15px">How confident are you?</h4>
+            <button class="btn btn-ghost btn-sm" onclick="toast('Prototype — this preference lives in Account settings.')">Turn off</button>
+          </div>
+          <div class="conf-grid">
+            ${CONF.map(c=>`<button class="conf-btn" aria-pressed="${s.confidence===c.k}" onclick="setConf('${c.k}')">${c.label}</button>`).join('')}
+          </div>
+        </div>
+        <div class="q-desktop-submit">
+          <button class="btn btn-primary btn-lg btn-block" onclick="submitAnswer()" ${s.selected===null?'disabled':''}>Submit answer</button>
+          ${s.selected===null?`<p class="micro mt3">Select an answer to continue. Rating your confidence is optional but powers the confidence analysis.</p>`:''}
+        </div>` : ''}
+
+      ${s.submitted ? explanationHTML(q) : ''}
+    </div>
+
+    <aside class="q-util">
+      <div class="card mb4">
+        <div class="eyebrow mb3">Session</div>
+        <div class="navgrid mb4">
+          ${s.qs.map((qq,i)=>{
+            const done=s.results.find(r=>r.id===qq.id);
+            return `<button class="${done?'done':''} ${i===s.index?'cur':''}" onclick="jumpTo(${i})" aria-label="Question ${i+1}">
+              ${i+1}${S.bookmarks.has(qq.id)?'<span class="dot">★</span>':''}</button>`;
+          }).join('')}
+        </div>
+        <div class="legend">
+          <span class="row gap2"><i style="background:var(--surface)"></i> Unanswered</span>
+          <span class="row gap2"><i style="background:var(--indigo-wash);border-color:#DDDEF9">✓</i> Answered</span>
+          <span class="row gap2"><i style="box-shadow:inset 0 0 0 2px var(--indigo)"></i> Current</span>
+          <span class="row gap2"><i>★</i> Bookmarked</span>
+        </div>
+      </div>
+
+      <div class="card mb4">
+        <div class="eyebrow mb3">Tools</div>
+        <div class="stack gap2">
+          <button class="btn btn-secondary btn-sm" onclick="toggleBookmark('${q.id}')">
+            ${icon('bm')} ${S.bookmarks.has(q.id)?'Remove bookmark':'Bookmark'}</button>
+          <button class="btn btn-secondary btn-sm" onclick="openNote('${q.id}')">${icon('note')} ${S.notes[q.id]?'Edit note':'Add note'}</button>
+          <button class="btn btn-secondary btn-sm" onclick="openReport('${q.id}')">${icon('flag')} ${S.reported.has(q.id)?'Reported':'Report a concern'}</button>
+          <button class="btn btn-secondary btn-sm" onclick="S.session.hideOptions=!S.session.hideOptions;render()">
+            ${s.hideOptions?'Show options':'Hide options'}</button>
+        </div>
+        <p class="micro mt3">Click an option letter to strike it out.</p>
+      </div>
+
+      <div class="card desktop-only">
+        <div class="eyebrow mb3">Shortcuts</div>
+        <div class="stack gap2 micro">
+          ${[['1–5','Select option'],['Enter','Submit'],['B','Bookmark'],['→','Next question']]
+            .map(([k,v])=>`<div class="row-between"><span class="mono">${k}</span><span>${v}</span></div>`).join('')}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  ${!s.submitted && !s.hideOptions?`<div class="q-sticky">
+    <button class="btn btn-primary btn-lg btn-block" onclick="submitAnswer()" ${s.selected===null?'disabled':''}>Submit answer</button>
+  </div>`:''}
+  ${s.submitted?`<div class="q-sticky">
+    <button class="btn btn-primary btn-lg btn-block" onclick="nextQuestion()">${s.index+1<s.qs.length?'Next question':'Finish session'}</button>
+  </div>`:''}`;
+}
+
+function optionHTML(q,o,i){
+  const s=S.session;
+  let cls='opt';
+  if(s.submitted){
+    if(o.c) cls+=' correct';
+    else if(s.selected===i) cls+=' wrong';
+  } else if(s.struck.includes(i)) cls+=' struck';
+  const pressed=(!s.submitted && s.selected===i);
+  return `<button class="${cls}" aria-pressed="${pressed}" ${s.submitted?'disabled':''} onclick="selectOpt(${i})">
+    <span class="opt-mark" onclick="event.stopPropagation();strikeOpt(${i})">${o.l}</span>
+    <span class="opt-text">
+      ${o.t}
+      ${s.submitted&&o.c?`<span class="opt-flag ok">${icon('check')} Correct answer</span>`:''}
+      ${s.submitted&&!o.c&&s.selected===i?`<span class="opt-flag no">${icon('x')} Your answer</span>`:''}
+    </span>
+  </button>`;
+}
+function selectOpt(i){ if(S.session.submitted) return; S.session.selected=i; render(); }
+function strikeOpt(i){
+  const st=S.session.struck, k=st.indexOf(i);
+  if(S.session.submitted) return;
+  k>=0?st.splice(k,1):st.push(i);
+  if(S.session.selected===i) S.session.selected=null;
+  render();
+}
+function setConf(k){ S.session.confidence=k; render(); }
+
+function submitAnswer(){
+  const s=S.session, q=currentQ();
+  if(s.selected===null) return;
+  const correct=q.options[s.selected].c;
+  const time=Math.round((Date.now()-s.qStart)/1000);
+  if(!S.firstAttempts[q.id]) S.firstAttempts[q.id]={correct,confidence:s.confidence,time};
+  S.attempts.push({id:q.id,correct,confidence:s.confidence,time,opened:true,cat:q.categoryKey});
+  s.results.push({id:q.id,correct,confidence:s.confidence,time});
+  if(S.plan==='free') S.freeUsed++;
+  s.submitted=true;
+  render();
+  const box=document.getElementById('feedback-live'); if(box) box.focus();
+}
+function nextQuestion(){
+  const s=S.session;
+  if(s.index+1<s.qs.length){
+    s.index++; s.selected=null; s.confidence=null; s.submitted=false; s.struck=[];
+    s.qStart=Date.now(); s.hideOptions=S.hideOptionsDefault;
+    render(); window.scrollTo(0,0);
+  } else finishSession();
+}
+function jumpTo(i){
+  const s=S.session;
+  if(i===s.index) return;
+  const done=s.results.find(r=>r.id===s.qs[i].id);
+  if(!done && !s.submitted && s.selected!==null){ /* allow */ }
+  s.index=i; s.selected=null; s.confidence=null; s.submitted=false; s.struck=[]; s.qStart=Date.now();
+  render(); window.scrollTo(0,0);
+}
+function finishSession(){
+  const s=S.session;
+  S.lastSummary={
+    label:s.label,results:s.results.slice(),
+    mins:Math.max(1,Math.round((Date.now()-s.start)/60000)),
+    sample:s.sample
+  };
+  S.session=null;
+  if(!S.signedIn){ go('sampleEnd'); return; }
+  go('summary');
+}
+function confirmEnd(){
+  showModal(`<h3>Pause session?</h3>
+    <p class="muted mt3">Your progress will be saved and you can continue later.</p>
+    <div class="row gap3 mt5 wrapf">
+      <button class="btn btn-secondary" onclick="closeModal()">Keep going</button>
+      <button class="btn btn-primary" onclick="closeModal();${S.signedIn?"go('dashboard')":"go('home')"}">Pause and save</button>
+    </div>`);
+}
+
+/* ---------------- explanation ---------------- */
+function explanationHTML(q){
+  const s=S.session;
+  const correct=q.options[s.selected].c;
+  const best=q.options.find(o=>o.c);
+  const others=q.options.filter(o=>!o.c);
+  const notes=SUBTOPIC_NOTES[q.subtopic];
+  return `
+  <div class="feedback ${correct?'ok':'no'}" tabindex="-1" id="feedback-live" role="status">
+    <h3>${correct?icon('check'):icon('x')} ${correct?'Correct':'Not quite'}</h3>
+    <p class="mt2">${correct?'You identified the key clinical factor.':'The reasoning below sets out what the deciding factor was.'}</p>
+  </div>
+
+  <div class="card exp">
+    <section>
+      <h4>Answer</h4>
+      <p class="body-lg"><b>The best answer is ${best.l}: ${best.t}.</b></p>
+    </section>
+
+    <section>
+      <h4>Why this is correct</h4>
+      <p class="body-lg">${q.concise}</p>
+      <div class="disclosure mt4">
+        <button onclick="toggleD('exp-more')" aria-expanded="false">Explore the reasoning ${icon('chev')}</button>
+        <div class="dbody hide" id="exp-more"><p>${q.expanded}</p></div>
+      </div>
+    </section>
+
+    ${q.working?`<section><h4>Working</h4>
+      <div class="working">${q.working.map(l=>esc(l)).join('<br>')}</div></section>`:''}
+
+    <section>
+      <h4>Why the other answers are not preferred</h4>
+      ${others.map(o=>`<div class="opt-analysis">
+        <div class="row gap3" style="align-items:flex-start">
+          <span class="opt-mark" style="width:24px;height:24px;font-size:12px">${o.l}</span>
+          <div><div style="font-weight:600;font-size:14.5px">${o.t}</div>
+          <p class="small muted mt2">${o.r}</p></div>
+        </div></div>`).join('')}
+      <div class="opt-analysis is-correct">
+        <div class="row gap3" style="align-items:flex-start">
+          <span class="opt-mark" style="width:24px;height:24px;font-size:12px;background:var(--success);color:#fff;border-color:var(--success)">${best.l}</span>
+          <div><div style="font-weight:600;font-size:14.5px">${best.t}</div>
+          <p class="small mt2">${best.r}</p></div>
+        </div></div>
+    </section>
+
+    <section>
+      <div class="remember"><h4 style="color:var(--indigo-deep)">Remember</h4>
+      <p class="body-lg" style="margin:0">${q.remember}</p></div>
+    </section>
+
+    <section><h4>Applying it here</h4><p>${q.apply}</p></section>
+
+    ${q.trap?`<section><h4>Common trap</h4><p>${q.trap}</p></section>`:''}
+
+    <section>
+      <h4>Evidence and further reading</h4>
+      ${q.refs.map(r=>`<div class="ref">
+        ${icon('book')}
+        <div><div style="font-weight:500;font-size:15px">${r.t}</div>
+        <div class="micro">${r.o} · ${r.s} · ${r.y}</div></div>
+      </div>`).join('')}
+    </section>
+
+    <section>
+      <div class="disclosure">
+        <button onclick="toggleD('notes-${q.id}')" aria-expanded="false">Topic notes: ${notes.name} ${icon('chev')}</button>
+        <div class="dbody hide notes-body" id="notes-${q.id}">${notes.body}</div>
+      </div>
+      <p class="micro mt3">These notes are shared by every question in this subtopic.</p>
+    </section>
+
+    <section>
+      <div class="row-between wrapf gap3">
+        <p class="micro">Question ID: <span class="mono">${q.id}</span> · Last reviewed: ${q.reviewed} · Reviewed by: AcePharm Clinical Editorial Team</p>
+      </div>
+      <div class="row gap2 mt3 wrapf">
+        <button class="btn btn-secondary btn-sm" onclick="toggleBookmark('${q.id}')">${icon('bm')} ${S.bookmarks.has(q.id)?'Bookmarked':'Bookmark'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="openNote('${q.id}')">${icon('note')} Add note</button>
+        <button class="btn btn-secondary btn-sm" onclick="openReport('${q.id}')">${icon('flag')} Report a concern</button>
+      </div>
+    </section>
+
+    <section style="border:1px dashed var(--border);border-radius:12px;background:var(--canvas);padding:var(--s4)">
+      <p class="micro">Space reserved here for the AI tutor. Out of scope for Build 1 — see Developer Brief section 2.3.</p>
+    </section>
+  </div>
+
+  <div class="row gap3 mt5 wrapf q-desktop-submit">
+    <button class="btn btn-primary btn-lg" onclick="nextQuestion()">${s.index+1<s.qs.length?'Next question':'Finish session'} ${icon('arrow')}</button>
+    <button class="btn btn-secondary btn-lg" onclick="toast('Marked for review later.')">Review later</button>
+  </div>`;
+}
+function toggleD(id){
+  const el=$('#'+id); if(!el) return;
+  const btn=el.previousElementSibling;
+  const open=!el.classList.contains('hide');
+  el.classList.toggle('hide'); btn.setAttribute('aria-expanded',String(!open));
+}
+
+
+/* ==========================================================
+   SUMMARY / PROGRESS / LIBRARY / ACCOUNT
+   ========================================================== */
+function viewSummary(){
+  const sum=S.lastSummary; if(!sum) return viewDashboard();
+  const n=sum.results.length, c=sum.results.filter(r=>r.correct).length;
+  const pct=n?Math.round(c/n*100):0;
+  const confWrong=sum.results.filter(r=>r.confidence==='certain'&&!r.correct).length;
+  const slow=sum.results.filter(r=>r.time>60).length;
+  const rec=recommendation();
+  return appShell(`<div style="max-width:720px;margin:0 auto">
+    <div class="tc mb5">
+      <div style="width:56px;height:56px;border-radius:16px;background:var(--indigo-wash);color:var(--indigo);display:grid;place-items:center;margin:0 auto var(--s4)">${icon('check')}</div>
+      <h1 style="font-size:30px">Session complete</h1>
+      <p class="muted mt2">${sum.label}</p>
+    </div>
+
+    <div class="card mb4"><div class="grid g4" style="gap:var(--s4);text-align:center">
+      ${[[`${c} of ${n}`,'Correct'],[pct+'%','First-attempt accuracy'],[sum.mins+' min','Time taken'],[n,'Explanations reviewed']]
+        .map(([v,l])=>`<div><div class="num" style="font-size:29px;font-weight:600;letter-spacing:-.02em">${v}</div><div class="micro">${l}</div></div>`).join('')}
+    </div></div>
+
+    <div class="card mb4">
+      <h3 style="font-size:19px" class="mb4">What this session showed</h3>
+      ${[
+        pct>=80?['Accuracy','You answered most questions correctly on first attempt. Coverage is now the priority rather than accuracy.']:null,
+        pct<80&&pct>0?['Accuracy',`Your first-attempt accuracy was ${pct}%. The explanations you opened are the fastest way to close that gap.`]:null,
+        confWrong?['Confidence',`${confWrong} answer${confWrong>1?'s were':' was'} marked "Certain" but incorrect. Review ${confWrong>1?'these':'this'} first — confidently wrong is the most valuable thing to correct.`]:null,
+        slow?['Timing',`You spent over a minute on ${slow} question${slow>1?'s':''}. Worth noting if you are working towards a timed assessment.`]:null,
+        ['Next step',rec.reason]
+      ].filter(Boolean).map(([h,b])=>`<div style="padding:13px 0;border-bottom:1px solid var(--border)">
+        <div class="eyebrow">${h}</div><p class="mt2">${b}</p></div>`).join('')}
+    </div>
+
+    <div class="card mb4">
+      <div class="eyebrow mb3">How did this session feel?</div>
+      <div class="row gap2 wrapf">
+        ${['Too easy','About right','Too difficult'].map(t=>`<button class="btn btn-secondary btn-sm" onclick="toast('Thanks — this helps calibrate difficulty. It never overrides your actual performance data.')">${t}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="row gap3 wrapf">
+      <button class="btn btn-primary btn-lg" onclick="startSession(false,'${rec.key||''}')">Start recommended review</button>
+      <button class="btn btn-secondary btn-lg" onclick="go('progress')">View progress</button>
+      <button class="btn btn-ghost" onclick="go('dashboard')">Return to dashboard</button>
+    </div>
+  </div>`,'dashboard');
+}
+
+function viewSampleEnd(){
+  return `${protoBar()}${mktNav()}<div class="sec"><div style="max-width:520px;margin:0 auto;padding:0 var(--s4)">
+    <div class="panel tc">
+      <h1 style="font-size:28px">That is one question of many.</h1>
+      <p class="lede mt4">Create a free account to keep your progress, build your own sessions and see where you are strongest and weakest.</p>
+      <button class="btn btn-primary btn-lg btn-block mt5" onclick="go('signup')">Start revising free</button>
+      <button class="btn btn-secondary btn-block mt3" onclick="go('home')">Back to the site</button>
+      <p class="micro mt4">No card required.</p>
+    </div>
+  </div></div>`;
+}
+
+function viewProgress(){
+  const fa=firstAttemptStats(), pr=practiceStats(), cats=categoryStats();
+  const locked = S.plan==='free';
+  const all=Object.values(S.firstAttempts);
+  const quad={cc:0,cw:0,uc:0,uw:0};
+  Object.values(S.firstAttempts).forEach(a=>{
+    const confident=a.confidence==='certain'||a.confidence==='fairly';
+    if(confident&&a.correct)quad.cc++; else if(confident&&!a.correct)quad.cw++;
+    else if(!confident&&a.correct)quad.uc++; else quad.uw++;
+  });
+  if(fa.n===0){
+    return appShell(`<h1 style="font-size:30px" class="mb5">Progress</h1>
+      <div class="empty">
+        <h3>Not enough information yet</h3>
+        <p class="muted mt3" style="max-width:420px;margin:12px auto 0">Complete questions across at least three topics and AcePharm will show you where to focus.</p>
+        <button class="btn btn-primary mt5" onclick="startSession()">Start a session</button>
+      </div>`,'progress');
+  }
+  return appShell(`
+    <h1 style="font-size:30px">Progress</h1>
+    <p class="muted mt2 mb5">Know what is improving and what still needs attention.</p>
+
+    <div class="grid g3 mb5">
+      ${[['First-attempt accuracy',fa.pct+'%','How often you were right the very first time you saw a question. The honest measure.'],
+         ['Practice accuracy',pr.pct+'%','Across all attempts, including repeats.'],
+         ['Coverage',Math.round(fa.n/QUESTIONS.length*100)+'%',`${fa.n} of ${QUESTIONS.length} available questions attempted.`]]
+        .map(([l,v,d])=>`<div class="card"><div class="eyebrow">${l}</div>
+          <div class="num" style="font-size:38px;font-weight:600;letter-spacing:-.03em;margin:6px 0 4px">${v}</div>
+          <p class="micro">${d}</p></div>`).join('')}
+    </div>
+
+    <div class="card mb5">
+      <h3 style="font-size:19px" class="mb4">Topic map</h3>
+      ${Object.entries(cats).map(([k,c])=>{
+        const st=statusLabel(c.pct,c.seen);
+        const cls=c.pct===null?'':c.pct<50?'danger':c.pct<75?'warn':'success';
+        return `<div class="topic-row">
+          <div><div style="font-weight:500">${c.name}</div><div class="micro">${c.seen} of ${c.total} attempted · ${c.coverage}% coverage</div></div>
+          <div class="bar-cell"><div class="bar ${cls}"><i style="width:${c.pct||0}%"></i></div></div>
+          <div style="text-align:right"><span class="pill ${st.cls}">${st.t}</span></div>
+        </div>`}).join('')}
+      <p class="micro mt4">Status runs: Not started → First pass → Needs attention → Developing → Secure.</p>
+    </div>
+
+    <div class="card mb5">
+      <div class="row-between mb4 wrapf gap3">
+        <div><h3 style="font-size:19px">Confidence map</h3>
+        <p class="micro mt2">How well your confidence matched whether you were actually right.</p></div>
+      </div>
+      ${locked?`<div class="locked">
+        <h4>This content is included with full AcePharm access.</h4>
+        <p class="muted small mt3">Upgrade to see the confidence breakdown and topic-level analytics.</p>
+        <button class="btn btn-primary mt4" onclick="openUpgrade()">View plans</button>
+      </div>`:`
+      <div class="quad">
+        <div><div class="qk" style="color:var(--success)">Secure knowledge</div><div class="qv num">${quad.cc}</div><div class="qd">Confident and correct.</div></div>
+        <div class="flag"><div class="qk">Worth reviewing first</div><div class="qv num">${quad.cw}</div><div class="qd">You felt certain but were wrong. The most valuable to revisit.</div></div>
+        <div><div class="qk" style="color:var(--warning)">Emerging knowledge</div><div class="qv num">${quad.uc}</div><div class="qd">Right, but not confident. More practice will make it stick.</div></div>
+        <div><div class="qk" style="color:var(--slate)">Needs teaching</div><div class="qv num">${quad.uw}</div><div class="qd">Start with the topic notes rather than more questions.</div></div>
+      </div>
+      ${quad.cw?`<div class="mt4" style="background:var(--danger-wash);border:1px solid #FBD5D5;border-radius:12px;padding:14px 16px">
+        <p class="small" style="color:var(--danger)"><b>${quad.cw} question${quad.cw>1?'s':''}</b> you were sure about turned out to be wrong. Those are the ones to look at first.</p>
+        <button class="btn btn-secondary btn-sm mt3" onclick="startSession()">Review those topics</button>
+      </div>`:''}`}
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:19px" class="mb3">Reset practice history</h3>
+      <p class="muted small measure">Clears your attempts for a category so you can work through it fresh. Your original first-attempt results are kept for your progress statistics.</p>
+      <div class="row gap2 mt4 wrapf">
+        ${Object.entries(cats).filter(([,c])=>c.seen>0).map(([k,c])=>
+          `<button class="btn btn-secondary btn-sm" onclick="confirmReset('${k}')">Reset ${c.name}</button>`).join('')||'<span class="micro">Nothing to reset yet.</span>'}
+      </div>
+    </div>`,'progress');
+}
+function confirmReset(k){
+  const c=CATEGORIES[k];
+  showModal(`<h3>Reset your practice history for ${c.name}?</h3>
+    <p class="muted mt3">This clears your attempts so you can work through this category fresh. Your original first-attempt results are kept for your progress statistics.</p>
+    <p class="small mt3" style="color:var(--danger)">This cannot be undone.</p>
+    <div class="row gap3 mt5 wrapf">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="doReset('${k}')">Reset category</button>
+    </div>`);
+}
+function doReset(k){
+  const before=S.attempts.length;
+  S.attempts=S.attempts.filter(a=>a.cat!==k);
+  closeModal(); render();
+  toast(`Practice history for ${CATEGORIES[k].name} reset. ${before-S.attempts.length} attempt(s) cleared; first-attempt records kept.`);
+}
+
+function viewLibrary(){
+  const bm=[...S.bookmarks].map(id=>QUESTIONS.find(q=>q.id===id));
+  const notes=Object.entries(S.notes);
+  return appShell(`
+    <h1 style="font-size:30px" class="mb5">Library</h1>
+    <div class="card mb4">
+      <h3 style="font-size:19px" class="mb4">Bookmarks</h3>
+      ${bm.length?bm.map(q=>`<div class="row-between" style="padding:13px 0;border-bottom:1px solid var(--border);gap:var(--s3)" class="wrapf">
+        <div><div style="font-weight:500">${q.topic}</div><div class="micro mono">${q.id} · ${q.category}</div></div>
+        <button class="btn btn-secondary btn-sm" onclick="toggleBookmark('${q.id}')">Remove</button></div>`).join('')
+      :`<div class="empty"><h4>Nothing saved yet</h4>
+        <p class="muted small mt2">Bookmark a question while you are revising and it will appear here.</p>
+        <button class="btn btn-primary mt4" onclick="startSession()">Browse questions</button></div>`}
+    </div>
+    <div class="card">
+      <h3 style="font-size:19px" class="mb4">Notes</h3>
+      ${notes.length?notes.map(([id,t])=>{
+        const q=QUESTIONS.find(x=>x.id===id);
+        return `<div style="padding:13px 0;border-bottom:1px solid var(--border)">
+          <div class="micro mono mb2">${id} · ${q.topic}</div>
+          <p class="small">${esc(t)}</p></div>`}).join('')
+      :`<div class="empty"><h4>No notes yet</h4>
+        <p class="muted small mt2">Notes you add while revising will collect here so you can find them again.</p></div>`}
+    </div>`,'library');
+}
+
+function viewAccount(){
+  return appShell(`<div style="max-width:640px">
+    <h1 style="font-size:30px" class="mb5">Account</h1>
+
+    <div class="card mb4">
+      <h3 style="font-size:19px" class="mb4">Subscription</h3>
+      ${S.plan==='free'?`
+        <p>You are on the free <b>Explorer</b> plan.</p>
+        <p class="muted small mt2">${Math.max(0,FREE_LIMIT-S.freeUsed)} of ${FREE_LIMIT} free questions remaining this month.</p>
+        <button class="btn btn-primary mt4" onclick="openUpgrade()">View plans</button>`
+      :`<div class="row-between wrapf gap3">
+          <div><p><b>AcePharm ${S.plan==='yearly'?'Yearly':'Monthly'}</b></p>
+          <p class="muted small mt2">Renews 3 August 2027 for ${S.plan==='yearly'?'£49.99':'£4.99'}.</p></div>
+          <span class="pill pill-success">${icon('check')} Active</span>
+        </div>
+        <div class="row gap2 mt4 wrapf">
+          <button class="btn btn-secondary btn-sm" onclick="toast('Prototype — this would open the Stripe customer portal.')">Update payment method</button>
+          <button class="btn btn-secondary btn-sm" onclick="openCancel()">Cancel subscription</button>
+        </div>`}
+    </div>
+
+    <div class="card mb4">
+      <h3 style="font-size:19px" class="mb4">Revision preferences</h3>
+      <label class="check mb3"><input type="checkbox" ${S.hideOptionsDefault?'checked':''} onchange="S.hideOptionsDefault=this.checked;toast(this.checked?'Options will be hidden by default.':'Options will show by default.')">
+        <span><b>Hide answer options by default</b><br><span class="micro">Work out your answer from the question stem first, then reveal the options.</span></span></label>
+      <label class="check mb3"><input type="checkbox" checked>
+        <span><b>Ask for my confidence before I submit</b><br><span class="micro">Powers the confidence map. The control stays available even when this is off.</span></span></label>
+      <label class="check"><input type="checkbox" checked>
+        <span><b>Show difficulty labels</b></span></label>
+      <div class="field mt4"><label class="label">Daily question target</label>
+        <select class="select" onchange="S.onboarding.target=parseInt(this.value);render()">
+          ${[5,10,20,40].map(n=>`<option ${S.onboarding.target===n?'selected':''}>${n}</option>`).join('')}
+        </select></div>
+    </div>
+
+    <div class="card mb4">
+      <h3 style="font-size:19px" class="mb4">Your details</h3>
+      <div class="field"><label class="label">First name</label><input class="input" value="${esc(S.name)}" onchange="S.name=this.value"></div>
+      <div class="field"><label class="label">Stage</label><input class="input" value="${esc(S.onboarding.stage||'Not set')}" readonly></div>
+      <div class="field"><label class="label">University</label><input class="input" value="${esc(S.onboarding.uni||'Not set')}" readonly></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:19px" class="mb3">Data</h3>
+      <div class="row gap2 wrapf">
+        <button class="btn btn-secondary btn-sm" onclick="toast('We are preparing your export. You will receive an email when it is ready.')">Export my data</button>
+        <button class="btn btn-secondary btn-sm" style="color:var(--danger)" onclick="toast('Prototype — this would open the deletion flow with a typed confirmation.')">Delete account</button>
+      </div>
+    </div>
+  </div>`,'account');
+}
+
+/* ==========================================================
+   MODALS
+   ========================================================== */
+function showModal(html){
+  $('#modal-host').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+}
+function openUpgrade(){
+  showModal(`<h3>Continue with full AcePharm access</h3>
+    <p class="muted mt3">Unlock the complete available question bank, progress analytics and revision tools.</p>
+    <div class="stack gap3 mt5">
+      <button class="btn btn-secondary btn-lg btn-block" onclick="subscribe('monthly')">Choose monthly, £4.99</button>
+      <button class="btn btn-primary btn-lg btn-block" onclick="subscribe('yearly')">Choose yearly, £49.99</button>
+      <button class="btn btn-ghost btn-block" onclick="closeModal()">Not now</button>
+    </div>
+    <p class="micro tc mt4">The yearly plan saves £9.89. Both plans provide the same features.</p>`);
+}
+function subscribe(plan){
+  S.plan=plan; closeModal(); render();
+  toast(`You now have full AcePharm access. Your subscription is active until 3 August 2027.`);
+}
+function openCancel(){
+  showModal(`<h3>Cancel your subscription?</h3>
+    <p class="muted mt3">Your full access will continue until 3 August 2027. After that, paid questions and advanced features will be locked, but your account and progress will remain available.</p>
+    <div class="field mt5"><label class="label">Reason (optional)</label>
+      <select class="select"><option>Select a reason</option><option>Too expensive</option><option>Finished my assessment</option>
+      <option>Not using it enough</option><option>Missing content</option><option>Prefer another resource</option></select></div>
+    <div class="row gap3 mt5 wrapf">
+      <button class="btn btn-primary" onclick="closeModal()">Keep subscription</button>
+      <button class="btn btn-secondary" onclick="doCancel()">Continue cancellation</button>
+    </div>`);
+}
+function doCancel(){
+  S.plan='free'; closeModal(); render();
+  toast('Subscription cancelled. You will not be charged again.');
+}
+function openNote(id){
+  const cur=S.notes[id]||'';
+  showModal(`<h3>Note</h3>
+    <p class="micro mono mt2">${id}</p>
+    <div class="field mt4"><textarea class="input" id="note-box" rows="5" placeholder="Add a note about this question">${esc(cur)}</textarea></div>
+    <div class="row gap3 wrapf">
+      <button class="btn btn-primary" onclick="saveNote('${id}')">Save note</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>`);
+  setTimeout(()=>$('#note-box')&&$('#note-box').focus(),50);
+}
+function saveNote(id){
+  const v=$('#note-box').value.trim();
+  if(v) S.notes[id]=v; else delete S.notes[id];
+  closeModal(); render(); toast(v?'Note saved.':'Note deleted.');
+}
+function openReport(id){
+  showModal(`<h3>What is the issue?</h3>
+    <p class="micro mt2">We capture the question ID, version, your account and the timestamp automatically — you do not need to type any of that.</p>
+    <div class="choice-stack mt4">
+      ${['Answer may be incorrect','Explanation is unclear','Reference appears outdated','Question is ambiguous','Typographical error','Technical problem','Accessibility problem','Other']
+        .map(c=>`<button class="choice" style="min-height:46px;padding:11px 14px" onclick="sendReport('${id}')"><span class="small" style="flex:1">${c}</span></button>`).join('')}
+    </div>
+    <button class="btn btn-ghost btn-block mt4" onclick="closeModal()">Cancel</button>`);
+}
+function sendReport(id){
+  S.reported.add(id); closeModal(); render();
+  toast('Thank you. Your report has been sent to the content team. You can continue your session.');
+}
+function toggleBookmark(id){
+  S.bookmarks.has(id)?S.bookmarks.delete(id):S.bookmarks.add(id);
+  render(); toast(S.bookmarks.has(id)?'Added to bookmarks.':'Removed from bookmarks.');
+}
+
+/* ==========================================================
+   ROUTER
+   ========================================================== */
+function render(){
+  const views={
+    home:viewHome, pricingPage:viewPricingPage, signup:viewSignup, signin:viewSignin,
+    onboarding:viewOnboarding, dashboard:viewDashboard, builder:viewBuilder,
+    session:viewSession, summary:viewSummary, sampleEnd:viewSampleEnd,
+    progress:viewProgress, library:viewLibrary, account:viewAccount
+  };
+  $('#root').innerHTML=(views[S.route]||viewHome)();
+}
+document.addEventListener('keydown',e=>{
+  if(S.route!=='session'||!S.session) return;
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if($('#modal-host').innerHTML.trim()) return;
+  const s=S.session, q=currentQ();
+  if(/^[1-9]$/.test(e.key)){ const i=+e.key-1; if(i<q.options.length&&!s.submitted){ selectOpt(i); } }
+  else if(e.key==='Enter'){ if(!s.submitted&&s.selected!==null) submitAnswer(); else if(s.submitted) nextQuestion(); }
+  else if(e.key.toLowerCase()==='b'){ toggleBookmark(q.id); }
+  else if(e.key==='ArrowRight'&&s.submitted){ nextQuestion(); }
+});
+render();
+
+
+/* ==========================================================
+   ══ VISION LAYER ══  Ask Ace and the AI feature set
+   Responses are scripted for the prototype. In production these
+   would be model calls grounded in the question, the learner's
+   history and the reference library.
+   ========================================================== */
+S.ace = {open:false, thread:[], busy:false, context:null, selection:''};
+S.flashcards = [];
+S.plan = null;
+S.osce = null;
+
+/* ---------------- Ace response engine ---------------- */
+const ACE_SAFETY = 'Ace explains AcePharm content and reasoning. It does not give patient-specific advice — always check the BNF and current guidance in practice.';
+
+function aceGreeting(q){
+  return {role:'ace',html:`<p>I can see you're on <b>${q.topic}</b>. Ask me anything about this question, or pick one of the prompts below.</p>`,chips:aceChips(q)};
+}
+function aceChips(q){
+  const base=[
+    {k:'simpler',t:'Explain this more simply'},
+    {k:'whynot',t:'Why not option ' + (q.options.find(o=>!o.c).l) + '?'},
+    {k:'similar',t:'Show me a similar case'},
+    {k:'test',t:'Test my understanding'},
+    {k:'exam',t:'How would this be examined?'}
+  ];
+  if(q.working) base.splice(1,0,{k:'steps',t:'Walk me through the maths'});
+  return base;
+}
+
+const ACE_LIB = {
+ 'ACP-CV-0012':{
+  simpler:`<p>Strip it back to three facts:</p>
+    <ol><li>He's on <b>three</b> blood pressure drugs at full dose and still isn't at target. That's the definition of resistant hypertension.</li>
+    <li>At that point, NICE looks at one number — <b>potassium</b>.</li>
+    <li>His potassium is 4.1, which is under 4.5, so the answer is <b>spironolactone</b>.</li></ol>
+    <p>If his potassium had been 4.8, the answer would flip to a beta-blocker or an alpha-blocker instead.</p>`,
+  whynot:`<p>Option A is bisoprolol. It's not <em>wrong</em> as a step 4 drug — it just isn't right <em>for this patient</em>.</p>
+    <p>The split at step 4 is:</p>
+    <ul><li>Potassium <b>≤ 4.5</b> → spironolactone</li>
+    <li>Potassium <b>&gt; 4.5</b> → alpha-blocker or beta-blocker</li></ul>
+    <p>His potassium is 4.1. Spironolactone raises potassium, so the rule exists to stop you pushing an already-high potassium higher. With 4.1 there's room.</p>`,
+  similar:`<p>Try this variation:</p>
+    <blockquote style="border-left:3px solid var(--indigo);padding-left:14px;margin:12px 0"><p>Same man, same three drugs, same blood pressure — but his potassium comes back at <b>4.9 mmol/L</b>.</p></blockquote>
+    <p>What changes? The answer moves to <b>doxazosin or bisoprolol</b>. Spironolactone would now be the dangerous choice.</p>
+    <p>That single number is doing all the work in this question. Examiners love it precisely because it's easy to skim past.</p>`,
+  test:`<p>Three quick ones — answer in your head:</p>
+    <ol><li>What potassium threshold decides step 4 treatment?</li>
+    <li>Which two drug classes are used when potassium is above that threshold?</li>
+    <li>What monitoring does a patient need in the first month after starting spironolactone, and why?</li></ol>
+    <p class="micro">Answers: 4.5 mmol/L · alpha-blocker or beta-blocker · U&Es, because spironolactone plus an ACE inhibitor can cause hyperkalaemia.</p>`,
+  exam:`<p>This concept turns up in three reliable disguises:</p>
+    <ul><li><b>The potassium switch</b> — as here, where the number decides the drug</li>
+    <li><b>The adherence trap</b> — a patient who looks resistant but hasn't been taking the tablets. Always confirm adherence before escalating</li>
+    <li><b>The maximum dose trap</b> — offering you an option to increase a drug that's already at its licensed maximum, like the indapamide 5 mg option here</li></ul>`
+ },
+ 'ACP-RE-0031':{
+  simpler:`<p>Two numbers, one conclusion.</p>
+    <p><b>Six relievers in nine months.</b> Anything over three a year is a warning sign.</p>
+    <p><b>Five months with no preventer.</b> Her inflammation is completely untreated.</p>
+    <p>Put those together and you have the exact pattern the National Review of Asthma Deaths found in preventable deaths. That's why this is urgent, not routine.</p>`,
+  whynot:`<p>Option A — using the reliever regularly — is the intuitive answer and it's the wrong one.</p>
+    <p>Salbutamol opens the airway for a few hours. It does nothing to the underlying inflammation that's causing the airway to narrow in the first place. Using it on a schedule masks deterioration while the disease progresses underneath.</p>
+    <p>The preventer is the drug that reduces her risk of dying. That's the one she's stopped taking.</p>`,
+  similar:`<p>Here's the version that catches people out:</p>
+    <blockquote style="border-left:3px solid var(--indigo);padding-left:14px;margin:12px 0"><p>A patient collects six relievers a year <em>and</em> collects her preventer every month without fail. She says she feels fine.</p></blockquote>
+    <p>Still needs review. High reliever use is a red flag <b>on its own</b>, regardless of preventer adherence — it may mean poor technique, the wrong device, or genuinely worsening disease.</p>`,
+  test:`<p>Quick check:</p>
+    <ol><li>How many reliever inhalers a year should trigger a review?</li>
+    <li>Name three things to check before escalating anyone's asthma treatment.</li>
+    <li>Why is a normal CO₂ an alarming finding in an acute asthma attack?</li></ol>
+    <p class="micro">Answers: three or more · technique, adherence, triggers (and the diagnosis itself) · because the patient should be hyperventilating — a normal CO₂ means they're tiring and heading for respiratory failure.</p>`,
+  exam:`<p>Asthma questions cluster around three things: <b>reliever overuse</b>, <b>inhaler technique</b>, and <b>recognising a life-threatening attack</b>. If a stem gives you a dispensing history, count the inhalers — that's almost always where the answer lives.</p>`
+ },
+ 'ACP-CV-0104':{
+  simpler:`<p>Warfarin is broken down by an enzyme called <b>CYP2C9</b>.</p>
+    <p>Metronidazole blocks that enzyme. Blocked enzyme means warfarin hangs around longer, which means more anticoagulation, which means the INR climbs.</p>
+    <p>Rough rule: <b>inhibitors push the INR up, inducers pull it down.</b></p>`,
+  whynot:`<p>Flucloxacillin is the interesting distractor here, because it does the <em>opposite</em>.</p>
+    <p>It <b>lowers</b> the INR, and the effect can hang around for weeks after the course has finished. So a patient who finishes flucloxacillin and has their INR checked a fortnight later can look inexplicably subtherapeutic.</p>
+    <p>Worth remembering as a pair: metronidazole up, flucloxacillin down.</p>`,
+  similar:`<p>Same question, different drug:</p>
+    <blockquote style="border-left:3px solid var(--indigo);padding-left:14px;margin:12px 0"><p>The same patient is prescribed <b>clarithromycin</b> for a chest infection.</p></blockquote>
+    <p>Same answer, same mechanism — clarithromycin is a potent enzyme inhibitor and will push her INR up. It also interacts dangerously with simvastatin, which is a separate exam favourite.</p>`,
+  test:`<p>Sort these into "raises INR" and "lowers INR":</p>
+    <p class="mono small">rifampicin · fluconazole · carbamazepine · ciprofloxacin · St John's wort · amiodarone</p>
+    <p class="micro">Raises: fluconazole, ciprofloxacin, amiodarone. Lowers: rifampicin, carbamazepine, St John's wort.</p>`,
+  exam:`<p>Warfarin interaction questions almost always test one of three things: which drug raises the INR, what to do about a specific high INR value, or which analgesic is safe. Learn the BNF high-INR table as a block — it's directly examinable.</p>`
+ },
+ 'ACP-PA-0007':{
+  steps:`<p>Take it one line at a time.</p>
+    <div class="working" style="margin:12px 0">Step 1 — total daily dose<br>45 mg × 2 doses  =  90 mg<br><br>Step 2 — apply the one-sixth rule<br>90 ÷ 6  =  15 mg<br><br>Answer: 15 mg immediate-release, as required</div>
+    <p>The whole question turns on Step 1. Divide 45 by 6 instead of 90 by 6 and you get 7.5 mg — under half what she needs.</p>
+    <p><b>Always write the daily total on its own line before you divide.</b></p>`,
+  simpler:`<p>One rule: <b>breakthrough dose = total daily dose ÷ 6</b>.</p>
+    <p>She takes 45 mg twice a day, so her daily total is 90 mg. 90 ÷ 6 = <b>15 mg</b>.</p>`,
+  whynot:`<p>Option B, 10 mg, is the trap answer — and it's a near miss rather than a wild guess, which is what makes it dangerous.</p>
+    <p>It comes from people who half-remember the rule and divide the wrong number, or who round 90 ÷ 6 in their head under time pressure. Writing out the daily total first prevents both.</p>`,
+  similar:`<blockquote style="border-left:3px solid var(--indigo);padding-left:14px;margin:12px 0"><p>She now needs <b>four</b> breakthrough doses a day, each of which helps.</p></blockquote>
+    <p>New daily total = 90 + (4 × 15) = <b>150 mg</b>. That becomes 75 mg twice daily, with a new breakthrough dose of 150 ÷ 6 = <b>25 mg</b>.</p>
+    <p>Notice the breakthrough dose recalculates every time the regular dose changes.</p>`,
+  test:`<p>Work these out:</p>
+    <ol><li>MST 30 mg twice daily — what's the breakthrough dose?</li>
+    <li>Oral morphine 120 mg daily, converting to subcutaneous morphine over 24 hours?</li>
+    <li>Same 120 mg, converting to subcutaneous <b>diamorphine</b>?</li></ol>
+    <p class="micro">Answers: 10 mg · 60 mg (divide by 2) · 40 mg (divide by 3).</p>`,
+  exam:`<p>Palliative calculations are high-yield and low-variation. Learn the four conversion factors and the one-sixth rule and you can answer most of them. Marks are usually lost on arithmetic, not on knowledge — so show your working in lines.</p>`
+ },
+ 'ACP-MH-0019':{
+  simpler:`<p>Lithium levels are always taken <b>12 hours after the dose</b>. Nothing else.</p>
+    <p>She takes hers at 10 pm, so the sample goes at about <b>10 am</b> the next morning.</p>
+    <p>The reference range of 0.4–1.0 only means anything at that 12-hour point. Sample early and it reads high; sample late and it reads low.</p>`,
+  whynot:`<p>Option C — two hours post-dose — sits near the peak concentration.</p>
+    <p>The number would come back high, someone would reduce her dose, and she'd end up subtherapeutic and at risk of relapse. A mistimed sample doesn't just give a wrong number; it triggers a wrong decision.</p>`,
+  similar:`<blockquote style="border-left:3px solid var(--indigo);padding-left:14px;margin:12px 0"><p>She's had diarrhoea for three days and now has a coarse tremor and is unsteady on her feet.</p></blockquote>
+    <p>This is toxicity, not a monitoring question. Dehydration reduces lithium clearance. Withhold the dose and get an urgent level.</p>
+    <p>The distinction to hold onto: <b>fine</b> tremor is normal at therapeutic levels, <b>coarse</b> tremor is a warning.</p>`,
+  test:`<p>Three checks:</p>
+    <ol><li>Which four drug groups raise lithium levels?</li>
+    <li>Which three blood tests are done six-monthly alongside the level?</li>
+    <li>Fine tremor or coarse tremor — which one worries you?</li></ol>
+    <p class="micro">Answers: diuretics, ACE inhibitors and ARBs, NSAIDs, metronidazole · renal function, thyroid function, calcium · coarse.</p>`,
+  exam:`<p>Lithium is examined in four ways: sampling timing, the interaction list, distinguishing fine from coarse tremor, and the six-monthly monitoring panel. All four are pure recall — they're free marks if you've drilled them.</p>`
+ }
+};
+
+function aceAnswer(intent,q,freeText){
+  const lib=ACE_LIB[q.id]||{};
+  if(intent&&lib[intent]) return lib[intent];
+  if(freeText) return aceFreeform(freeText,q,lib);
+  return `<p>${lib.simpler||'Let me talk you through this question.'}</p>`;
+}
+function aceFreeform(t,q,lib){
+  const s=t.toLowerCase();
+  if(/simpl|basic|eli5|confus|don.?t (get|understand)/.test(s)) return lib.simpler||'';
+  if(/why not|option [a-e]|wrong/.test(s)) return lib.whynot||'';
+  if(/similar|another|example|case/.test(s)) return lib.similar||'';
+  if(/test|quiz|check me/.test(s)) return lib.test||'';
+  if(/exam|assessment|come up/.test(s)) return lib.exam||'';
+  if(/calc|maths|working|step/.test(s)) return lib.steps||lib.simpler||'';
+  if(/dose|dosing/.test(s)) return `<p>Dosing detail for this scenario sits in the topic notes for <b>${SUBTOPIC_NOTES[q.subtopic].name}</b> — I've opened them for you below the explanation.</p><p>If you want the licensed doses themselves, check the current BNF monograph rather than relying on me.</p>`;
+  return `<p>Good question. Here's how I'd approach it in the context of <b>${q.topic}</b>:</p>${lib.simpler||''}
+    <p class="micro mt3">If that's not what you were after, try one of the prompts below or rephrase it.</p>`;
+}
+
+/* ---------------- Ace panel UI ---------------- */
+function acePanel(q){
+  const t=S.ace.thread;
+  return `<div class="ace" id="ace-panel">
+    <div class="ace-head">
+      <div class="row gap3" style="min-width:0">
+        <span class="ace-orb" aria-hidden="true"></span>
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:15px">Ask Ace</div>
+          <div class="micro">Grounded in this question and your history</div>
+        </div>
+      </div>
+      <span class="pill pill-teal">Beta</span>
+    </div>
+    <div class="ace-thread" id="ace-thread">
+      ${t.map(m=>m.role==='you'
+        ? `<div class="ace-msg you"><div class="ace-bubble you">${esc(m.text)}</div></div>`
+        : `<div class="ace-msg"><span class="ace-orb sm" aria-hidden="true"></span><div class="ace-bubble">${m.html}${m.cite?`<div class="ace-cite">${icon('book')} <span>${m.cite}</span></div>`:''}</div></div>`
+      ).join('')}
+      ${S.ace.busy?`<div class="ace-msg"><span class="ace-orb sm" aria-hidden="true"></span>
+        <div class="ace-bubble"><span class="ace-dots"><i></i><i></i><i></i></span></div></div>`:''}
+    </div>
+    <div class="ace-chips">
+      ${aceChips(q).map(c=>`<button class="ace-chip" onclick="askAce('${c.k}','${q.id}')">${c.t}</button>`).join('')}
+    </div>
+    <div class="ace-input">
+      <input class="input" id="ace-box" placeholder="Ask Ace about this question…" onkeydown="if(event.key==='Enter')askAce(null,'${q.id}')">
+      <button class="btn btn-primary" onclick="askAce(null,'${q.id}')" aria-label="Send">${icon('arrow')}</button>
+    </div>
+    <p class="micro mt3">${ACE_SAFETY}</p>
+  </div>`;
+}
+function askAce(intent,qid){
+  const q=QUESTIONS.find(x=>x.id===qid);
+  let text='';
+  if(!intent){
+    const box=$('#ace-box'); if(!box) return;
+    text=box.value.trim(); if(!text) return;
+    S.ace.thread.push({role:'you',text});
+  } else {
+    const chip=aceChips(q).find(c=>c.k===intent);
+    S.ace.thread.push({role:'you',text:chip?chip.t:intent});
+  }
+  S.ace.busy=true; render(); scrollAce();
+  setTimeout(()=>{
+    const html=aceAnswer(intent,q,text);
+    S.ace.thread.push({role:'ace',html,cite:`${q.refs[0].o} — ${q.refs[0].t}`});
+    S.ace.busy=false; render(); scrollAce();
+  }, 700+Math.random()*500);
+}
+function scrollAce(){
+  const el=$('#ace-thread'); if(el) el.scrollTop=el.scrollHeight;
+}
+function openAceFor(q){
+  if(!S.ace.thread.length) S.ace.thread=[aceGreeting(q)];
+  S.ace.open=true; render();
+  setTimeout(()=>{const p=$('#ace-panel'); if(p) p.scrollIntoView({behavior:'smooth',block:'center'});},80);
+}
+function aceExplainSelection(){
+  const sel=String(window.getSelection());
+  if(!sel || sel.trim().length<3){ toast('Select some text in the question first.'); return; }
+  const q=S.session?currentQ():QUESTIONS[0];
+  if(!S.ace.thread.length) S.ace.thread=[aceGreeting(q)];
+  S.ace.open=true;
+  S.ace.thread.push({role:'you',text:`Explain: "${sel.trim().slice(0,90)}"`});
+  S.ace.busy=true; render();
+  setTimeout(()=>{
+    S.ace.thread.push({role:'ace',
+      html:`<p>You highlighted <b>"${esc(sel.trim().slice(0,70))}"</b>.</p>${aceAnswer('simpler',q)}`,
+      cite:`${q.refs[0].o} — ${q.refs[0].t}`});
+    S.ace.busy=false; render(); scrollAce();
+  },800);
+}
+document.addEventListener('mouseup',()=>{
+  const sel=String(window.getSelection()).trim();
+  const btn=$('#sel-ace');
+  if(S.route==='session' && sel.length>3){
+    if(!btn){
+      const b=document.createElement('button');
+      b.id='sel-ace'; b.className='sel-ace';
+      b.innerHTML='Ask Ace about this';
+      b.onclick=aceExplainSelection;
+      document.body.appendChild(b);
+    }
+    const r=window.getSelection().getRangeAt(0).getBoundingClientRect();
+    const el=$('#sel-ace');
+    el.style.top=(r.top+window.scrollY-44)+'px';
+    el.style.left=Math.max(12,r.left+r.width/2-80)+'px';
+  } else if(btn){ btn.remove(); }
+});
+
+
+/* ==========================================================
+   AI HUB — planner, flashcards, insights, simulators
+   ========================================================== */
+function viewAce(){
+  const fa=firstAttemptStats();
+  const tiles=[
+    {k:'planner',t:'Revision planner',d:'A week of sessions built from your weak topics, your assessment date and how much time you actually have.',ico:'chart'},
+    {k:'osce',t:'Consultation simulator',d:'Counsel a simulated patient in real time. Ace plays the patient, then marks you against a consultation rubric.',ico:'note',tag:'Showcase'},
+    {k:'generate',t:'Generate practice',d:'Ace writes new questions targeting the exact concept you keep missing, reviewed before they reach you.',ico:'book'},
+    {k:'flash',t:'Flashcards from mistakes',d:'Every question you get wrong becomes a spaced-repetition card automatically.',ico:'bm'},
+    {k:'calc',t:'Calculation coach',d:'Show your working line by line and Ace tells you exactly where it went wrong — not just that it did.',ico:'chart'},
+    {k:'insights',t:'Weekly insight',d:'A written read on your week: what moved, what stalled, and the one thing to do next.',ico:'alert'}
+  ];
+  return appShell(`
+    <div class="glow-panel mb5">
+      <div class="row gap4 wrapf" style="align-items:center">
+        <span class="ace-orb" style="width:46px;height:46px"></span>
+        <div style="flex:1;min-width:260px">
+          <h2 style="font-size:29px">Ace</h2>
+          <p style="color:#C7D2FE;margin-top:6px;max-width:560px">Your tutor, planner and examiner — grounded in AcePharm's reviewed content and everything it knows about how you revise.</p>
+        </div>
+      </div>
+      <div class="grid g3 mt6" style="gap:var(--s3)">
+        ${[['Questions seen',fa.n],['First-attempt',fa.pct+'%'],['Cards due',S.flashcards.filter(c=>c.due).length]]
+          .map(([l,v])=>`<div class="glow-card"><div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#A5B4FC">${l}</div>
+          <div class="num" style="font-size:29px;font-weight:600;margin-top:4px">${v}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="grid g3">
+      ${tiles.map(t=>`<button class="ai-tile" onclick="go('ace_${t.k}')">
+        <span class="ai-ico">${icon(t.ico)}</span>
+        <div class="row-between mb2"><h4 style="font-size:17px">${t.t}</h4>${t.tag?`<span class="pill pill-teal">${t.tag}</span>`:''}</div>
+        <p class="small muted" style="flex:1">${t.d}</p>
+        <span class="small mt4" style="color:var(--indigo);font-weight:500">Open ${icon('arrow')}</span>
+      </button>`).join('')}
+    </div>
+
+    <div class="card mt5">
+      <h3 style="font-size:19px" class="mb3">How Ace is kept safe</h3>
+      <div class="grid g2" style="gap:var(--s4)">
+        ${[['Grounded, not open-ended','Ace answers from AcePharm\u2019s reviewed content and the linked references. It does not free-associate about medicines.'],
+           ['Every claim is traceable','Responses cite the source they came from, so you can check them the way you would check any other revision resource.'],
+           ['It never gives patient advice','Ace is a study tool. It declines clinical questions about real patients and points you to the BNF and current guidance.'],
+           ['Corrections flow back','If Ace gets something wrong, reporting it routes to the same editorial queue as a question report.']]
+          .map(([h,b])=>`<div><h4 style="font-size:15px">${h}</h4><p class="small muted mt2">${b}</p></div>`).join('')}
+      </div>
+    </div>`,'ace');
+}
+
+/* ---------------- planner ---------------- */
+function buildPlan(){
+  const cats=categoryStats();
+  const ranked=Object.entries(cats).sort((a,b)=>(a[1].pct??101)-(b[1].pct??101));
+  const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  S.plan=days.map((d,i)=>{
+    if(i===6) return {day:d,type:'rest',title:'Rest day',detail:'Consolidation happens when you stop. No session scheduled.'};
+    if(i===4) return {day:d,type:'review',title:'Spaced review',detail:'Revisit everything you answered incorrectly this week, plus cards falling due.',mins:20};
+    const c=ranked[i%ranked.length];
+    return {day:d,type:'focus',title:c[1].name,
+      detail:c[1].pct===null?'Not yet attempted — this session establishes your baseline.'
+        :`Currently ${c[1].pct}% first-attempt accuracy. Scheduled early in the week while your attention is freshest.`,
+      mins:i===0?25:20,key:c[0]};
+  });
+}
+function viewAcePlanner(){
+  if(!S.plan) buildPlan();
+  const today=new Date().getDay(); const idx=today===0?6:today-1;
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+    <div class="row-between wrapf gap3 mb2">
+      <h1 style="font-size:30px">Revision planner</h1>
+      <button class="btn btn-secondary btn-sm" onclick="S.plan=null;render();toast('Plan rebuilt from your latest performance.')">Rebuild plan</button>
+    </div>
+    <p class="muted mb5">Built from your weak topics, your assessment date and a realistic amount of time.</p>
+
+    <div class="ace-cta mb5">
+      <div class="row gap3" style="flex:1;min-width:250px"><span class="ace-orb sm"></span>
+        <p class="small">${S.onboarding.date&&S.onboarding.date.includes('8 weeks')
+          ? 'Your assessment is 56 days away. I have front-loaded clinical topics and left calculations for the final fortnight, when short daily drilling works better.'
+          : 'No assessment date set, so this plan is built for steady coverage rather than a countdown. Adding a date in your settings will change how I sequence it.'}</p></div>
+    </div>
+
+    <div class="grid g2" style="gap:var(--s3)">
+      ${S.plan.map((p,i)=>`<div class="plan-day ${i===idx?'today':''} ${i<idx?'done':''}">
+        <div class="row-between mb2">
+          <span style="font-weight:600">${p.day}${i===idx?' · today':''}</span>
+          ${p.mins?`<span class="pill">${p.mins} min</span>`:'<span class="pill">Rest</span>'}
+        </div>
+        <div style="font-weight:500;font-size:15px">${p.title}</div>
+        <p class="small muted mt2">${p.detail}</p>
+        ${p.type!=='rest'?`<button class="btn ${i===idx?'btn-primary':'btn-secondary'} btn-sm mt3" onclick="startSession(false,'${p.key||''}')">Start this session</button>`:''}
+      </div>`).join('')}
+    </div>
+
+    <div class="card mt5">
+      <h3 style="font-size:18px" class="mb3">Why the plan looks like this</h3>
+      <ul style="padding-left:20px" class="muted small">
+        <li style="margin-bottom:7px">Your weakest topic sits on Monday, when adherence to a plan is highest.</li>
+        <li style="margin-bottom:7px">Friday is reserved for spaced review rather than new material — revisiting on a delay is what moves knowledge into long-term memory.</li>
+        <li style="margin-bottom:7px">Sunday is deliberately empty. Plans that schedule seven days out of seven get abandoned in week two.</li>
+        <li>Sessions are 20–25 minutes because that is what you have actually been completing, not what you told us you would do.</li>
+      </ul>
+    </div>`,'ace');
+}
+
+/* ---------------- generate practice ---------------- */
+function viewAceGenerate(){
+  const cats=categoryStats();
+  const weak=Object.entries(cats).filter(([,c])=>c.seen>0).sort((a,b)=>a[1].pct-b[1].pct)[0];
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+    <h1 style="font-size:30px">Generate practice</h1>
+    <p class="muted mt2 mb5 measure">When you keep missing the same concept, the bank may not have enough questions on it. Ace drafts new ones targeting that exact gap.</p>
+
+    <div class="card mb4">
+      <div class="eyebrow mb3">Detected gap</div>
+      ${weak?`<h3 style="font-size:20px">${weak[1].name}</h3>
+      <p class="muted mt2">${weak[1].pct}% first-attempt accuracy across ${weak[1].seen} question${weak[1].seen>1?'s':''}.</p>
+      <div class="mt4" style="background:var(--indigo-wash);border-radius:11px;padding:14px 16px">
+        <p class="small" style="color:var(--indigo-deep)">Looking at which options you chose rather than just whether you were right, the pattern is narrower than the topic itself — you are consistently missing the <b>decision threshold</b> rather than the drug knowledge.</p>
+      </div>`:'<p class="muted">Complete a session first and Ace will identify where the gap is.</p>'}
+      <button class="btn btn-primary mt4" onclick="fakeGenerate()">Draft 5 questions on this gap</button>
+    </div>
+
+    <div id="gen-out"></div>
+
+    <div class="card mt4" style="border-style:dashed">
+      <h3 style="font-size:17px" class="mb3">The rule that keeps this safe</h3>
+      <p class="muted small measure">Generated questions enter the same editorial pipeline as everything else — draft, clinical review, educational review, publish. They are labelled as AI-drafted until a pharmacist signs them off, and they never count toward your progress statistics while unreviewed.</p>
+      <p class="micro mt3">This is the difference between an AI question bank and a question bank with AI in it.</p>
+    </div>`,'ace');
+}
+function fakeGenerate(){
+  const out=$('#gen-out'); if(!out) return;
+  out.innerHTML=`<div class="card"><div class="row gap3"><span class="ace-orb sm"></span>
+    <div><span class="ace-dots"><i></i><i></i><i></i></span><p class="micro mt2">Drafting against the detected gap…</p></div></div></div>`;
+  setTimeout(()=>{
+    out.innerHTML=`<div class="card">
+      <div class="row-between mb4 wrapf gap3">
+        <h3 style="font-size:18px">5 drafted questions</h3>
+        <span class="pill pill-warn">Awaiting clinical review</span>
+      </div>
+      ${[
+        ['Threshold recall','A patient on three antihypertensives has a potassium of 4.8 mmol/L. Which step 4 option is appropriate?','Hard'],
+        ['Applied threshold','Same patient, potassium 4.2 mmol/L, eGFR 28 mL/min/1.73m². What now?','Hard'],
+        ['Adherence first','A patient appears resistant but collects only 6 months of tablets a year. Next step?','Medium'],
+        ['Maximum dose trap','Which of these options is already at its licensed maximum for hypertension?','Medium'],
+        ['Monitoring','What must be checked within a month of starting spironolactone alongside ramipril?','Easy']
+      ].map(([tag,stem,d])=>`<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+        <div class="row gap2 mb2 wrapf"><span class="pill pill-indigo">${tag}</span><span class="pill">${d}</span></div>
+        <p class="small">${stem}</p></div>`).join('')}
+      <div class="row gap2 mt4 wrapf">
+        <button class="btn btn-primary btn-sm" onclick="toast('Sent to the clinical review queue.')">Send to review queue</button>
+        <button class="btn btn-secondary btn-sm" onclick="toast('Drafts discarded.');$('#gen-out').innerHTML=''">Discard</button>
+      </div>
+    </div>`;
+  },1600);
+}
+
+/* ---------------- flashcards ---------------- */
+function seedFlashcards(){
+  const wrong=Object.entries(S.firstAttempts).filter(([,a])=>!a.correct).map(([id])=>id);
+  S.flashcards=wrong.map(id=>{
+    const q=QUESTIONS.find(x=>x.id===id);
+    return {id,front:q.remember.split('.')[0]+'?',back:q.remember,topic:q.topic,due:true,interval:1};
+  });
+  if(!S.flashcards.length){
+    S.flashcards=QUESTIONS.slice(0,3).map(q=>({id:q.id,front:`${q.topic} — what is the key principle?`,back:q.remember,topic:q.topic,due:true,interval:1}));
+  }
+}
+function viewAceFlash(){
+  if(!S.flashcards.length) seedFlashcards();
+  const due=S.flashcards.filter(c=>c.due);
+  const c=due[0];
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+    <h1 style="font-size:30px">Flashcards</h1>
+    <p class="muted mt2 mb5 measure">Built automatically from the questions you got wrong. Ace turns the learning point into a card and schedules it to come back just before you would forget it.</p>
+
+    ${c?`
+    <div class="card-flip" id="flip" onclick="flipCard()">
+      <div class="eyebrow mb3">${c.topic}</div>
+      <div id="flip-face" style="font-size:19px;line-height:1.55">${c.front}</div>
+      <p class="micro mt5">Tap to reveal</p>
+    </div>
+    <div class="row gap2 mt4 wrapf" id="flip-actions" style="display:none">
+      <button class="btn btn-secondary" onclick="gradeCard(1)">Again · 10 min</button>
+      <button class="btn btn-secondary" onclick="gradeCard(3)">Hard · 1 day</button>
+      <button class="btn btn-secondary" onclick="gradeCard(5)">Good · 4 days</button>
+      <button class="btn btn-primary" onclick="gradeCard(8)">Easy · 10 days</button>
+    </div>
+    <p class="micro mt4">${due.length} card${due.length===1?'':'s'} due · ${S.flashcards.length} in your deck</p>
+    `:`<div class="empty"><h3>Nothing due</h3>
+      <p class="muted mt3">All caught up. Cards will reappear as they fall due.</p>
+      <button class="btn btn-secondary mt4" onclick="S.flashcards.forEach(c=>c.due=true);render()">Reset deck</button></div>`}
+
+    <div class="card mt5">
+      <h3 style="font-size:17px" class="mb3">Where these come from</h3>
+      <p class="muted small measure">Every card is generated from a question you answered incorrectly on first attempt, using the learning point a pharmacist wrote — not a summary Ace invented. The scheduling is standard spaced repetition; the intelligence is in choosing which of your mistakes deserve a card at all.</p>
+    </div>`,'ace');
+}
+function flipCard(){
+  const due=S.flashcards.filter(c=>c.due); if(!due.length) return;
+  const f=$('#flip-face'); const a=$('#flip-actions');
+  f.innerHTML=due[0].back; a.style.display='flex'; $('#flip').onclick=null;
+}
+function gradeCard(days){
+  const due=S.flashcards.filter(c=>c.due);
+  if(due[0]) due[0].due=false;
+  render();
+  toast(days<=1?'Card scheduled to return shortly.':`Card scheduled for ${days} days.`);
+}
+
+/* ---------------- calculation coach ---------------- */
+function viewAceCalc(){
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+    <h1 style="font-size:30px">Calculation coach</h1>
+    <p class="muted mt2 mb5 measure">Getting a calculation wrong tells you nothing about <em>where</em> you went wrong. Show your working and Ace finds the line that broke.</p>
+
+    <div class="card mb4">
+      <div class="eyebrow mb3">Question</div>
+      <p class="body-lg">A patient takes morphine sulfate modified-release 45 mg twice daily. What is the appropriate breakthrough dose of immediate-release oral morphine?</p>
+      <div class="field mt5">
+        <label class="label" for="work">Your working — one step per line</label>
+        <textarea class="input mono" id="work" rows="5" style="font-size:14px">45 ÷ 6 = 7.5 mg</textarea>
+        <div class="hint">Try the line above, or write your own. Ace checks each line rather than only the final answer.</div>
+      </div>
+      <button class="btn btn-primary" onclick="checkWorking()">Check my working</button>
+    </div>
+    <div id="calc-out"></div>`,'ace');
+}
+function checkWorking(){
+  const v=($('#work').value||'').replace(/\s/g,'');
+  const out=$('#calc-out');
+  out.innerHTML=`<div class="card"><div class="row gap3"><span class="ace-orb sm"></span><span class="ace-dots"><i></i><i></i><i></i></span></div></div>`;
+  setTimeout(()=>{
+    const rightTotal=/90/.test(v);
+    const answer15=/15/.test(v);
+    out.innerHTML=`<div class="ace">
+      <div class="ace-head"><div class="row gap3"><span class="ace-orb"></span>
+        <div><div style="font-weight:600;font-size:15px">Ace</div><div class="micro">Checked line by line</div></div></div></div>
+      <div class="ace-msg"><span class="ace-orb sm"></span><div class="ace-bubble" style="max-width:100%">
+      ${answer15&&rightTotal
+        ? `<p><b>That's right, and your method is right too.</b></p>
+           <p>You wrote the daily total on its own line before dividing, which is exactly the habit that stops this going wrong under time pressure.</p>`
+        : answer15
+        ? `<p><b>Right answer — but I'd tighten the working.</b></p>
+           <p>You got to 15 mg, which is correct. I can't see the daily total as a separate step though, and that's the line that protects you when the numbers are less friendly.</p>
+           <div class="working" style="margin:10px 0">45 mg × 2  =  90 mg<br>90 ÷ 6     =  15 mg</div>`
+        : `<p><b>The rule is right. The number you applied it to is not.</b></p>
+           <p>You divided by 6, which is correct — the breakthrough dose is one sixth. But you divided <b>45</b>, and 45 is a single dose, not the daily total.</p>
+           <div class="working" style="margin:10px 0">You wrote:  45 ÷ 6  =  7.5 mg<br>Should be:  90 ÷ 6  =  15 mg</div>
+           <p>She takes 45 mg <b>twice</b> a day, so the daily total is 90 mg.</p>
+           <p>This is the single most common error in opioid conversion, and it always produces an under-dose — which in palliative care means a patient in pain. Write the daily total on its own line every time.</p>`}
+      <div class="ace-cite">${icon('book')} <span>BNF — Prescribing in palliative care</span></div>
+      </div></div>
+      <div class="ace-chips">
+        <button class="ace-chip" onclick="toast('Ace would drill you on three more conversions.')">Drill me on this</button>
+        <button class="ace-chip" onclick="go('ace_flash')">Make this a flashcard</button>
+      </div>
+    </div>`;
+  },1300);
+}
+
+
+/* ---------------- consultation simulator (showcase) ---------------- */
+const OSCE = {
+  brief:{
+    title:'New inhaler counselling',
+    setting:'Community pharmacy consultation room',
+    patient:'Rebecca Hughes, 34',
+    task:'Ms Hughes has been prescribed a beclometasone inhaler for the first time, alongside her existing salbutamol. Counsel her on its use. You have five minutes.'
+  },
+  turns:[
+    {pt:'Hi — so they\u2019ve given me a second inhaler? I already have my blue one and honestly it works fine. I don\u2019t really see why I need another.',
+     opts:[
+      {t:'Explain the difference between the two inhalers and why the preventer matters',score:'good',
+       reply:'Oh… so the blue one only opens things up when it\u2019s already gone wrong? Nobody\u2019s put it like that before. So the brown one is stopping it happening in the first place?',
+       note:'Strong opening. You addressed the belief driving her scepticism rather than restating the instruction.'},
+      {t:'Tell her the doctor has prescribed it, so she should take it as directed',score:'poor',
+       reply:'Right. I mean, I suppose. I\u2019ll see how I get on.',
+       note:'This closes the conversation without changing anything. Deference to the prescriber is not a reason a patient can act on, and she has told you she is not convinced.'},
+      {t:'Ask her how often she has been using the blue inhaler',score:'best',
+       reply:'Um… most days I suppose? Sometimes twice. More if I\u2019ve been walking up hills. Is that a lot?',
+       note:'Best opening. You gathered before you explained, and you have just uncovered daily reliever use — which changes the whole consultation.'}
+     ]},
+    {pt:'So when do I actually take the brown one? And do I stop the blue one?',
+     opts:[
+      {t:'Twice daily, every day, even when she feels well — and keep the blue one for symptoms',score:'best',
+       reply:'Every day even when I\u2019m fine? That feels strange. But okay — twice a day, and keep the blue one for when I actually need it.',
+       note:'Correct and complete. You pre-empted the commonest reason preventers get abandoned: feeling well and assuming it is no longer needed.'},
+      {t:'Twice daily, and she can stop the blue inhaler now',score:'poor',
+       reply:'Oh — stop the blue one completely? Even if I can\u2019t breathe?',
+       note:'Clinically unsafe. The reliever must stay available for symptom relief and for an attack.'},
+      {t:'Whenever she feels her chest tightening',score:'poor',
+       reply:'So only when it\u2019s bad? That sounds the same as the blue one then.',
+       note:'This describes reliever use. A preventer taken as needed does not work — the anti-inflammatory effect depends on regular dosing.'}
+     ]},
+    {pt:'Is there anything I should watch out for? My friend said steroids are bad for you.',
+     opts:[
+      {t:'Acknowledge the concern, explain inhaled doses are small and local, and mention rinsing to prevent thrush',score:'best',
+       reply:'That\u2019s reassuring actually. And I just rinse my mouth after? That\u2019s easy enough.',
+       note:'Well handled. You validated the concern before correcting it, which is what makes the correction land, and you gave the one practical action that prevents the commonest side effect.'},
+      {t:'Reassure her that inhaled steroids are completely safe',score:'poor',
+       reply:'Completely safe? Okay…',
+       note:'Overclaiming. Inhaled corticosteroids do carry local effects, and at higher doses systemic ones. Patients notice when reassurance is too absolute, and it costs you credibility.'},
+      {t:'Explain that the risks of untreated asthma are greater than the risks of the inhaler',score:'good',
+       reply:'I hadn\u2019t thought about it that way. So not taking it is the bigger risk?',
+       note:'True and useful framing, though it skips the practical counselling — she still does not know to rinse her mouth.'}
+     ]},
+    {pt:'Okay. I think I\u2019ve got it. Anything else?',
+     opts:[
+      {t:'Check her inhaler technique before she leaves',score:'best',
+       reply:'Now? Okay… like this? Oh — I\u2019m breathing in too fast, aren\u2019t I.',
+       note:'The single highest-value thing you can do in this consultation. Poor technique is the commonest reason inhaled treatment appears to fail, and it cannot be assessed by asking.'},
+      {t:'Offer a leaflet and say goodbye',score:'poor',
+       reply:'Thanks, I\u2019ll have a read.',
+       note:'A leaflet is not counselling. You had a patient in front of you and did not check whether she can use the device.'},
+      {t:'Arrange a follow-up in four weeks',score:'good',
+       reply:'Yes, I can do that.',
+       note:'Sensible safety-netting, but it defers the thing you could have done now.'}
+     ]}
+  ],
+  rubric:[
+    ['Gathered information before advising','Did you establish her current use and beliefs before explaining?'],
+    ['Explained preventer vs reliever clearly','Did she leave understanding why there are two inhalers?'],
+    ['Gave correct dosing instructions','Regular twice-daily dosing, reliever retained.'],
+    ['Addressed concerns without overclaiming','Steroid worry acknowledged and answered honestly.'],
+    ['Covered practical safety','Mouth rinsing, technique check, safety-netting.'],
+    ['Checked technique','Observed rather than assumed.']
+  ]
+};
+function startOsce(){
+  S.osce={turn:0,log:[],scores:[],done:false};
+  go('ace_osce');
+}
+function viewAceOsce(){
+  const o=S.osce;
+  if(!o){
+    return appShell(`
+      <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+      <h1 style="font-size:30px">Consultation simulator</h1>
+      <p class="muted mt2 mb5 measure">Written questions test what you know. They cannot test whether you can hold a conversation with a worried patient. Ace plays the patient, responds to what you actually say, and marks you against a consultation rubric afterwards.</p>
+      <div class="card mb4">
+        <span class="pill pill-teal mb3">Scenario</span>
+        <h3 style="font-size:21px">${OSCE.brief.title}</h3>
+        <div class="grid g2 mt4" style="gap:var(--s4)">
+          <div><div class="eyebrow">Setting</div><p class="small mt2">${OSCE.brief.setting}</p></div>
+          <div><div class="eyebrow">Patient</div><p class="small mt2">${OSCE.brief.patient}</p></div>
+        </div>
+        <div class="mt4" style="background:var(--canvas);border-radius:11px;padding:15px 17px">
+          <div class="eyebrow mb2">Your task</div><p>${OSCE.brief.task}</p>
+        </div>
+        <button class="btn btn-primary btn-lg mt5" onclick="startOsce()">Begin consultation</button>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h3 style="font-size:17px" class="mb3">Why this matters for pharmacy specifically</h3>
+        <p class="muted small measure">Pharmacy assessment is moving toward consultation and prescribing competence, not recall. OSCEs, the foundation year, independent prescribing — all of them assess something a question bank structurally cannot reach. This is the part of the roadmap that turns AcePharm from a revision tool into a training platform.</p>
+      </div>`,'ace');
+  }
+  if(o.done) return viewOsceResult();
+  const turn=OSCE.turns[o.turn];
+  return appShell(`
+    <div class="row-between wrapf gap3 mb4">
+      <div><h1 style="font-size:24px">${OSCE.brief.title}</h1>
+      <p class="micro">Exchange ${o.turn+1} of ${OSCE.turns.length}</p></div>
+      <button class="btn btn-ghost btn-sm" onclick="S.osce=null;render()">End consultation</button>
+    </div>
+    <div class="bar mb4"><i style="width:${Math.round(o.turn/OSCE.turns.length*100)}%"></i></div>
+
+    <div class="chat-sim mb4" id="sim">
+      ${o.log.map(m=>m.me
+        ? `<div class="sim-msg me"><span class="sim-av me">You</span><div class="sim-bub">${m.t}</div></div>`
+        : `<div class="sim-msg"><span class="sim-av pt">RH</span><div class="sim-bub">${m.t}</div></div>`).join('')}
+      <div class="sim-msg"><span class="sim-av pt">RH</span><div class="sim-bub">${turn.pt}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow mb3">How do you respond?</div>
+      <div class="choice-stack">
+        ${turn.opts.map((op,i)=>`<button class="choice" style="align-items:flex-start" onclick="osceAnswer(${i})">
+          <span style="flex:1">${op.t}</span></button>`).join('')}
+      </div>
+      <div class="field mt4" style="margin-bottom:0">
+        <label class="label" for="osce-free">Or say it in your own words</label>
+        <div class="ace-input"><input class="input" id="osce-free" placeholder="Type what you would say…">
+          <button class="btn btn-primary" onclick="osceAnswer(-1)">${icon('arrow')}</button></div>
+      </div>
+    </div>`,'ace');
+}
+function osceAnswer(i){
+  const o=S.osce, turn=OSCE.turns[o.turn];
+  let chosen, said;
+  if(i===-1){
+    const v=($('#osce-free').value||'').trim();
+    if(!v) return;
+    said=v;
+    chosen=turn.opts.find(x=>x.score==='good')||turn.opts[0];
+    chosen={...chosen,note:'Free-text response. In production Ace would assess what you actually said against the rubric. '+chosen.note};
+  } else { chosen=turn.opts[i]; said=chosen.t; }
+  o.log.push({me:true,t:said});
+  o.log.push({me:false,t:chosen.reply});
+  o.scores.push({score:chosen.score,note:chosen.note,said});
+  o.turn++;
+  if(o.turn>=OSCE.turns.length) o.done=true;
+  render();
+  setTimeout(()=>{const s=$('#sim'); if(s) s.scrollTop=s.scrollHeight;},60);
+}
+function viewOsceResult(){
+  const o=S.osce;
+  const pts=o.scores.reduce((a,s)=>a+(s.score==='best'?2:s.score==='good'?1:0),0);
+  const max=o.scores.length*2;
+  const pct=Math.round(pts/max*100);
+  const band=pct>=80?['Strong','pill-success']:pct>=50?['Developing','pill-warn']:['Needs work','pill-danger'];
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="S.osce=null;render()">← Back</button>
+    <div class="glow-panel mb5">
+      <div class="row-between wrapf gap4">
+        <div><span class="pill" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff">Consultation complete</span>
+          <h2 style="font-size:28px;margin-top:12px">${OSCE.brief.title}</h2></div>
+        <div style="text-align:right"><div class="num" style="font-size:46px;font-weight:600;letter-spacing:-.03em">${pct}%</div>
+          <span class="pill ${band[1]}">${band[0]}</span></div>
+      </div>
+    </div>
+
+    <div class="ace mb4">
+      <div class="ace-head"><div class="row gap3"><span class="ace-orb"></span>
+        <div><div style="font-weight:600;font-size:15px">Ace — examiner feedback</div>
+        <div class="micro">Assessed against a consultation rubric</div></div></div></div>
+      <div class="ace-msg"><span class="ace-orb sm"></span><div class="ace-bubble" style="max-width:100%">
+        <p>${pct>=80
+          ? 'A genuinely good consultation. You gathered before you advised, which is the habit that separates a competent consultation from a recital of facts.'
+          : pct>=50
+          ? 'A reasonable consultation with a clear pattern to work on: you know the content, but you tended to explain before you had established what she actually believed.'
+          : 'The clinical content was largely there, but the consultation structure was not. Almost every mark lost came from telling rather than asking.'}</p>
+        <p>${o.scores.some(s=>s.score==='poor')
+          ? 'The specific moments to revisit are marked below. Look at what the patient said immediately before each one — the cue was usually in her words.'
+          : 'No significant missteps. To push further, work on the economy of your explanations; five minutes goes quickly.'}</p>
+      </div></div>
+    </div>
+
+    <div class="card mb4">
+      <h3 style="font-size:18px" class="mb4">Exchange by exchange</h3>
+      ${o.scores.map((s,i)=>`<div class="rubric-row">
+        <span class="pill ${s.score==='best'?'pill-success':s.score==='good'?'pill-warn':'pill-danger'}" style="flex:none">
+          ${s.score==='best'?'Best':s.score==='good'?'Acceptable':'Missed'}</span>
+        <div><p class="small" style="font-weight:500">${esc(s.said)}</p>
+        <p class="small muted mt2">${s.note}</p></div>
+      </div>`).join('')}
+    </div>
+
+    <div class="card mb4">
+      <h3 style="font-size:18px" class="mb4">Rubric</h3>
+      ${OSCE.rubric.map((r,i)=>{
+        const hit=i<o.scores.length?o.scores[i]&&o.scores[i].score!=='poor':pct>=50;
+        return `<div class="rubric-row">
+          <span style="color:${hit?'var(--success)':'var(--danger)'};flex:none">${hit?icon('check'):icon('x')}</span>
+          <div><p class="small" style="font-weight:500">${r[0]}</p><p class="micro mt1">${r[1]}</p></div></div>`;
+      }).join('')}
+    </div>
+
+    <div class="row gap3 wrapf">
+      <button class="btn btn-primary" onclick="startOsce()">Try again</button>
+      <button class="btn btn-secondary" onclick="S.osce=null;render()">Choose another scenario</button>
+      <button class="btn btn-ghost" onclick="go('ace')">Back to Ace</button>
+    </div>`,'ace');
+}
+
+/* ---------------- weekly insight ---------------- */
+function viewAceInsights(){
+  const fa=firstAttemptStats(), cats=categoryStats();
+  const ranked=Object.entries(cats).filter(([,c])=>c.seen>0).sort((a,b)=>a[1].pct-b[1].pct);
+  const conf={cw:0};
+  Object.values(S.firstAttempts).forEach(a=>{ if((a.confidence==='certain'||a.confidence==='fairly')&&!a.correct) conf.cw++; });
+  return appShell(`
+    <button class="btn btn-ghost btn-sm mb4" onclick="go('ace')">← Back to Ace</button>
+    <h1 style="font-size:30px">This week</h1>
+    <p class="muted mt2 mb5">A written read on your week, not another chart.</p>
+
+    ${fa.n===0?`<div class="empty"><h3>Nothing to report yet</h3>
+      <p class="muted mt3">Complete a session and Ace will write you a summary.</p>
+      <button class="btn btn-primary mt4" onclick="startSession()">Start a session</button></div>`
+    :`<div class="ace">
+      <div class="ace-head"><div class="row gap3"><span class="ace-orb"></span>
+        <div><div style="font-weight:600;font-size:15px">Ace</div><div class="micro">Written from your first-attempt data</div></div></div>
+        <span class="pill">${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</span></div>
+      <div class="ace-msg"><span class="ace-orb sm"></span><div class="ace-bubble" style="max-width:100%">
+        <p>You answered <b>${fa.n} question${fa.n===1?'':'s'}</b> this week at <b>${fa.pct}%</b> first-attempt accuracy.</p>
+        ${ranked.length?`<p>${ranked[0][1].name} is your weakest area at ${ranked[0][1].pct}%. ${ranked.length>1?`${ranked[ranked.length-1][1].name} is holding up well at ${ranked[ranked.length-1][1].pct}%.`:''}</p>`:''}
+        ${conf.cw?`<p><b>The thing worth your attention:</b> ${conf.cw} question${conf.cw>1?'s':''} you felt confident about ${conf.cw>1?'were':'was'} wrong. That gap between what you think you know and what you do know is the most useful signal in your data — and it is the one you cannot see without being asked for your confidence.</p>`
+          :`<p>Your confidence ratings tracked your actual performance closely this week, which suggests you have a realistic picture of what you know.</p>`}
+        <p><b>One thing for next week:</b> ${ranked.length?`a 15-question ${ranked[0][1].name} session early in the week, while you have the attention for it.`:'complete a session across three or more topics so I have something to work with.'}</p>
+      </div></div>
+      <div class="ace-chips">
+        <button class="ace-chip" onclick="go('ace_planner')">Build me a plan around this</button>
+        <button class="ace-chip" onclick="startSession(false,'${ranked.length?ranked[0][0]:''}')">Start that session now</button>
+        <button class="ace-chip" onclick="toast('Ace would compare this against your last four weeks.')">Compare with last month</button>
+      </div>
+    </div>`}
+
+    <div class="card mt5">
+      <h3 style="font-size:17px" class="mb3">Why a paragraph, not a dashboard</h3>
+      <p class="muted small measure">Students already have access to their numbers. What they usually cannot do is interpret them — decide which of six percentages actually deserves this week's attention. That interpretation is the thing worth automating.</p>
+    </div>`,'ace');
+}
+
+
+/* ==========================================================
+   WIRING — override Build-1 stubs with the vision layer
+   ========================================================== */
+
+/* 1. Replace the reserved AI slot in the explanation with the live panel */
+const _explanationHTML = explanationHTML;
+explanationHTML = function(q){
+  let html=_explanationHTML(q);
+  const stub=html.substring(html.indexOf('<section style="border:1px dashed'), html.indexOf('</section>', html.indexOf('<section style="border:1px dashed'))+10);
+  const live = S.ace.open
+    ? `<section style="padding-top:var(--s5)">${acePanel(q)}</section>`
+    : `<section style="padding-top:var(--s5)">
+        <div class="ace-cta">
+          <div class="row gap3" style="flex:1;min-width:230px"><span class="ace-orb"></span>
+            <div><div style="font-weight:600;font-size:15px">Not fully convinced?</div>
+            <div class="micro">Ask Ace to break this down, challenge it, or test you on it.</div></div></div>
+          <button class="btn btn-primary" onclick="openAceFor(QUESTIONS.find(x=>x.id==='${q.id}'))">Ask Ace</button>
+        </div></section>`;
+  return html.replace(stub, live);
+};
+
+/* 2. Add Ace to the app navigation */
+const _appShell = appShell;
+appShell = function(inner,current){
+  let html=_appShell(inner,current);
+  const desk=`<button ${current==='ace'?'aria-current="page"':''} onclick="go('ace')" style="display:inline-flex;align-items:center;gap:7px">
+    <span class="ace-orb" style="width:17px;height:17px"></span>Ace</button>`;
+  html=html.replace('<button  onclick="go(\'progress\')">Progress</button>', desk+'<button  onclick="go(\'progress\')">Progress</button>');
+  html=html.replace('<button aria-current="page" onclick="go(\'progress\')">Progress</button>', desk+'<button aria-current="page" onclick="go(\'progress\')">Progress</button>');
+  return html;
+};
+
+/* 3. Dashboard — insert the Ace insight card */
+const _viewDashboard = viewDashboard;
+viewDashboard = function(){
+  let html=_viewDashboard();
+  const fa=firstAttemptStats();
+  let cw=0; Object.values(S.firstAttempts).forEach(a=>{ if((a.confidence==='certain'||a.confidence==='fairly')&&!a.correct) cw++; });
+  const cats=categoryStats();
+  const weakest=Object.entries(cats).filter(([,c])=>c.seen>0).sort((a,b)=>a[1].pct-b[1].pct)[0];
+  const card=`<div class="ace mb4" style="margin-top:0">
+    <div class="ace-head"><div class="row gap3"><span class="ace-orb"></span>
+      <div><div style="font-weight:600;font-size:15px">Ace</div><div class="micro">Your week, read back to you</div></div></div>
+      <button class="btn btn-ghost btn-sm" onclick="go('ace')">Open Ace</button></div>
+    <div class="ace-msg"><span class="ace-orb sm"></span><div class="ace-bubble" style="max-width:100%">
+      ${fa.n===0
+        ? `<p>We haven't met properly yet. Complete a session and I'll start telling you what your data actually means — not just what it says.</p>`
+        : cw
+        ? `<p>Something worth looking at: <b>${cw} question${cw>1?'s':''}</b> you were confident about turned out to be wrong${weakest?`, mostly in ${weakest[1].name}`:''}. That is the gap between what you think you know and what you do — and it is the fastest thing to fix.</p>`
+        : `<p>You're at <b>${fa.pct}%</b> first-attempt accuracy${weakest?`, with ${weakest[1].name} the weakest at ${weakest[1].pct}%`:''}. Your confidence ratings are tracking reality closely, which is a good sign.</p>`}
+    </div></div>
+    <div class="ace-chips" style="margin-bottom:0">
+      <button class="ace-chip" onclick="go('ace_planner')">Plan my week</button>
+      <button class="ace-chip" onclick="go('ace_insights')">Explain my data</button>
+      <button class="ace-chip" onclick="go('ace_osce')">Practise a consultation</button>
+    </div>
+  </div>`;
+  return html.replace('<div class="card mb4" style="border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)">',
+                      card+'<div class="card mb4" style="border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)">');
+};
+
+/* 4. Marketing homepage — restore and expand the AI section */
+const _viewHome = viewHome;
+viewHome = function(){
+  let html=_viewHome();
+  const aiSection=`
+  <section class="sec" id="ace"><div class="wrap">
+    <div class="glow-panel">
+      <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:var(--s8);align-items:center" class="split">
+        <div>
+          <div class="row gap3 mb4"><span class="ace-orb" style="width:40px;height:40px"></span>
+            <span class="pill" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff">Meet Ace</span></div>
+          <h2 style="font-size:clamp(28px,3.4vw,42px)">A tutor that has read every explanation, and remembers every answer you gave.</h2>
+          <p style="color:#C7D2FE;font-size:18px;line-height:1.65;margin-top:var(--s4);max-width:520px">
+            Ace sits beside every question. Ask it to explain something differently, challenge the answer, or test you on it — and it answers from AcePharm's reviewed content, citing where each point came from.</p>
+          <div class="row gap3 mt6 wrapf">
+            <button class="btn btn-lg" style="background:#fff;color:var(--indigo-deep)" onclick="startSession(true)">See Ace on a real question</button>
+            <button class="btn btn-lg" style="background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.3)" onclick="go('acePage')">How Ace works</button>
+          </div>
+        </div>
+        <div class="stack gap3">
+          ${[['Explain it differently','Not every explanation lands the first time. Ace will try another angle, as many times as you need.'],
+             ['Challenge the answer','Ask why option B is wrong and get a real argument, not a restatement.'],
+             ['Plan the week','Ace turns your weak topics and your exam date into a schedule you might actually follow.'],
+             ['Rehearse a consultation','Ace plays the patient. You counsel. It marks you against a rubric afterwards.']]
+            .map(([h,b])=>`<div class="glow-card"><div style="font-weight:600;font-size:15.5px">${h}</div>
+              <p style="color:#C7D2FE;font-size:14px;margin-top:5px;line-height:1.55">${b}</p></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap">
+    <div class="tc" style="max-width:640px;margin:0 auto">
+      <div class="eyebrow mb3">Where this goes</div>
+      <h2>Beyond the question bank.</h2>
+      <p class="lede mt4">The degree is the entry point. The same student progresses through foundation training, registration and into prescribing — and each stage needs something a question bank cannot do on its own.</p>
+    </div>
+    <div class="grid g3 mt6">
+      ${[['Consultation and OSCE practice','Simulated patients you can counsel, assessed against real consultation rubrics.','Building'],
+         ['Prescribing simulation','Work through a clinical decision with the consequences of each choice made visible.','Planned'],
+         ['Foundation and registration','The same platform, carrying your history forward into the training year and beyond.','Planned'],
+         ['Calculation coaching','Show your working and get told which line broke, not just that the answer was wrong.','Building'],
+         ['Voice revision','Answer questions out loud on the walk to placement.','Exploring'],
+         ['University partnerships','Cohort-level insight for schools of pharmacy, without exposing individual students.','Exploring']]
+        .map(([h,b,tag])=>`<div class="card">
+          <div class="row-between mb3"><h4 style="font-size:16px">${h}</h4>
+          <span class="pill ${tag==='Building'?'pill-teal':''}">${tag}</span></div>
+          <p class="small muted">${b}</p></div>`).join('')}
+    </div>
+  </div></section>`;
+  return html.replace('<section class="sec"><div class="wrap">\n    <h2 class="mb5">One platform. A clearer way to revise.</h2>',
+    aiSection+'<section class="sec"><div class="wrap">\n    <h2 class="mb5">One platform. A clearer way to revise.</h2>');
+};
+
+/* 5. Ace marketing page */
+function viewAcePage(){
+  return `${protoBar()}${mktNav()}
+  <div class="sec"><div class="wrap">
+    <div class="tc" style="max-width:720px;margin:0 auto">
+      <span class="ace-orb" style="width:54px;height:54px;margin:0 auto var(--s4)"></span>
+      <h1 class="display" style="font-size:clamp(34px,4.4vw,50px)">Ace</h1>
+      <p class="lede mt4">A tutor that knows the content, knows your history, and can only answer from material a pharmacist has signed off.</p>
+    </div>
+
+    <div class="grid g3 mt6">
+      ${[['Grounded in reviewed content','Ace answers from AcePharm\u2019s question bank, explanations, topic notes and reference library. It is not a general chatbot pointed at medicines.'],
+         ['Cites its sources','Every response names where it came from, so you can verify it the way you would verify any revision resource.'],
+         ['Knows what you have answered','It can see which questions you got wrong, what you said you were confident about, and where the gap between the two sits.'],
+         ['Refuses clinical advice','Ace is a study tool. Ask it about a real patient and it will tell you to check the BNF and current guidance.'],
+         ['Feeds the editorial queue','Report an Ace response and it routes to the same review process as a question report.'],
+         ['Never marks its own homework','Questions Ace drafts are labelled as AI-drafted and reviewed by a pharmacist before publication.']]
+        .map(([h,b])=>`<div class="card"><h4 style="font-size:16.5px">${h}</h4><p class="small muted mt3">${b}</p></div>`).join('')}
+    </div>
+
+    <div class="panel mt6">
+      <h2 style="font-size:26px" class="mb5">What you can ask it</h2>
+      <div class="grid g2" style="gap:var(--s4)">
+        ${[['"Explain this more simply"','It tries a different angle rather than repeating the explanation louder.'],
+           ['"Why not option B?"','A real argument for why the distractor fails, and when it would have been right.'],
+           ['"Show me a similar case"','A variation on the same concept, with the one detail changed that flips the answer.'],
+           ['"Test me on this"','Three quick recall checks with the answers held back.'],
+           ['"How would this be examined?"','The disguises this concept usually appears in.'],
+           ['Highlight any text','Select a phrase in a question and ask Ace about that specific thing.']]
+          .map(([q,a])=>`<div><div style="font-weight:600;color:var(--indigo-deep)">${q}</div><p class="small muted mt2">${a}</p></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="tc mt6">
+      <button class="btn btn-primary btn-lg" onclick="startSession(true)">Try Ace on a real question</button>
+      <p class="micro mt3">No account needed.</p>
+    </div>
+  </div></div>`;
+}
+
+/* 6. Router additions */
+const _render = render;
+render = function(){
+  const extra={
+    ace:viewAce, ace_planner:viewAcePlanner, ace_generate:viewAceGenerate,
+    ace_flash:viewAceFlash, ace_calc:viewAceCalc, ace_osce:viewAceOsce,
+    ace_insights:viewAceInsights, acePage:viewAcePage
+  };
+  if(extra[S.route]){ $('#root').innerHTML=extra[S.route](); return; }
+  _render();
+};
+
+/* 7. Reset should clear the AI state too */
+const _resetAll = resetAll;
+resetAll = function(){ S.ace={open:false,thread:[],busy:false,context:null,selection:''};
+  S.flashcards=[]; S.plan=null; S.osce=null; _resetAll(); };
+
+/* 8. New question clears the Ace thread so it stays contextual */
+const _nextQuestion = nextQuestion;
+nextQuestion = function(){ S.ace.thread=[]; S.ace.open=false; _nextQuestion(); };
+
+/* 9. Nav link to the Ace page */
+const _mktNav = mktNav;
+mktNav = function(){
+  return _mktNav().replace('<a href="#pricing">Pricing</a>','<a onclick="go(\'acePage\')" style="cursor:pointer">Ace</a><a href="#pricing">Pricing</a>');
+};
+
+render();
+
+</script>
+</body>
+</html>

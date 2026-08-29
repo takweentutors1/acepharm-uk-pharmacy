@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buttons — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.button-demo { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: 11px 20px; border-radius: var(--radius-button); border: 1px solid transparent; font-size: 15px; font-weight: 500; cursor: pointer; margin: 0.5rem; }
+.button-demo:active { transform: translateY(1px); }
+.btn-primary { background: var(--color-indigo); color: white; }
+.btn-primary:hover { background: var(--color-indigo-deep); }
+.btn-secondary { background: var(--color-surface); color: var(--color-text-primary); border-color: var(--color-border); }
+.btn-secondary:hover { border-color: var(--color-slate); }
+.btn-ghost { background: transparent; color: var(--color-text-secondary); padding: 10px 12px; }
+.btn-ghost:hover { color: var(--color-text-primary); }
+.btn-danger { background: var(--color-danger); color: white; }
+.demo-row { margin-bottom: 2rem; }
+.demo-label { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Components" viewport="700x240" subtitle="Primary, secondary, ghost, danger button variants" name="Buttons" -->
+<h1>Button System</h1>
+
+<div class="demo-row">
+  <div class="demo-label">Primary (Default)</div>
+  <button class="button-demo btn-primary">Start revising free</button>
+  <button class="button-demo btn-primary" disabled>Disabled</button>
+</div>
+
+<div class="demo-row">
+  <div class="demo-label">Secondary</div>
+  <button class="button-demo btn-secondary">Explore the platform</button>
+  <button class="button-demo btn-secondary" disabled>Disabled</button>
+</div>
+
+<div class="demo-row">
+  <div class="demo-label">Ghost</div>
+  <button class="button-demo btn-ghost">View all FAQs</button>
+  <button class="button-demo btn-ghost" disabled>Disabled</button>
+</div>
+
+<div class="demo-row">
+  <div class="demo-label">Danger</div>
+  <button class="button-demo btn-danger">Delete account</button>
+  <button class="button-demo btn-danger" disabled>Disabled</button>
+</div>
+</body>
+</html>

@@ -12,7 +12,6 @@ import {
   questionFirstAttempts, 
   questionAttempts, 
   subscriptions,
-  auditLogs
 } from '../db/schema';
 
 export interface BackupResult {

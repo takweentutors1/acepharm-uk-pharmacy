@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AcePharm Design System</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+body { background: var(--color-canvas); padding: 3rem 2rem; }
+.container { max-width: 1140px; margin: 0 auto; }
+.hero { text-align: center; margin-bottom: 4rem; }
+.hero h1 { margin-bottom: 1rem; }
+.hero p { font-size: 18px; color: var(--color-text-secondary); margin-bottom: 2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+.card-link { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 2rem; text-decoration: none; color: inherit; transition: all 0.15s; }
+.card-link:hover { border-color: var(--color-indigo); transform: translateY(-2px); }
+.card-link h3 { margin-bottom: 0.5rem; color: var(--color-indigo); }
+.card-link p { font-size: 14px; color: var(--color-text-secondary); }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 1280 854" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="854" fill="#4F46E5"/>
+  <rect x="960" width="320" height="854" fill="#0F766E"/>
+  <text x="640" y="427" font-family="Geist, sans-serif" font-size="120" font-weight="600" text-anchor="middle" dominant-baseline="middle" fill="white">AcePharm</text>
+</svg>
+</template>
+
+<div class="container">
+  <div class="hero">
+    <h1 class="display">AcePharm Design System</h1>
+    <p>A complete visual and component system for UK pharmacy education.</p>
+    <p style="color: var(--color-text-secondary); font-size: 15px;">Created by pharmacists. Built for pharmacy students.</p>
+  </div>
+
+  <div class="grid">
+    <a href="readme.md" class="card-link">
+      <h3>📖 Documentation</h3>
+      <p>Complete design guide, token specs, component inventory, and accessibility rules.</p>
+    </a>
+    <a href="guidelines/colors.html" class="card-link">
+      <h3>🎨 Color System</h3>
+      <p>Primary, semantic, and neutral palette with full hex values and usage rules.</p>
+    </a>
+    <a href="guidelines/typography.html" class="card-link">
+      <h3>✍️ Typography</h3>
+      <p>Responsive font scale from display to micro, with weights and line heights.</p>
+    </a>
+    <a href="guidelines/spacing.html" class="card-link">
+      <h3>📏 Spacing</h3>
+      <p>8px-based scale with semantic tokens for padding, margin, and gaps.</p>
+    </a>
+    <a href="guidelines/buttons.html" class="card-link">
+      <h3>🔘 Buttons</h3>
+      <p>Primary, secondary, ghost, and danger variants across all sizes and states.</p>
+    </a>
+    <a href="guidelines/question-design.html" class="card-link">
+      <h3>❓ Question Design</h3>
+      <p>Multiple-choice option buttons with feedback states and confidence selectors.</p>
+    </a>
+    <a href="guidelines/ace-ui.html" class="card-link">
+      <h3>🤖 Ace UI</h3>
+      <p>Ask Ace panel, thread display, quick prompts, and citation blocks.</p>
+    </a>
+    <a href="SKILL.md" class="card-link">
+      <h3>⚙️ Skill Prompt</h3>
+      <p>Ready-to-use design system skill for Claude, with usage guidelines.</p>
+    </a>
+  </div>
+
+  <div style="background: white; border: 1px solid var(--color-border); border-radius: var(--radius-panel); padding: 3rem; text-align: center;">
+    <h2 style="margin-bottom: 1rem;">Quick Start</h2>
+    <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">Begin with the <strong>readme.md</strong> for a complete overview of the brand, then explore the specimen cards above. All components are React-based and use CSS custom properties from <strong>styles.css</strong>.</p>
+    <p style="font-size: 14px; color: var(--color-text-secondary);">This design system is the single source of truth for AcePharm's visual identity across the learner app, admin portal, and marketing site.</p>
+  </div>
+</div>
+</body>
+</html>

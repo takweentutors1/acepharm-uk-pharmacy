@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colors — AcePharm</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body { padding: 2rem; background: #f8fafc; }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+.swatch { border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); }
+.swatch-color { height: 120px; }
+.swatch-label { padding: 1rem; background: white; font-size: 13px; font-weight: 600; }
+.swatch-hex { color: var(--color-text-secondary); font-size: 12px; font-family: var(--font-mono); margin-top: 0.25rem; }
+</style>
+</head>
+<body>
+<!-- @dsCard group="Colors" viewport="700x200" subtitle="Primary palette and semantic colors" name="Primary Colors" -->
+<h2>Primary Palette</h2>
+<div class="swatch-grid">
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-indigo);"></div><div class="swatch-label">Indigo<div class="swatch-hex">#4F46E5</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-indigo-deep);"></div><div class="swatch-label">Indigo Deep<div class="swatch-hex">#3730A3</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-indigo-wash);"></div><div class="swatch-label">Indigo Wash<div class="swatch-hex">#F1F2FC</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-teal);"></div><div class="swatch-label">Teal<div class="swatch-hex">#0F766E</div></div></div>
+</div>
+
+<h2>Semantic Colors</h2>
+<div class="swatch-grid">
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-success);"></div><div class="swatch-label">Success<div class="swatch-hex">#15803D</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-danger);"></div><div class="swatch-label">Danger<div class="swatch-hex">#B91C1C</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-warning);"></div><div class="swatch-label">Warning<div class="swatch-hex">#B45309</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-info);"></div><div class="swatch-label">Info<div class="swatch-hex">#0369A1</div></div></div>
+</div>
+
+<h2>Neutral Palette</h2>
+<div class="swatch-grid">
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-ink);"></div><div class="swatch-label">Ink<div class="swatch-hex">#111827</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-slate);"></div><div class="swatch-label">Slate<div class="swatch-hex">#64748B</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-canvas);"></div><div class="swatch-label">Canvas<div class="swatch-hex">#F8FAFC</div></div></div>
+  <div class="swatch"><div class="swatch-color" style="background: var(--color-surface); border: 1px solid var(--color-border);"></div><div class="swatch-label">Surface<div class="swatch-hex">#FFFFFF</div></div></div>
+</div>
+</body>
+</html>

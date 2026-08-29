@@ -1,0 +1,132 @@
+/* ============================================================
+   ACEPHARM DESIGN SYSTEM — TYPOGRAPHY TOKENS
+   Font families, sizes, weights, line heights
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ========== FONT FAMILIES ========== */
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  --font-serif: system-ui, -apple-system, sans-serif; /* fallback if serif needed */
+
+  /* ========== TYPE SCALE (responsive using clamp) ========== */
+  /* Display: 36–53px */
+  --size-display: clamp(36px, 4.6vw, 53px);
+  --size-h1: clamp(32px, 4vw, 48px);
+  --size-h2: clamp(27px, 3.2vw, 38px);
+  --size-h3: clamp(20px, 2vw, 26px);
+  --size-h4: 19px;
+  --size-body-lg: 18px;
+  --size-body: 16px;
+  --size-small: 14px;
+  --size-micro: 13px;
+  --size-eyebrow: 13px;
+
+  /* ========== FONT WEIGHTS ========== */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ========== LINE HEIGHTS ========== */
+  --lh-tight: 1.15; /* @kind other */
+  --lh-normal: 1.5; /* @kind other */
+  --lh-relaxed: 1.6; /* @kind other */
+  --lh-loose: 1.72; /* @kind other */
+
+  /* ========== LETTER SPACING ========== */
+  --ls-tight: -0.035em;
+  --ls-normal: -0.02em;
+  --ls-wide: 0.09em;
+  --ls-extra-wide: 0.12em;
+}
+
+/* ========== TYPE DEFINITIONS ========== */
+.display {
+  font-family: var(--font-sans);
+  font-size: var(--size-display);
+  font-weight: var(--weight-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+h1 {
+  font-family: var(--font-sans);
+  font-size: var(--size-h1);
+  font-weight: var(--weight-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-normal);
+}
+
+h2 {
+  font-family: var(--font-sans);
+  font-size: var(--size-h2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-normal);
+}
+
+h3 {
+  font-family: var(--font-sans);
+  font-size: var(--size-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-normal);
+}
+
+h4 {
+  font-family: var(--font-sans);
+  font-size: var(--size-h4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-normal);
+}
+
+.body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--size-body-lg);
+  line-height: var(--lh-loose);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  line-height: var(--lh-normal);
+}
+
+.lede {
+  font-family: var(--font-sans);
+  font-size: var(--size-body-lg);
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+
+.small {
+  font-family: var(--font-sans);
+  font-size: var(--size-small);
+}
+
+.micro {
+  font-family: var(--font-sans);
+  font-size: var(--size-micro);
+  color: var(--color-text-secondary);
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--size-eyebrow);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--color-action-primary);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ========== MODIFIERS ========== */
+.measure { max-width: 68ch; }
+.muted { color: var(--color-text-secondary); }
