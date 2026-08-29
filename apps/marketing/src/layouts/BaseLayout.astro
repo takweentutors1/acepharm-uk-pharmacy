@@ -1,0 +1,87 @@
+---
+import '@acepharm/design-tokens/tokens.css';
+import { CookieConsentBanner } from '@acepharm/ui';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'AcePharm — Created by pharmacists. Built for pharmacy students.',
+  description = 'A revision platform designed exclusively for UK MPharm students, foundation trainees, and GPhC candidates.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-canvas text-ink font-sans antialiased min-h-screen flex flex-col">
+    <header class="border-b border-border bg-surface sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <span class="text-2xl font-bold tracking-tight text-indigo">AcePharm</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate">
+          <a href="/features" class="hover:text-ink transition-colors">Features</a>
+          <a href="/question-bank" class="hover:text-ink transition-colors">Question Bank</a>
+          <a href="/ace" class="hover:text-ink transition-colors">Ace AI</a>
+          <a href="/pricing" class="hover:text-ink transition-colors">Pricing</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <a
+            href="https://app.acepharm.co.uk/login"
+            class="text-sm font-medium text-slate hover:text-ink px-3 py-2"
+          >
+            Log in
+          </a>
+          <a
+            href="https://app.acepharm.co.uk/register"
+            class="inline-flex items-center justify-center rounded-btn bg-indigo px-4 py-2 text-sm font-medium text-surface hover:bg-indigo-deep transition-colors shadow-sm"
+          >
+            Start free
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-border bg-surface py-12 mt-16 text-sm text-slate">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between gap-6">
+        <div>
+          <p class="font-bold text-ink text-base">AcePharm</p>
+          <p class="mt-1 text-xs">Created by pharmacists. Built for pharmacy students.</p>
+        </div>
+        <div class="flex gap-8 text-xs">
+          <a href="/about" class="hover:text-ink">About</a>
+          <a href="/editorial-standards" class="hover:text-ink">Editorial Standards</a>
+          <a href="/privacy" class="hover:text-ink">Privacy</a>
+          <a href="/terms" class="hover:text-ink">Terms</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      import { tracker } from '@acepharm/ui';
+      // Initialize tracker on page load
+      tracker.init({
+        cloudflareWebAnalyticsToken: import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN,
+      });
+    </script>
+    <CookieConsentBanner client:idle />
+  </body>
+</html>
