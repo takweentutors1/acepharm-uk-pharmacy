@@ -14,13 +14,32 @@ export type Bindings = {
   ZEN_API_KEY?: string;
 };
 
+import { rateLimiter } from './middleware/rate-limit';
+
 const app = new Hono<AuthContext>();
+
+// Global Security & CSP Headers
+app.use('*', async (c, next) => {
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  c.header(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://*.firebaseapp.com; connect-src 'self' https://*.workers.dev https://*.pages.dev https://api.acepharm.co.uk https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://opencode.ai; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
+  );
+  await next();
+});
 
 app.use('*', cors({
   origin: ['https://acepharm.co.uk', 'https://app.acepharm.co.uk', 'http://localhost:3000', 'http://localhost:3001'],
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
+
+// Apply Rate Limiting to sensitive Auth & User endpoints (60 req/min)
+app.use('/api/v1/auth/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_auth' }));
+app.use('/api/v1/user/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_user' }));
 
 // Public health check
 app.get('/health', (c) => {
