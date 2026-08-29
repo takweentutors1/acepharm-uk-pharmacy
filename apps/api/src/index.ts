@@ -259,6 +259,17 @@ app.get('/api/v1/ace/weekly-insight', async (c) => {
   });
 });
 
+import { executeD1BackupToR2 } from './lib/backup-service';
+
+// Admin Manual Backup Trigger & Test Endpoint
+admin.post('/backup/trigger', requireRole(['super_admin', 'finance_admin']), async (c) => {
+  const result = await executeD1BackupToR2(c.env.DB, c.env.ASSETS);
+  return c.json({
+    status: 'success',
+    ...result,
+  });
+});
+
 export { app };
 
 export default {
@@ -266,10 +277,30 @@ export default {
   async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
     ctx.waitUntil(
       (async () => {
-        const db = drizzle(env.DB);
-        const zenApiKey = env.ZEN_API_KEY;
-        const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
-        console.log(`Weekly insight cron completed: processed ${result.processed}, cached ${result.cached}`);
+        const cron = event.cron;
+        console.log(`[Scheduled Cron Triggered]: ${cron}`);
+
+        // 1. Daily 03:00 UTC D1 Automated Backup to R2
+        if (cron === '0 3 * * *' || cron.includes('3')) {
+          try {
+            const backupResult = await executeD1BackupToR2(env.DB, env.ASSETS);
+            console.log(`[Daily D1 Backup Success]: Saved snapshot ${backupResult.backupKey} (${backupResult.sizeBytes} bytes)`);
+          } catch (err) {
+            console.error('[Daily D1 Backup Error]:', err);
+          }
+        }
+
+        // 2. Weekly 04:00 UTC Monday Insight Generator
+        if (cron === '0 4 * * 1' || cron.includes('4')) {
+          try {
+            const db = drizzle(env.DB);
+            const zenApiKey = env.ZEN_API_KEY;
+            const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
+            console.log(`[Weekly Insight Cron Success]: processed ${result.processed}, cached ${result.cached}`);
+          } catch (err) {
+            console.error('[Weekly Insight Cron Error]:', err);
+          }
+        }
       })()
     );
   },

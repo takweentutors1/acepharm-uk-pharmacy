@@ -33,9 +33,11 @@ id = "173f61310b0f45fb85541bc2fc0cf776"
 binding = "ASSETS"
 bucket_name = "acepharm-assets"
 
-# Cron Triggers (Weekly Insight Generator - runs every Monday at 04:00 UTC)
+# Cron Triggers:
+# 1. Daily D1 automated backup to R2 (runs daily at 03:00 UTC)
+# 2. Weekly Insight Generator (runs every Monday at 04:00 UTC)
 [triggers]
-crons = ["0 4 * * 1"]
+crons = ["0 3 * * *", "0 4 * * 1"]
 
 # ==========================================
 # Staging Environment Configuration
@@ -44,7 +46,7 @@ crons = ["0 4 * * 1"]
 name = "acepharm-api-staging"
 
 [env.staging.triggers]
-crons = ["0 4 * * 1"]
+crons = ["0 3 * * *", "0 4 * * 1"]
 
 [[env.staging.d1_databases]]
 binding = "DB"
