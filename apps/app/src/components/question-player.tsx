@@ -5,6 +5,7 @@ import { Button, Badge, Card, MarkdownRenderer } from '@acepharm/ui';
 import { ReportQuestionModal } from '@/components/report-modal';
 import { AskAcePanel } from '@/components/ask-ace-panel';
 import { FloatingHighlightMenu } from '@/components/floating-highlight-menu';
+import { FreeTierUpgradeModal } from '@/components/free-tier-upgrade-modal';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -218,6 +219,7 @@ export function QuestionPlayer({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSubmitted, selectedOptionId, question.options, confidence, onNext]);
 
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [highlightedText, setHighlightedText] = useState<string>('');
   const playerRef = React.useRef<HTMLDivElement>(null);
 
@@ -225,6 +227,17 @@ export function QuestionPlayer({
     if (!selectedOptionId || isSubmitted) return;
     // OPTIMISTIC-UI SUBMISSION: Immediate feedback rendering (<300ms perceived latency)
     setIsSubmitted(true);
+
+    // Free-tier milestone check: trigger upgrade modal AFTER question-30 explanation finishes rendering
+    const currentAnsweredCount = Number(localStorage.getItem('acepharm_free_tier_count') || '0') + 1;
+    localStorage.setItem('acepharm_free_tier_count', currentAnsweredCount.toString());
+
+    if (currentAnsweredCount === 30 || currentQuestionIndex === 30) {
+      // Soft delay to guarantee the student has read and rendered the complete explanation first
+      setTimeout(() => {
+        setShowUpgradeModal(true);
+      }, 1200);
+    }
   };
 
   const selectedOption = question.options.find((o) => o.id === selectedOptionId);
@@ -638,6 +651,13 @@ export function QuestionPlayer({
         publicId={question.publicId}
         questionVersion={question.version}
         sessionId={sessionId}
+      />
+
+      {/* Free Tier Upgrade Soft Modal (Rendered ONLY after Question 30 Explanation) */}
+      <FreeTierUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        questionsAnswered={30}
       />
     </div>
   );
