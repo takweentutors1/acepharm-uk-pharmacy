@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button, Card } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="Features — AcePharm"
+  description="Everything you need for more focused pharmacy revision. Practise questions, understand difficult topics, follow your progress and receive a clear recommendation for what to do next."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Everything you need for more focused pharmacy revision.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        Practise questions, understand difficult topics, follow your progress and receive a clear recommendation for what to do next.
+      </p>
+      <div class="mt-8">
+        <a href="https://app.acepharm.co.uk/register">
+          <Button size="lg" variant="primary">Start revising free</Button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-5xl mx-auto px-4 space-y-16">
+    {/* Feature 1 */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+      <div class="space-y-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Question Experience</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-ink">Questions designed to teach, not merely test.</h2>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          Single best answer scenarios and clinical calculations written to match modern GPhC assessment frameworks. Rate your confidence before submitting to highlight uncalibrated knowledge.
+        </p>
+      </div>
+      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm space-y-3">
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Pre-submission confidence rating (1–3)</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Border & tint option selection (no premature spoilers)</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Keyboard shortcuts (A–E, 1–3, Enter, Space)</div>
+      </Card>
+    </div>
+
+    {/* Feature 2 */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm space-y-3 order-2 md:order-1">
+        <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-medium">Stage 1: Concise Takeaway Principle</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Stage 2: Comprehensive Clinical Rationale</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Stage 3: Distractor Analysis (Every Option Explained)</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Stage 4: Verified BNF & NICE Guideline Links</div>
+      </Card>
+      <div class="space-y-4 order-1 md:order-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Explanation Quality</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-ink">Understand the answer properly.</h2>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          No lazy one-line feedback. Every question features a structured 4-stage explanation with rationales for all incorrect options, so you know exactly why the right answer is right and the wrong answers are wrong.
+        </p>
+      </div>
+    </div>
+
+    {/* Feature 3 */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+      <div class="space-y-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Analytics & Calibration</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-ink">See more than a percentage.</h2>
+        <p class="text-sm text-ink-muted leading-relaxed">
+          AcePharm isolates first-attempt accuracy from repeat practice to prevent false confidence. View your confidence-accuracy calibration matrix and discover high-confidence blind spots.
+        </p>
+      </div>
+      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm space-y-3">
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">First-attempt vs practice accuracy isolation</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Confidence-calibration matrix (confident & correct vs dangerous blindspots)</div>
+        <div class="p-3 bg-surface-raised rounded-xl text-xs text-ink-muted font-medium">Adaptive recommendations based on lowest first-attempt accuracy</div>
+      </Card>
+    </div>
+  </section>
+
+  <section class="py-20 bg-slate-50 border-t border-border-subtle text-center px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-ink">Build your first session</h2>
+      <p class="mt-4 text-sm text-ink-muted">Choose your topics, set your mode and start revising with complete clarity.</p>
+      <div class="mt-8">
+        <a href="https://app.acepharm.co.uk/session/new">
+          <Button size="lg" variant="primary">Build your first session</Button>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

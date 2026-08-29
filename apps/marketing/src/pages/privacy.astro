@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy Policy — AcePharm"
+  description="Your data, explained clearly. This policy explains what AcePharm collects, why it is used, how long it is retained and the choices available to you."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        Privacy Policy
+      </h1>
+      <p class="mt-4 text-xl text-primary font-semibold">Your data, explained clearly.</p>
+      <p class="mt-2 text-sm text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        This policy explains what AcePharm collects, why it is used, how long it is retained and the choices available to you.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 max-w-3xl mx-auto px-4 space-y-8 text-sm text-ink leading-relaxed">
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">1. Data We Collect</h2>
+      <p class="text-ink-muted">We collect account information (name, email address, year of study), learning activity (question attempts, confidence ratings, timestamps, bookmarks, notes), and technical telemetry required to provide service security and prevent rate-limit abuse.</p>
+    </div>
+
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">2. How We Use Your Data</h2>
+      <p class="text-ink-muted">Your question attempts are used to compute your personalized calibration metrics, identify weak clinical areas, and recommend revision sessions. We never sell your personal data to third parties.</p>
+    </div>
+
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">3. AI Conversations & Telemetry</h2>
+      <p class="text-ink-muted">Inquiries sent to Ace are processed to generate instructional explanations grounded in our curriculum. We log token volume, latency, and retrieved references to maintain safety and audit instructional quality.</p>
+    </div>
+  </section>
+</BaseLayout>

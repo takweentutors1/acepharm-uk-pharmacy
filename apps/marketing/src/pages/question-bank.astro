@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button, Card } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="Question Bank — AcePharm"
+  description="A pharmacy question bank built around understanding. Every question should help you recognise an important principle, avoid a common error or make a safer clinical decision."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        A pharmacy question bank built around understanding.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        Every question should help you recognise an important principle, avoid a common error or make a safer clinical decision.
+      </p>
+      <div class="mt-8">
+        <a href="https://app.acepharm.co.uk/session/new">
+          <Button size="lg" variant="primary">Try a sample question</Button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-5xl mx-auto px-4 space-y-16">
+    {/* Pathways */}
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-6">Choose your pathway</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <Card className="p-5 bg-white border border-primary/40 rounded-2xl shadow-xs">
+          <span class="px-2 py-0.5 rounded-md bg-primary-100 text-primary-800 text-[11px] font-bold">Active</span>
+          <h3 class="font-bold text-ink text-base mt-2">MPharm revision</h3>
+          <p class="text-xs text-ink-muted mt-1">High-yield clinical topics, therapeutics, calculations and law for years 2 to 4.</p>
+        </Card>
+        <Card className="p-5 bg-surface-raised border border-border-subtle rounded-2xl opacity-75">
+          <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[11px] font-medium">Coming later</span>
+          <h3 class="font-bold text-ink text-base mt-2">Foundation training</h3>
+          <p class="text-xs text-ink-muted mt-1">Practice-based scenarios, calculations and clinical governance for trainees.</p>
+        </Card>
+        <Card className="p-5 bg-surface-raised border border-border-subtle rounded-2xl opacity-75">
+          <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[11px] font-medium">Coming later</span>
+          <h3 class="font-bold text-ink text-base mt-2">Registration Assessment</h3>
+          <p class="text-xs text-ink-muted mt-1">Simulated full-length Paper 1 and Paper 2 mock exam experiences.</p>
+        </Card>
+        <Card className="p-5 bg-surface-raised border border-border-subtle rounded-2xl opacity-75">
+          <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[11px] font-medium">Coming later</span>
+          <h3 class="font-bold text-ink text-base mt-2">Oriel preparation</h3>
+          <p class="text-xs text-ink-muted mt-1">Situational judgement tests and clinical prioritisation questions.</p>
+        </Card>
+        <Card className="p-5 bg-surface-raised border border-border-subtle rounded-2xl opacity-75">
+          <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[11px] font-medium">Coming later</span>
+          <h3 class="font-bold text-ink text-base mt-2">Independent Prescribing</h3>
+          <p class="text-xs text-ink-muted mt-1">Advanced therapeutics, differential diagnosis and prescribing safety.</p>
+        </Card>
+      </div>
+    </div>
+
+    {/* Modes */}
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-6">Choose your mode</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        {['Learn', 'Timed', 'Smart Mix', 'Weak Areas', 'Unseen Questions', 'Bookmarks', 'Incorrect Questions', 'Custom Session'].map((mode) => (
+          <div class="p-3.5 bg-white rounded-xl border border-border-subtle font-semibold text-ink shadow-xs text-center">
+            {mode}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Question types */}
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-6">Question types</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-4 bg-white rounded-xl border border-border-subtle">
+          <h3 class="font-bold text-ink text-sm">Single best answer</h3>
+          <p class="text-xs text-ink-muted mt-1">Realistic clinical vignettes with five plausible options and complete distractor rationales.</p>
+        </div>
+        <div class="p-4 bg-white rounded-xl border border-border-subtle">
+          <h3 class="font-bold text-ink text-sm">Numerical calculation</h3>
+          <p class="text-xs text-ink-muted mt-1">Infusion rates, dilutions, doses, molecular weights and pharmacokinetics with step-by-step diagnostic feedback.</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Quality statement */}
+    <div class="p-6 bg-primary-50/60 rounded-2xl border border-primary-200 text-center">
+      <p class="text-sm font-semibold text-primary-900">
+        Published questions pass clinical, educational and editorial review before becoming available to learners.
+      </p>
+      <p class="text-xs text-ink-subtle mt-2">
+        AcePharm is an independent educational platform. Practice content is designed for education and cannot guarantee a particular examination result.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

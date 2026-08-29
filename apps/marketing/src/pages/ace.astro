@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Button, Card } from '@acepharm/ui';
+---
+
+<BaseLayout
+  title="Ace — Your Clinical Revision Tutor"
+  description="A tutor that knows the content, knows your history, and can only answer from material a pharmacist has signed off."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <span class="px-3.5 py-1 rounded-full bg-primary-100/80 text-primary-800 text-xs font-semibold uppercase tracking-wider border border-primary-200">
+        Clinical AI Grounding
+      </span>
+      <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-ink mt-4">
+        Ace
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        A tutor that knows the content, knows your history, and can only answer from material a pharmacist has signed off.
+      </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <a href="https://app.acepharm.co.uk/session/new">
+          <Button size="lg" variant="primary">Try Ace on a real question</Button>
+        </a>
+      </div>
+      <p class="mt-3 text-xs text-ink-subtle">No account needed for the free sample.</p>
+    </div>
+  </section>
+
+  <section class="py-20 max-w-5xl mx-auto px-4 space-y-16">
+    {/* Six Principles */}
+    <div>
+      <h2 class="text-2xl font-bold text-ink mb-8 text-center">Six Core Principles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">1. Grounded strictly in reviewed content</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">Ace only answers from verified AcePharm subtopic notes, explanations and UK guidelines. It never invents clinical facts from general web data.</p>
+        </Card>
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">2. Always cites where points come from</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">Every response displays direct citations linking back to the verified database chunk or guideline paragraph used to answer.</p>
+        </Card>
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">3. Never gives patient-specific advice</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">Ace is built strictly for student education. Inquiries about live personal treatment or emergencies are immediately directed to the BNF and emergency services.</p>
+        </Card>
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">4. Thread-scoped and context-aware</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">Ace knows exactly which question, options and explanation you are currently viewing, allowing natural conversational follow-ups.</p>
+        </Card>
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">5. Highlight-to-Ask capability</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">Select any unfamiliar term, drug interaction or clinical phrase on mobile or desktop to immediately query Ace about that excerpt.</p>
+        </Card>
+        <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+          <h3 class="font-bold text-ink mb-2 text-sm">6. Refuses when information is missing</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">If retrieved content does not contain the answer, Ace explicitly declines and directs you to primary resources rather than hallucinating.</p>
+        </Card>
+      </div>
+    </div>
+
+    {/* What you can ask it */}
+    <div class="p-8 bg-surface-raised rounded-2xl border border-border-subtle">
+      <h2 class="text-xl font-bold text-ink mb-4">What you can ask Ace</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        <div class="p-3 bg-white rounded-xl border border-border-subtle font-medium">“Make this explanation simpler”</div>
+        <div class="p-3 bg-white rounded-xl border border-border-subtle font-medium">“Why is Option C wrong in this scenario?”</div>
+        <div class="p-3 bg-white rounded-xl border border-border-subtle font-medium">“Give me a similar GPhC exam practice scenario”</div>
+        <div class="p-3 bg-white rounded-xl border border-border-subtle font-medium">“Show me step-by-step working for this calculation”</div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

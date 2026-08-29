@@ -1,0 +1,42 @@
+:root {
+  /* Core palette */
+  --indigo: #4F46E5;
+  --indigo-deep: #3730A3;
+  --indigo-wash: #F1F2FC;
+  --ink: #111827;
+  --slate: #64748B;
+  --canvas: #F8FAFC;
+  --surface: #FFFFFF;
+  --border: #E2E8F0;
+
+  /* Supporting / Status */
+  --teal: #0F766E;
+  --success: #15803D;
+  --warning: #B45309;
+  --danger: #B91C1C;
+  --info: #0369A1;
+  --success-wash: #F0FDF4;
+  --danger-wash: #FEF2F2;
+  --warning-wash: #FFFBEB;
+
+  /* Border radius */
+  --r-btn: 11px;
+  --r-input: 10px;
+  --r-card: 15px;
+  --r-panel: 22px;
+
+  /* 8-point Spacing scale */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+  --s9: 96px;
+
+  /* Typography */
+  --sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+}

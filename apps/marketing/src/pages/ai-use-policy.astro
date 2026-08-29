@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="AI Use Policy — AcePharm"
+  description="How AcePharm uses AI. This policy explains what Ace can and cannot do, what content it draws on, what is logged, and how to report a response you believe is wrong."
+>
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
+        AI Use Policy
+      </h1>
+      <p class="mt-4 text-xl text-primary font-semibold">How AcePharm uses AI.</p>
+      <p class="mt-2 text-sm text-ink-muted max-w-2xl mx-auto leading-relaxed">
+        This policy explains what Ace can and cannot do, what content it draws on, what is logged, and how to report a response you believe is wrong.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 max-w-3xl mx-auto px-4 space-y-8 text-sm text-ink leading-relaxed">
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">1. Grounding & Scope</h2>
+      <p class="text-ink-muted">Ace is engineered strictly as an educational study assistant. It retrieves verified subtopic notes and rationales authored and reviewed by human pharmacists. Ace cannot provide patient-specific medical advice or prescribe treatments.</p>
+    </div>
+
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">2. Mandatory Citations</h2>
+      <p class="text-ink-muted">Every response delivered by Ace includes citations to the underlying UK guidelines, BNF entries, or curriculum notes from which the answer was composed.</p>
+    </div>
+
+    <div class="space-y-3">
+      <h2 class="text-base font-bold text-ink uppercase tracking-wider">3. Reporting an AI Output</h2>
+      <p class="text-ink-muted">If you believe an Ace explanation is misleading or contradicts current guidance, use the 'Report a Question' link in the active session player to trigger an immediate editorial audit.</p>
+    </div>
+  </section>
+</BaseLayout>

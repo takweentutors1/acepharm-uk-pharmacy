@@ -1,0 +1,28 @@
+{
+  "name": "@acepharm/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@acepharm/design-tokens": "workspace:*",
+    "@ai-sdk/openai-compatible": "^3.0.39",
+    "ai": "^7.0.83",
+    "drizzle-orm": "^0.33.0",
+    "hono": "^4.6.1",
+    "jose": "^6.2.10"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "drizzle-kit": "^0.24.2",
+    "tsx": "^4.23.12",
+    "typescript": "^5.6.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^3.78.2"
+  }
+}
