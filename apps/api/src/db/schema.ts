@@ -186,6 +186,8 @@ export const questions = sqliteTable('questions', {
 }, (table) => ({
   subtopicIdx: index('questions_subtopic_idx').on(table.primarySubtopicId),
   statusIdx: index('questions_status_idx').on(table.status),
+  statusSubtopicIdx: index('questions_status_subtopic_idx').on(table.status, table.primarySubtopicId),
+  statusPathwayIdx: index('questions_status_pathway_idx').on(table.status, table.pathwayId),
 }));
 
 export const questionSecondarySubtopics = sqliteTable('question_secondary_subtopics', {
@@ -355,6 +357,7 @@ export const questionAttempts = sqliteTable('question_attempts', {
   answeredAt: integer('answered_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
 }, (table) => ({
   userQuestionIdx: index('attempts_user_question_idx').on(table.userId, table.questionId),
+  userCorrectIdx: index('attempts_user_correct_idx').on(table.userId, table.isCorrect),
   sessionIdx: index('attempts_session_idx').on(table.sessionId),
   dueReviewIdx: index('attempts_due_review_idx').on(table.userId, table.dueForReviewAt),
 }));
