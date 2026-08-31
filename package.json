@@ -21,7 +21,9 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "sharp",
-      "workerd"
+      "workerd",
+      "@firebase/util",
+      "protobufjs"
     ]
   },
   "packageManager": "pnpm@11.21.0"
