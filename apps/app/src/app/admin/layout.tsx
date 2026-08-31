@@ -13,7 +13,8 @@ import {
   FileText, 
   Activity, 
   LifeBuoy, 
-  Users 
+  Users,
+  BookOpen
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -28,6 +29,7 @@ export default function AdminLayout({
     { href: '/admin/review', label: 'Review Queue', icon: ShieldCheck },
     { href: '/admin/import', label: 'Importer', icon: FileSpreadsheet },
     { href: '/admin/questions/new', label: 'New Question', icon: FileEdit },
+    { href: '/admin/blog', label: 'Blog Editor', icon: BookOpen },
     { href: '/admin/reported', label: 'Reports', icon: HelpCircle },
     { href: '/admin/subtopic-notes', label: 'Notes', icon: FileText },
     { href: '/admin/ai-oversight', label: 'AI Oversight', icon: Activity },

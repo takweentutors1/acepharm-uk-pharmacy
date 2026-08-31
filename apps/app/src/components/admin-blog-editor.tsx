@@ -33,7 +33,20 @@ export function AdminBlogEditor({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/blog`);
+      // Try admin list if token available, or fall back to public list
+      let token: string | null = null;
+      if (typeof window !== 'undefined') {
+        const { auth } = await import('@/lib/firebase');
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      }
+
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const endpoint = token ? `${apiBaseUrl}/api/v1/blog/admin/all` : `${apiBaseUrl}/api/v1/blog`;
+      const res = await fetch(endpoint, { headers });
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
@@ -53,9 +66,20 @@ export function AdminBlogEditor({ apiBaseUrl }: { apiBaseUrl: string }) {
     setSavedStatus(null);
 
     try {
+      let token: string | null = null;
+      if (typeof window !== 'undefined') {
+        const { auth } = await import('@/lib/firebase');
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      }
+
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${apiBaseUrl}/api/v1/blog/admin/save`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(selectedPost),
       });
 
