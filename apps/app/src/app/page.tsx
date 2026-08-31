@@ -43,12 +43,20 @@ export default function StudentDashboardPage() {
   const [showCancellationModal, setShowCancellationModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [categoriesOverview, setCategoriesOverview] = useState<CategoryItem[]>([]);
-  const [streakMetrics, setStreakMetrics] = useState({
-    currentStreak: 4,
-    longestStreak: 12,
-    todayQuestionsCount: 8,
-    todayActiveMinutes: 14,
-    isMeaningfulToday: true,
+  const [streakMetrics, setStreakMetrics] = useState<{
+    currentStreak: number;
+    longestStreak: number;
+    todayQuestionsCount: number;
+    todayActiveMinutes: number;
+    isMeaningfulToday: boolean;
+    streakHistory?: { date: string; questionsCount: number; activeMinutes: number; isMeaningful: boolean }[];
+  }>({
+    currentStreak: 0,
+    longestStreak: 0,
+    todayQuestionsCount: 0,
+    todayActiveMinutes: 0,
+    isMeaningfulToday: false,
+    streakHistory: undefined,
   });
   const [recommendation, setRecommendation] = useState<{
     topicName: string;
@@ -108,11 +116,12 @@ export default function StudentDashboardPage() {
           if (streakRes.ok) {
             const sData = await streakRes.json();
             setStreakMetrics({
-              currentStreak: sData.currentStreak ?? 1,
-              longestStreak: sData.longestStreak ?? 1,
+              currentStreak: sData.currentStreak ?? 0,
+              longestStreak: sData.longestStreak ?? 0,
               todayQuestionsCount: sData.todayQuestionsCount ?? 0,
               todayActiveMinutes: sData.todayActiveMinutes ?? 0,
               isMeaningfulToday: Boolean(sData.isMeaningfulToday),
+              streakHistory: sData.streakHistory,
             });
           }
 
@@ -204,7 +213,9 @@ export default function StudentDashboardPage() {
             longestStreak={streakMetrics.longestStreak} 
             isMeaningfulToday={streakMetrics.isMeaningfulToday} 
             todayQuestionsCount={streakMetrics.todayQuestionsCount} 
-            todayActiveMinutes={streakMetrics.todayActiveMinutes} 
+            todayActiveMinutes={streakMetrics.todayActiveMinutes}
+            dailyGoalTarget={dailyGoal.dailyTarget}
+            streakHistory={streakMetrics.streakHistory}
           />
         </div>
 
