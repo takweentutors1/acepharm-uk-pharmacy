@@ -68,12 +68,18 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Badge variant="teal" className="font-medium text-xs">
-              MPharm Foundation Trainee
-            </Badge>
-            <div className="w-9 h-9 rounded-full bg-indigo/10 border border-indigo/20 text-indigo flex items-center justify-center font-bold text-xs">
-              UK
-            </div>
+            <a
+              href="/auth/login"
+              className="text-xs font-semibold text-slate hover:text-ink px-2.5 py-1.5 rounded-btn border border-border transition-colors"
+            >
+              Sign In
+            </a>
+            <a
+              href="/auth/register"
+              className="text-xs font-semibold text-white bg-indigo hover:bg-indigo-deep px-3 py-1.5 rounded-btn shadow-xs transition-all"
+            >
+              Register
+            </a>
           </div>
         </div>
       </header>
