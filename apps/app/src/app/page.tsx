@@ -5,6 +5,7 @@ import { Button, Card, Badge } from '@acepharm/ui';
 import { StreakTracker } from '@/components/streak-tracker';
 import { CategoryResetModal } from '@/components/category-reset-modal';
 import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
+import { SubscriptionModal } from '@/components/subscription-modal';
 import { useAuth } from '@/lib/auth-context';
 import { 
   Play, 
@@ -39,6 +40,7 @@ export default function StudentDashboardPage() {
   const { user, profile, signOut } = useAuth();
   const [selectedResetCategory, setSelectedResetCategory] = useState<{ id: string; name: string; count: number } | null>(null);
   const [showCancellationModal, setShowCancellationModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [categoriesOverview, setCategoriesOverview] = useState<CategoryItem[]>([]);
   const [streakMetrics, setStreakMetrics] = useState({
     currentStreak: 4,
@@ -335,27 +337,10 @@ export default function StudentDashboardPage() {
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-border/60">
             <button
               type="button"
-              onClick={async () => {
-                try {
-                  const token = user ? await user.getIdToken() : '';
-                  const res = await fetch(`${API_URL}/api/v1/stripe/customer-portal`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token || 'guest'}`,
-                    },
-                  });
-                  const data = await res.json();
-                  if (data?.url) {
-                    window.location.href = data.url;
-                  }
-                } catch {
-                  setShowCancellationModal(true);
-                }
-              }}
+              onClick={() => setShowSubscriptionModal(true)}
               className="text-indigo hover:text-indigo-deep text-xs font-semibold px-3 py-1.5 rounded-btn border border-indigo/20 bg-indigo-wash hover:bg-indigo/10 transition-colors flex items-center gap-1.5"
             >
-              Billing Portal
+              Manage Subscription
             </button>
             <button
               type="button"
@@ -368,6 +353,13 @@ export default function StudentDashboardPage() {
         </div>
       </main>
 
+      {/* In-App Subscription & Billing Portal Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        onOpenCancellation={() => setShowCancellationModal(true)}
+      />
+
       {/* Explicit Category Reset Modal */}
       {selectedResetCategory && (
         <CategoryResetModal
@@ -377,18 +369,24 @@ export default function StudentDashboardPage() {
           categoryName={selectedResetCategory.name}
           questionCount={selectedResetCategory.count}
           onResetSuccess={() => {
-            console.log('Category practice attempts reset successfully.');
+            setCategoriesOverview((prev) =>
+              prev.map((c) =>
+                c.id === selectedResetCategory.id
+                  ? { ...c, attempted: 0, accuracy: 0, status: 'First Pass' }
+                  : c
+              )
+            );
           }}
         />
       )}
 
-      {/* Two-Screen In-App Cancellation Flow Modal */}
+      {/* Section 7.4 In-App Cancellation Flow Modal */}
       <CancellationFlowModal
         isOpen={showCancellationModal}
         onClose={() => setShowCancellationModal(false)}
-        currentPeriodEnd={new Date(Date.now() + 14 * 86400000)}
+        currentPeriodEnd={new Date(Date.now() + 30 * 86400000)}
         onCancellationComplete={() => {
-          console.log('Subscription cancellation scheduled at period end.');
+          // Handled inside modal with immediate optimistic feedback
         }}
       />
     </div>
