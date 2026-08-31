@@ -59,7 +59,7 @@ export const PricingToggle: React.FC = () => {
             </ul>
           </div>
           <div className="mt-8">
-            <a href="https://app.acepharm.co.uk/register" className="block w-full">
+            <a href="https://app.acepharm.co.uk/auth/register" className="block w-full">
               <Button variant="outline" className="w-full">Start revising free</Button>
             </a>
           </div>
@@ -91,7 +91,7 @@ export const PricingToggle: React.FC = () => {
             </ul>
           </div>
           <div className="mt-8">
-            <a href="https://app.acepharm.co.uk/register?plan=monthly" className="block w-full">
+            <a href="https://app.acepharm.co.uk/auth/register?plan=monthly" className="block w-full">
               <Button variant={!isAnnual ? 'primary' : 'outline'} className="w-full">
                 Choose monthly
               </Button>
@@ -130,7 +130,7 @@ export const PricingToggle: React.FC = () => {
             </ul>
           </div>
           <div className="mt-8">
-            <a href="https://app.acepharm.co.uk/register?plan=yearly" className="block w-full">
+            <a href="https://app.acepharm.co.uk/auth/register?plan=yearly" className="block w-full">
               <Button variant="primary" className="w-full shadow-sm">
                 Choose yearly
               </Button>
