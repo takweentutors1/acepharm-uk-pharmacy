@@ -39,6 +39,17 @@ bucket_name = "acepharm-assets"
 [triggers]
 crons = ["0 3 * * *", "0 4 * * 1"]
 
+# Environment Variables
+[vars]
+PUBLIC_SITE_URL = "https://acepharm-marketing.pages.dev"
+PUBLIC_APP_URL = "https://acepharm-app.pages.dev"
+CUSTOM_DOMAIN_SITE = "https://acepharm.co.uk"
+CUSTOM_DOMAIN_APP = "https://app.acepharm.co.uk"
+STRIPE_PRICE_ID_MONTHLY = "price_1U9ixsE4ZQJ9iwGZ7rF40bDe"
+STRIPE_PRICE_ID_YEARLY = "price_1U9j0pE4ZQJ9iwGZ0At7aZH8"
+STRIPE_WEBHOOK_ENDPOINT_ID = "we_1U9jWDE4ZQJ9iwGZuHESR1EC"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51SbDyYE4ZQJ9iwGZD3Un8Ifrd06XPQ71eTwfWLCyn1y4hyP5HEcbLNdJYqgb4XeHIAqM2rbJ33KOAPseyGajXZLg00k2oGQRKk"
+
 # ==========================================
 # Staging Environment Configuration
 # ==========================================
