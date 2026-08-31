@@ -175,7 +175,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await firebaseSignOut(auth);
     } finally {
-      const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL || 'https://acepharm.co.uk';
+      const marketingUrl = 
+        process.env.NEXT_PUBLIC_SITE_URL || 
+        process.env.NEXT_PUBLIC_MARKETING_URL || 
+        'https://acepharm-marketing.pages.dev';
       window.location.href = marketingUrl;
     }
   };
