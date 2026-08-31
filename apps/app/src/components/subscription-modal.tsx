@@ -70,8 +70,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <Card className="max-w-xl w-full p-6 sm:p-8 bg-surface border-border shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-ink/70 backdrop-blur-xs animate-in fade-in duration-200">
+      <Card className="max-w-xl w-full p-5 sm:p-8 bg-surface border-border shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}

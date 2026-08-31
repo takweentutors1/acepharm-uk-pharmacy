@@ -306,6 +306,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onOpenSubscription }) => {
                 <Layers className="w-4 h-4 text-indigo" /> Curriculum Hierarchy
               </Link>
               <Link
+                href="/admin/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 text-xs text-ink hover:bg-canvas rounded-lg"
+              >
+                <BookOpen className="w-4 h-4 text-indigo" /> Blog & Articles CMS
+              </Link>
+              <Link
                 href="/admin/review"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 px-3 py-2 text-xs text-ink hover:bg-canvas rounded-lg"
@@ -313,11 +320,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onOpenSubscription }) => {
                 <ShieldCheck className="w-4 h-4 text-teal" /> Review Queue
               </Link>
               <Link
+                href="/admin/questions/new"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 text-xs text-ink hover:bg-canvas rounded-lg"
+              >
+                <FileEdit className="w-4 h-4 text-indigo" /> Question Authoring
+              </Link>
+              <Link
                 href="/admin/import"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 px-3 py-2 text-xs text-ink hover:bg-canvas rounded-lg"
               >
                 <FileSpreadsheet className="w-4 h-4 text-amber-500" /> Spreadsheet Importer
+              </Link>
+              <Link
+                href="/admin/ai-oversight"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 text-xs text-ink hover:bg-canvas rounded-lg"
+              >
+                <Activity className="w-4 h-4 text-rose-500" /> AI Tutor Oversight
               </Link>
             </div>
           )}
