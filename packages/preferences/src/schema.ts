@@ -45,6 +45,7 @@ export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 export const StorageKeys = {
   PREFERENCES: 'acepharm_user_preferences',
   AUTH_TOKEN: 'acepharm_auth_token',
+  USER_PROFILE: 'acepharm_user_profile',
   STAGE_PREFIX: 'acepharm_stage_',
   FREE_TIER_COUNT: 'acepharm_free_tier_count',
   QUESTION_SESSION_PREFIX: 'acepharm_session_',

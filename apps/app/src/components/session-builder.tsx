@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Badge, Card } from '@acepharm/ui';
 import { 
   Play, 
@@ -93,12 +93,46 @@ const CATEGORIES_DATA: CategoryOption[] = [
 ];
 
 export function SessionBuilder() {
+  const [categories, setCategories] = useState<CategoryOption[]>(CATEGORIES_DATA);
   const [mode, setMode] = useState<'learn' | 'timed'>('learn');
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(['cat-cv', 'cat-resp']);
   const [selectedSubtopicIds, setSelectedSubtopicIds] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<'all' | 'unattempted' | 'incorrect' | 'due_for_review'>('all');
   const [questionCount, setQuestionCount] = useState<number>(20);
   const [isStarting, setIsStarting] = useState(false);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+
+  useEffect(() => {
+    async function loadLiveCurriculum() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/curriculum/tree`);
+        if (res.ok) {
+          const data = await res.json();
+          const pathway = data.pathways?.[0];
+          if (pathway && pathway.categories && pathway.categories.length > 0) {
+            const mapped: CategoryOption[] = pathway.categories.map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              count: (c.subtopics?.length || 1) * 5,
+              subtopics: (c.subtopics || []).map((sub: any) => ({
+                id: sub.id,
+                name: sub.name,
+                count: 5,
+              })),
+            }));
+            setCategories(mapped);
+            if (mapped.length > 0) {
+              setSelectedCategoryIds(mapped.slice(0, 2).map((c) => c.id));
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load live curriculum categories in session builder:', e);
+      }
+    }
+    loadLiveCurriculum();
+  }, []);
 
   // Toggle Category selection
   const handleToggleCategory = (catId: string) => {
@@ -108,15 +142,15 @@ export function SessionBuilder() {
   };
 
   const handleSelectAllCategories = () => {
-    if (selectedCategoryIds.length === CATEGORIES_DATA.length) {
+    if (selectedCategoryIds.length === categories.length) {
       setSelectedCategoryIds([]);
     } else {
-      setSelectedCategoryIds(CATEGORIES_DATA.map((c) => c.id));
+      setSelectedCategoryIds(categories.map((c) => c.id));
     }
   };
 
   // Estimate total matched pool
-  const totalAvailableInSelection = CATEGORIES_DATA
+  const totalAvailableInSelection = categories
     .filter((c) => selectedCategoryIds.includes(c.id))
     .reduce((acc, c) => acc + c.count, 0);
 
@@ -124,10 +158,10 @@ export function SessionBuilder() {
 
   const handleStartSession = () => {
     setIsStarting(true);
-    // In production this calls POST /api/v1/sessions/create and navigates to session player
+    const catQuery = selectedCategoryIds.join(',');
     setTimeout(() => {
-      window.location.href = `/session/active?mode=${mode}&count=${effectiveCount}`;
-    }, 400);
+      window.location.href = `/session/active?mode=${mode}&count=${effectiveCount}&categories=${encodeURIComponent(catQuery)}&filter=${statusFilter}`;
+    }, 300);
   };
 
   return (
@@ -262,7 +296,7 @@ export function SessionBuilder() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {CATEGORIES_DATA.map((cat) => {
+          {categories.map((cat) => {
             const isSelected = selectedCategoryIds.includes(cat.id);
             return (
               <div

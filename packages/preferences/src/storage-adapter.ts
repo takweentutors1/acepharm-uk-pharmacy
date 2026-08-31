@@ -50,6 +50,10 @@ export const AuthStorage = {
   setToken: (token: string): void => SafeStorage.setItem(StorageKeys.AUTH_TOKEN, token),
   removeToken: (): void => SafeStorage.removeItem(StorageKeys.AUTH_TOKEN),
   
+  getSavedProfile: <T>(): T | null => SafeStorage.getJSON<T | null>(StorageKeys.USER_PROFILE, null),
+  setSavedProfile: <T>(profile: T): void => SafeStorage.setJSON(StorageKeys.USER_PROFILE, profile),
+  removeSavedProfile: (): void => SafeStorage.removeItem(StorageKeys.USER_PROFILE),
+
   getStage: (uid: string): string | null => SafeStorage.getItem(`${StorageKeys.STAGE_PREFIX}${uid}`),
   setStage: (uid: string, stage: string): void => SafeStorage.setItem(`${StorageKeys.STAGE_PREFIX}${uid}`, stage),
 };

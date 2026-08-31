@@ -57,7 +57,10 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return AuthStorage.getSavedProfile<UserProfile>();
+  });
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
@@ -65,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfileFromD1 = async (firebaseUser: User) => {
     try {
       const token = await firebaseUser.getIdToken();
+      AuthStorage.setToken(token);
+
       const res = await fetch(`${API_URL}/api/v1/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,13 +78,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const savedStage = AuthStorage.getStage(firebaseUser.uid);
       
+      let nextProfile: UserProfile;
+
       if (res.ok) {
         const data = await res.json();
         const role: UserRole = data?.user?.role || 'student';
-        const isAdmin = ['content_lead', 'super_admin', 'clinical_reviewer', 'educational_reviewer', 'author'].includes(role);
+        const isAdmin = ['content_lead', 'super_admin', 'clinical_reviewer', 'educational_reviewer', 'author', 'marketing_editor'].includes(role);
         const isReviewer = ['clinical_reviewer', 'educational_reviewer', 'content_lead', 'super_admin'].includes(role);
 
-        setProfile({
+        nextProfile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: data?.user?.first_name || firebaseUser.displayName || 'Pharmacy Learner',
@@ -88,10 +95,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isReviewer,
           stage: (savedStage as any) || 'foundation',
           isPro: true,
-        });
+        };
       } else {
         // Fallback default student profile
-        setProfile({
+        nextProfile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName || 'Pharmacy Learner',
@@ -100,10 +107,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isReviewer: false,
           stage: (savedStage as any) || 'foundation',
           isPro: true,
-        });
+        };
       }
+
+      setProfile(nextProfile);
+      AuthStorage.setSavedProfile(nextProfile);
     } catch {
-      setProfile({
+      const fallbackProfile: UserProfile = {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         displayName: firebaseUser.displayName || 'Pharmacy Learner',
@@ -112,7 +122,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isReviewer: false,
         stage: 'foundation',
         isPro: true,
-      });
+      };
+      setProfile(fallbackProfile);
+      AuthStorage.setSavedProfile(fallbackProfile);
     }
   };
 
@@ -122,7 +134,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (firebaseUser) {
         await fetchProfileFromD1(firebaseUser);
       } else {
+        // Check if there is no user, clear cache
+        setUser(null);
         setProfile(null);
+        AuthStorage.removeToken();
+        AuthStorage.removeSavedProfile();
       }
       setLoading(false);
     });
@@ -131,7 +147,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    if (cred.user) {
+      await fetchProfileFromD1(cred.user);
+    }
   };
 
   const signUp = async (email: string, pass: string, name: string, stage: string) => {
@@ -139,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (cred.user) {
       await updateProfile(cred.user, { displayName: name });
       AuthStorage.setStage(cred.user.uid, stage);
+      await fetchProfileFromD1(cred.user);
       try {
         await sendCustomEmailVerification(cred.user);
       } catch (e) {
@@ -148,6 +168,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    AuthStorage.removeToken();
+    AuthStorage.removeSavedProfile();
+    setProfile(null);
+    setUser(null);
     await firebaseSignOut(auth);
   };
 
