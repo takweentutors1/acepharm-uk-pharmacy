@@ -101,52 +101,107 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         {/* Membership Details */}
         <div className="bg-canvas border border-border rounded-xl p-4 mb-6 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate">Current Membership</span>
-            <Badge variant="success" className="text-xs font-semibold">
-              Pro Active (£4.99/month)
+            <div>
+              <span className="text-xs font-medium text-slate">Current Membership</span>
+              <p className="text-xs font-bold text-ink mt-0.5">
+                {profile?.isPro ? 'AcePharm Pro Membership' : 'AcePharm Explorer (Free Tier)'}
+              </p>
+            </div>
+            <Badge variant={profile?.isPro ? "success" : "teal"} className="text-xs font-semibold">
+              {profile?.isPro ? 'Pro Active' : 'Free Explorer (30 Qs / mo)'}
             </Badge>
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate">Next Auto-Renewal Date</span>
+
+          {/* Monthly Allowance Progress Meter for Free Tier */}
+          <div className="pt-2 border-t border-border/70 space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-slate">Monthly Question Allowance:</span>
+              <span className="font-semibold text-ink font-mono">
+                {profile?.isPro ? 'Unlimited Access' : '8 / 30 questions used this month'}
+              </span>
+            </div>
+            {!profile?.isPro && (
+              <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+                <div className="bg-teal h-full rounded-full" style={{ width: `${(8 / 30) * 100}%` }} />
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-xs pt-1">
+            <span className="text-slate">Next Allowance / Auto-Renewal Reset:</span>
             <span className="font-semibold text-ink flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-indigo" /> 30 September 2026
             </span>
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate">Default Payment Card</span>
-            <span className="font-mono text-ink">•••• 4242 (Visa)</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate">VAT Invoices & Receipts</span>
-            <span className="text-indigo font-semibold flex items-center gap-1 cursor-pointer hover:underline">
-              <Receipt className="w-3.5 h-3.5" /> Download Latest (INV-2026-08)
-            </span>
-          </div>
+
+          {profile?.isPro && (
+            <>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate">Default Payment Card:</span>
+                <span className="font-mono text-ink">•••• 4242 (Visa)</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate">VAT Invoices & Receipts:</span>
+                <span className="text-indigo font-semibold flex items-center gap-1 cursor-pointer hover:underline">
+                  <Receipt className="w-3.5 h-3.5" /> Download Latest (INV-2026-08)
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Tier Upgrade / Switch Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-          <div className="p-4 rounded-xl border border-indigo/30 bg-indigo-wash/30 flex flex-col justify-between space-y-3">
+        {/* 3-Tier Pricing & Plan Selection Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          {/* Free Explorer Tier */}
+          <div className="p-3.5 rounded-xl border border-border bg-canvas/40 flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-indigo">Monthly Plan</span>
-                <span className="text-xs font-semibold text-slate">£4.99/mo</span>
+                <span className="text-xs font-bold text-ink">Free Explorer</span>
+                <span className="text-xs font-semibold text-slate">£0/mo</span>
               </div>
-              <p className="text-[11px] text-slate mt-1">Flexible monthly billing. Cancel anytime.</p>
+              <p className="text-[11px] text-slate mt-1 leading-snug">
+                30 free questions every month, core review & bookmarks.
+              </p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              disabled={loadingPlan === 'monthly'}
-              onClick={() => handleCheckout('monthly')}
+              disabled={!profile?.isPro}
+              onClick={() => {
+                setFeedback('Switched to Free Explorer Plan (30 Qs/mo).');
+                setTimeout(() => onClose(), 1200);
+              }}
               className="w-full text-xs font-semibold"
             >
-              Current Active Plan
+              {!profile?.isPro ? 'Current Plan' : 'Downgrade to Free'}
             </Button>
           </div>
 
-          <div className="p-4 rounded-xl border border-teal/40 bg-teal-wash/30 flex flex-col justify-between space-y-3 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-teal text-white text-[9px] font-bold px-2 py-0.5 rounded-bl">
+          {/* Monthly Pro Plan */}
+          <div className="p-3.5 rounded-xl border border-indigo/30 bg-indigo-wash/30 flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-indigo">Monthly Pro</span>
+                <span className="text-xs font-semibold text-slate">£4.99/mo</span>
+              </div>
+              <p className="text-[11px] text-slate mt-1 leading-snug">
+                Unlimited question bank, Ace tutor & timed exam mocks.
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={loadingPlan === 'monthly'}
+              onClick={() => handleCheckout('monthly')}
+              className="w-full text-xs font-semibold shadow-xs"
+            >
+              {profile?.isPro ? 'Active Monthly' : 'Upgrade (£4.99)'}
+            </Button>
+          </div>
+
+          {/* Annual Pass */}
+          <div className="p-3.5 rounded-xl border border-teal/40 bg-teal-wash/30 flex flex-col justify-between space-y-3 relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-teal text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl">
               Save 17%
             </div>
             <div>
@@ -154,7 +209,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <span className="text-xs font-bold text-teal">Annual Pass</span>
                 <span className="text-xs font-semibold text-slate">£49.99/yr</span>
               </div>
-              <p className="text-[11px] text-slate mt-1">Full 12-month GPhC exam coverage.</p>
+              <p className="text-[11px] text-slate mt-1 leading-snug">
+                Full 12-month GPhC exam coverage with single payment.
+              </p>
             </div>
             <Button
               variant="primary"
@@ -163,7 +220,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               onClick={() => handleCheckout('yearly')}
               className="w-full text-xs font-bold shadow-xs bg-teal hover:bg-teal-deep text-white border-none"
             >
-              Switch to Yearly (£49.99)
+              Switch to Yearly
             </Button>
           </div>
         </div>
