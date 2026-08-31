@@ -2,6 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '@acepharm/ui';
+import { useAuth } from '@/lib/auth-context';
+import { AppHeader } from '@/components/app-header';
+import { SubscriptionModal } from '@/components/subscription-modal';
+import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
 import { 
   TrendingUp, 
   Target, 
@@ -116,8 +120,48 @@ const DEMO_PROGRESS_DATA: ProgressAnalyticsResult = {
 };
 
 export default function ProgressPage() {
-  const [data] = useState(DEMO_PROGRESS_DATA);
+  const { user, profile } = useAuth();
+  const [data, setData] = useState<ProgressAnalyticsResult>(DEMO_PROGRESS_DATA);
   const [isZeroAttempts, setIsZeroAttempts] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+
+  useEffect(() => {
+    async function loadLiveMetrics() {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`${API_URL}/api/v1/analytics/metrics`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.accuracySplit && json.coverageMap) {
+            setData({
+              accuracySplit: json.accuracySplit,
+              calibrationMatrix: json.calibrationMatrix,
+              coverageMap: json.coverageMap,
+            });
+            // If the user has 0 total attempts in the database, automatically show zero attempts mode
+            if (json.accuracySplit.practice.total === 0) {
+              setIsZeroAttempts(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load live analytics metrics from D1, using fallback:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadLiveMetrics();
+  }, [user]);
 
   const totalAttempts = isZeroAttempts ? 0 : data.accuracySplit.practice.total;
 
@@ -134,43 +178,26 @@ export default function ProgressPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-canvas">
-      {/* Header */}
-      <header className="border-b border-border bg-surface sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-indigo flex items-center justify-center text-white font-bold text-base shadow-sm">
-                A
-              </span>
-              <span className="text-xl font-bold tracking-tight text-ink">AcePharm</span>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate">
-              <a href="/" className="hover:text-ink transition-colors">Dashboard</a>
-              <a href="/session/new" className="hover:text-ink transition-colors">Practice Builder</a>
-              <a href="/progress" className="text-indigo font-bold border-b-2 border-indigo py-5">
-                Progress & Calibration
-              </a>
-              <a href="/admin/curriculum" className="hover:text-ink transition-colors">Admin Portal</a>
-            </nav>
-          </div>
+      {/* Standard Unified AppHeader */}
+      <AppHeader onOpenSubscription={() => setShowSubscriptionModal(true)} />
 
-          <div className="flex items-center gap-3">
-            {/* Developer Preview Toggle for Zero-Attempt Mode */}
-            <button
-              type="button"
-              onClick={() => setIsZeroAttempts(!isZeroAttempts)}
-              className="text-[11px] font-mono px-2.5 py-1 rounded border border-border bg-canvas text-slate hover:text-ink transition-colors"
-              title="Toggle between populated account and fresh zero-attempt account"
-            >
-              Mode: {isZeroAttempts ? '🐣 New Account (0 Attempts)' : '📊 Active Learner'}
-            </button>
-            <Badge variant="teal" className="font-medium text-xs">
-              MPharm Foundation Trainee
-            </Badge>
-          </div>
-        </div>
-      </header>
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        onOpenCancellation={() => {
+          setShowSubscriptionModal(false);
+          setShowCancellationModal(true);
+        }}
+      />
+
+      {/* Cancellation Flow Modal */}
+      <CancellationFlowModal
+        isOpen={showCancellationModal}
+        onClose={() => setShowCancellationModal(false)}
+        currentPeriodEnd={new Date(Date.now() + 30 * 86400000)}
+        onCancellationComplete={() => {}}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
