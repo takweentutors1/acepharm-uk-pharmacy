@@ -24,14 +24,24 @@ contactRouter.post('/submit', async (c) => {
 
   // 1. Insert into D1 support_tickets table
   try {
+    // Map arbitrary category strings to the schema enum: 'billing' | 'technical' | 'clinical_content' | 'account' | 'general'
+    const mapCategory = (cat?: string): 'billing' | 'technical' | 'clinical_content' | 'account' | 'general' => {
+      const lower = (cat || '').toLowerCase();
+      if (lower.includes('bill') || lower.includes('subscript')) return 'billing';
+      if (lower.includes('tech') || lower.includes('erratum') || lower.includes('bug')) return 'technical';
+      if (lower.includes('clinic') || lower.includes('content') || lower.includes('question')) return 'clinical_content';
+      if (lower.includes('account')) return 'account';
+      return 'general';
+    };
+
     await db.insert(supportTickets).values({
       id: ticketId,
       userId: null,
-      category: body.category || 'General Support',
+      email: body.email,
+      category: mapCategory(body.category),
       subject: `[Contact Form] ${body.category || 'Inquiry'}: ${body.name}`,
-      description: `Sender: ${body.name} (${body.email})\nCategory: ${body.category}\n\nMessage:\n${body.message}`,
+      message: `Sender: ${body.name} (${body.email})\nCategory: ${body.category}\n\nMessage:\n${body.message}`,
       status: 'open',
-      priority: 'medium',
       createdAt: now,
       updatedAt: now,
     });

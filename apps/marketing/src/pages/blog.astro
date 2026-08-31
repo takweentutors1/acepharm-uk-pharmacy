@@ -4,7 +4,14 @@ import { TopicFilter } from '@acepharm/ui';
 
 // Fetch dynamically from D1 API worker with fallback
 const API_URL = import.meta.env.PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
-let articles = [];
+let articles: Array<{
+  slug: string;
+  title: string;
+  category: string;
+  date: string;
+  readTime: string;
+  excerpt: string;
+}> = [];
 
 const DEFAULT_ARTICLES = [
   {
