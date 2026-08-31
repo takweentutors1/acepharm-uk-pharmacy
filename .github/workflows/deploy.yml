@@ -71,12 +71,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply D1 Database Migrations (Remote)
+        if: env.CLOUDFLARE_API_TOKEN != ''
         run: pnpm --filter @acepharm/api exec wrangler d1 migrations apply acepharm-db --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Verify / Sync Vectorize Index
+        if: env.CLOUDFLARE_API_TOKEN != ''
         run: |
           # Confirms the vectorize index exists and matches dimensions
           pnpm --filter @acepharm/api exec wrangler vectorize get acepharm-content || \
