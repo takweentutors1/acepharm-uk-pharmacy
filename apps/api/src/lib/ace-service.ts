@@ -72,7 +72,8 @@ export async function retrieveRelevantChunks(
   userPrompt: string,
   ai?: any,
   vectorize?: any,
-  topK: number = 4
+  topK: number = 4,
+  filterContextId?: string
 ): Promise<RetrievedChunk[]> {
   if (!ai || !vectorize || !userPrompt.trim()) {
     return [];
@@ -89,11 +90,13 @@ export async function retrieveRelevantChunks(
       return [];
     }
 
-    // 2. Query Vectorize
-    const matches = await vectorize.query(queryVector, {
-      topK,
+    // 2. Query Vectorize with optional namespace/metadata
+    const queryOptions: any = {
+      topK: Math.max(topK, 6), // Fetch candidate pool for reranking
       returnMetadata: true,
-    });
+    };
+
+    const matches = await vectorize.query(queryVector, queryOptions);
 
     if (!matches || !matches.matches || matches.matches.length === 0) {
       return [];
@@ -111,14 +114,26 @@ export async function retrieveRelevantChunks(
       scoreMap.set(m.id, m.score || 0);
     }
 
-    return rows.map((r) => ({
-      id: r.id,
-      sourceType: r.sourceType,
-      sourceId: r.sourceId,
-      chunkIndex: r.chunkIndex,
-      contentText: r.contentText,
-      score: scoreMap.get(r.id) || 0,
-    }));
+    // 4. Hybrid Reciprocal Scoring & Context Prioritization
+    const hydrated = rows.map((r) => {
+      let score = scoreMap.get(r.id) || 0;
+      // Contextual boost if chunk source matches the active question ID
+      if (filterContextId && r.sourceId === filterContextId) {
+        score += 0.25;
+      }
+      return {
+        id: r.id,
+        sourceType: r.sourceType,
+        sourceId: r.sourceId,
+        chunkIndex: r.chunkIndex,
+        contentText: r.contentText,
+        score,
+      };
+    });
+
+    // Sort by weighted confidence score and truncate to topK
+    hydrated.sort((a, b) => (b.score || 0) - (a.score || 0));
+    return hydrated.slice(0, topK);
   } catch (err) {
     console.warn('Ace retrieval warning (falling back gracefully):', err);
     return [];

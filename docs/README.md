@@ -15,6 +15,8 @@ Welcome to the central documentation index for **AcePharm** — an evidence-led 
 | **[AcePharm Design System.html](file:///Users/pc/acepharm-web-app/docs/AcePharm%20Design%20System.html)** | HTML | UI/UX Visual Spec | Design system tokens, color palettes, spacing, typography, and component specifications. |
 | **[API-SPECIFICATION.md](file:///Users/pc/acepharm-web-app/docs/API-SPECIFICATION.md)** | Markdown | **Active Specification** | Cloudflare Workers REST & Server-Sent Events (SSE) streaming API endpoints. |
 | **[CLINICAL-AUTHORING-GUIDE.md](file:///Users/pc/acepharm-web-app/docs/CLINICAL-AUTHORING-GUIDE.md)** | Markdown | **Active Standard** | Clinical question authoring rules, 4-stage explanation schema, and review standards. |
+| **[OPERATIONS-RUNBOOK.md](file:///Users/pc/acepharm-web-app/docs/OPERATIONS-RUNBOOK.md)** | Markdown | **Active Operations** | Cloudflare D1 migrations, Vectorize sync, secret rotation, and disaster recovery runbook. |
+| **[DATA-RETENTION-POLICY.md](file:///Users/pc/acepharm-web-app/docs/DATA-RETENTION-POLICY.md)** | Markdown | **Active Compliance** | UK GDPR data retention schedules, erasure protocol, and Western Europe residency mapping. |
 | **[COPY-COMPLIANCE-MATRIX.md](file:///Users/pc/acepharm-web-app/docs/COPY-COMPLIANCE-MATRIX.md)** | Markdown | **Active Governance** | Compliance verification matrix for tone of voice, banned terms, and disclaimers. |
 
 ---
@@ -29,6 +31,8 @@ Key architectural decisions are documented in the [`docs/adr/`](file:///Users/pc
   - Documents the implementation of zero-JS crawlable marketing pages, JSON-LD schemas (`Organization`, `Product`, `Course`, `FAQPage`, `Article`), and Core Web Vitals optimization.
 - **[ADR 0003: Dual-Store Attempt Logging & Calibration Analytics](file:///Users/pc/acepharm-web-app/docs/adr/0003-dual-store-attempt-logging.md)**
   - Documents the database isolation of `first_attempts` from `practice_attempts` to eliminate false practice-repetition inflation.
+- **[ADR 0004: Hierarchical Content Chunking & Vector Indexing Strategy](file:///Users/pc/acepharm-web-app/docs/adr/0004-rag-chunking-strategy.md)**
+  - Documents the embedding and vectorization pipeline using `@cf/baai/bge-base-en-v1.5` and Cloudflare Vectorize for sub-50ms RAG retrieval.
 
 ---
 
