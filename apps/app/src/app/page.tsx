@@ -314,22 +314,57 @@ export default function StudentDashboardPage() {
         </Card>
 
         {/* Subscription & Account Self-Service Footer Panel */}
-        <div className="p-4 bg-surface border border-border rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-canvas text-primary">
-              <CreditCard className="w-4 h-4" />
+        <div className="p-5 bg-surface border border-border rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs shadow-2xs">
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 rounded-lg bg-indigo-wash text-indigo border border-indigo/20">
+              <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-ink">Subscription Management</p>
-              <p className="text-slate">Manage your £4.99/mo or £49.99/yr plan, update payment methods, or cancel anytime.</p>
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-ink text-sm">Subscription & Billing Management</p>
+                <Badge variant={user ? "success" : "teal"} className="text-[10px] py-0">
+                  {user ? "Active Pro Member" : "Explorer Access"}
+                </Badge>
+              </div>
+              <p className="text-slate text-xs mt-0.5">
+                Manage your £4.99/mo or £49.99/yr membership, download VAT invoices, update cards, or cancel anytime.
+              </p>
             </div>
           </div>
-          <button
-            onClick={() => setShowCancellationModal(true)}
-            className="text-slate hover:text-danger text-xs font-semibold underline transition-colors"
-          >
-            Cancel Subscription
-          </button>
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-border/60">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const token = user ? await user.getIdToken() : '';
+                  const res = await fetch(`${API_URL}/api/v1/stripe/customer-portal`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token || 'guest'}`,
+                    },
+                  });
+                  const data = await res.json();
+                  if (data?.url) {
+                    window.location.href = data.url;
+                  }
+                } catch {
+                  setShowCancellationModal(true);
+                }
+              }}
+              className="text-indigo hover:text-indigo-deep text-xs font-semibold px-3 py-1.5 rounded-btn border border-indigo/20 bg-indigo-wash hover:bg-indigo/10 transition-colors flex items-center gap-1.5"
+            >
+              Billing Portal
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCancellationModal(true)}
+              className="text-slate hover:text-danger text-xs font-semibold underline transition-colors"
+            >
+              Cancel Subscription
+            </button>
+          </div>
         </div>
       </main>
 
