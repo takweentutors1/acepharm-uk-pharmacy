@@ -5,6 +5,7 @@ export * from './components/cookie-consent';
 export * from './components/markdown-renderer';
 export * from './components/mobile-nav';
 export * from './components/pricing-toggle';
+export * from './components/study-session-hero';
 export * from './components/faq-accordion';
 export * from './components/topic-filter';
 export * from './lib/consent';

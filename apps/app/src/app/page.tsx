@@ -50,6 +50,23 @@ export default function StudentDashboardPage() {
     todayActiveMinutes: 14,
     isMeaningfulToday: true,
   });
+  const [recommendation, setRecommendation] = useState<{
+    topicName: string;
+    subtopicName: string;
+    targetCount: number;
+    explanation: string;
+    estimatedAccuracy: number;
+  }>({
+    topicName: 'Respiratory medicines',
+    subtopicName: 'Asthma and COPD',
+    targetCount: 15,
+    explanation: 'Based on your recent practice: we recommend a focused drill on clinical guidelines and inhaler technique.',
+    estimatedAccuracy: 50,
+  });
+  const [dailyGoal, setDailyGoal] = useState({
+    answeredToday: 12,
+    dailyTarget: 20,
+  });
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
@@ -64,7 +81,6 @@ export default function StudentDashboardPage() {
           const pathway = data.pathways?.[0];
           if (pathway && pathway.categories) {
             const mapped: CategoryItem[] = pathway.categories.map((cat: any, idx: number) => {
-              // Calculate counts or provide calibrated initial states
               const subCount = cat.subtopics?.length || 1;
               const totalEst = subCount * 5;
               const attemptedEst = Math.min(totalEst, (idx + 1) * 3);
@@ -82,14 +98,13 @@ export default function StudentDashboardPage() {
           }
         }
 
-        // 2. Fetch live user streak metrics if authenticated
+        // 2. Fetch live user streak metrics, daily goal & recommendation if authenticated
         if (user) {
           const token = await user.getIdToken();
-          const streakRes = await fetch(`${API_URL}/api/v1/analytics/streak`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const headers = { Authorization: `Bearer ${token}` };
+
+          // Fetch Streak
+          const streakRes = await fetch(`${API_URL}/api/v1/analytics/streak`, { headers });
           if (streakRes.ok) {
             const sData = await streakRes.json();
             setStreakMetrics({
@@ -99,6 +114,31 @@ export default function StudentDashboardPage() {
               todayActiveMinutes: sData.todayActiveMinutes ?? 0,
               isMeaningfulToday: Boolean(sData.isMeaningfulToday),
             });
+          }
+
+          // Fetch Daily Goal
+          const goalRes = await fetch(`${API_URL}/api/v1/analytics/daily-goal`, { headers });
+          if (goalRes.ok) {
+            const gData = await goalRes.json();
+            setDailyGoal({
+              answeredToday: gData.answeredToday ?? 0,
+              dailyTarget: gData.dailyTarget ?? 20,
+            });
+          }
+
+          // Fetch Recommendation
+          const recRes = await fetch(`${API_URL}/api/v1/analytics/recommendation`, { headers });
+          if (recRes.ok) {
+            const rData = await recRes.json();
+            if (rData.recommendation) {
+              setRecommendation({
+                topicName: rData.recommendation.topicName || 'Therapeutics',
+                subtopicName: rData.recommendation.subtopicName || 'Clinical Guidelines',
+                targetCount: rData.recommendation.recommendedCount || 15,
+                explanation: rData.recommendation.explanation || 'Personalized recommendation based on your syllabus coverage.',
+                estimatedAccuracy: rData.recommendation.estimatedAccuracy || 50,
+              });
+            }
           }
         }
       } catch (err) {
@@ -124,15 +164,17 @@ export default function StudentDashboardPage() {
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <Badge variant="default" className="text-xs font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> AI Recommendation (Milestone 4)
+                  <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Recommended Focus Drill
                 </Badge>
-                <span className="text-xs text-slate font-mono">135 Questions Live</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20">
+                  {profile?.displayName ? `Good evening, ${profile.displayName.split(' ')[0]}` : 'Active Session'}
+                </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-ink leading-tight">
-                Calculations: Cockcroft-Gault & Renal Dosing
+                {recommendation.topicName}: {recommendation.subtopicName}, {recommendation.targetCount} questions
               </h2>
               <p className="text-slate text-xs sm:text-sm mt-2 leading-relaxed">
-                Based on your recent Paper 1 practice: accuracy is currently <strong>50%</strong>. We recommend a focused 10-question drill on creatinine clearance formulas and narrow therapeutic index adjustments.
+                {recommendation.explanation}
               </p>
             </div>
 
