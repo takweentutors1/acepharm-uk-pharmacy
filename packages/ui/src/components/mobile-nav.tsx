@@ -104,13 +104,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentPath = '' }) => {
 
         <div className="pt-6 border-t border-border space-y-3">
           <a
-            href="https://app.acepharm.co.uk/login"
+            href="https://acepharm-app.pages.dev/auth/login"
             className="block text-center text-sm font-semibold text-slate hover:text-ink py-2.5 rounded-btn border border-border transition-colors"
           >
             Log in
           </a>
           <a
-            href="https://app.acepharm.co.uk/register"
+            href="https://acepharm-app.pages.dev/auth/register"
             className="block text-center text-sm font-semibold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
           >
             Start revising free
