@@ -107,6 +107,9 @@ export function SessionBuilder() {
     async function loadLiveCurriculum() {
       try {
         const res = await fetch(`${API_URL}/api/v1/curriculum/tree`);
+        const searchParams = new URLSearchParams(window.location.search);
+        const preselectedCat = searchParams.get('categoryId');
+
         if (res.ok) {
           const data = await res.json();
           const pathway = data.pathways?.[0];
@@ -122,10 +125,14 @@ export function SessionBuilder() {
               })),
             }));
             setCategories(mapped);
-            if (mapped.length > 0) {
+            if (preselectedCat && mapped.some((m) => m.id === preselectedCat)) {
+              setSelectedCategoryIds([preselectedCat]);
+            } else if (mapped.length > 0) {
               setSelectedCategoryIds(mapped.slice(0, 2).map((c) => c.id));
             }
           }
+        } else if (preselectedCat) {
+          setSelectedCategoryIds([preselectedCat]);
         }
       } catch (e) {
         console.warn('Could not load live curriculum categories in session builder:', e);

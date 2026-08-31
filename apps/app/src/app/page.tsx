@@ -84,32 +84,58 @@ export default function StudentDashboardPage() {
       try {
         // 1. Fetch real curriculum tree from Cloudflare D1
         const res = await fetch(`${API_URL}/api/v1/curriculum/tree`);
+        let baseCategories: CategoryItem[] = [];
+
         if (res.ok) {
           const data = await res.json();
           const pathway = data.pathways?.[0];
           if (pathway && pathway.categories) {
-            const mapped: CategoryItem[] = pathway.categories.map((cat: any, idx: number) => {
+            baseCategories = pathway.categories.map((cat: any) => {
               const subCount = cat.subtopics?.length || 1;
               const totalEst = subCount * 5;
-              const attemptedEst = Math.min(totalEst, (idx + 1) * 3);
-              const acc = idx % 2 === 0 ? 80 : 65;
               return {
                 id: cat.id,
                 name: cat.name,
                 total: totalEst,
-                attempted: attemptedEst,
-                accuracy: acc,
-                status: acc >= 75 ? 'Secure' : acc >= 60 ? 'Developing' : 'Needs Attention',
+                attempted: 0,
+                accuracy: 0,
+                status: 'Not started',
               };
             });
-            setCategoriesOverview(mapped);
+            setCategoriesOverview(baseCategories);
           }
         }
 
-        // 2. Fetch live user streak metrics, daily goal & recommendation if authenticated
+        // 2. Fetch live user streak metrics, daily goal & progress metrics if authenticated
         if (user) {
           const token = await user.getIdToken();
           const headers = { Authorization: `Bearer ${token}` };
+
+          // Fetch Live Progress Metrics & Coverage Map
+          const metricsRes = await fetch(`${API_URL}/api/v1/analytics/metrics`, { headers });
+          if (metricsRes.ok) {
+            const mData = await metricsRes.json();
+            if (mData.coverageMap && mData.coverageMap.length > 0) {
+              const liveCategories: CategoryItem[] = mData.coverageMap.map((cov: any) => {
+                const subAccuracies = (cov.subtopics || [])
+                  .map((s: any) => s.firstPassAccuracy || 0)
+                  .filter((a: number) => a > 0);
+                const avgAcc = subAccuracies.length > 0
+                  ? Math.round(subAccuracies.reduce((a: number, b: number) => a + b, 0) / subAccuracies.length)
+                  : (cov.attemptedQuestions > 0 ? 70 : 0);
+
+                return {
+                  id: cov.categoryId,
+                  name: cov.categoryName,
+                  total: cov.totalQuestions || 10,
+                  attempted: cov.attemptedQuestions || 0,
+                  accuracy: avgAcc,
+                  status: cov.statusLabel || (cov.attemptedQuestions > 0 ? 'Developing' : 'Not started'),
+                };
+              });
+              setCategoriesOverview(liveCategories);
+            }
+          }
 
           // Fetch Streak
           const streakRes = await fetch(`${API_URL}/api/v1/analytics/streak`, { headers });
