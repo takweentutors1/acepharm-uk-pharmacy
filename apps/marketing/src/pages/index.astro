@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Button, Card, Badge } from '@acepharm/ui';
+import { Button, Card } from '@acepharm/ui';
 ---
 
 <BaseLayout 
@@ -8,17 +8,17 @@ import { Button, Card, Badge } from '@acepharm/ui';
   description="AcePharm brings pharmacy-specific questions, clear explanations and progress analytics into one focused platform designed for UK pharmacy students."
 >
   {/* 2.2 Hero Section */}
-  <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 via-canvas to-canvas border-b border-border-subtle">
+  <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-indigo-wash/60 via-canvas to-canvas border-b border-border">
     <div class="max-w-5xl mx-auto px-4 text-center">
       <div class="inline-block mb-4">
-        <span class="px-3.5 py-1 rounded-full bg-primary-100/80 text-primary-800 text-xs font-semibold uppercase tracking-wider border border-primary-200">
+        <span class="px-3.5 py-1 rounded-full bg-indigo-wash text-indigo text-xs font-semibold uppercase tracking-wider border border-indigo-200">
           Created by pharmacists. Built for pharmacy students.
         </span>
       </div>
       <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-ink max-w-4xl mx-auto leading-tight">
         Pharmacy revision that shows you exactly what to study next.
       </h1>
-      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+      <p class="mt-6 text-lg sm:text-xl text-slate max-w-2xl mx-auto leading-relaxed">
         AcePharm brings pharmacy-specific questions, clear explanations and progress analytics into one focused platform designed for UK pharmacy students.
       </p>
       
@@ -31,32 +31,32 @@ import { Button, Card, Badge } from '@acepharm/ui';
         </a>
       </div>
       
-      <p class="mt-3 text-xs text-ink-subtle">
+      <p class="mt-3 text-xs text-slate-light">
         No card required. Upgrade only when you are ready.
       </p>
-      <p class="mt-6 text-xs font-medium text-ink-muted uppercase tracking-wider">
+      <p class="mt-6 text-xs font-medium text-slate uppercase tracking-wider">
         Built for MPharm students and the next generation of pharmacists.
       </p>
 
       {/* Hero Visual Mockup */}
-      <div class="mt-12 max-w-3xl mx-auto bg-white rounded-2xl border border-border-subtle shadow-xl p-6 sm:p-8 text-left grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="mt-12 max-w-3xl mx-auto bg-surface rounded-card border border-border shadow-card p-6 sm:p-8 text-left grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div class="sm:col-span-2 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-ink-subtle uppercase tracking-wider">Study Session</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">Good evening, Aisha</span>
+            <span class="text-xs font-bold text-slate-light uppercase tracking-wider">Study Session</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20">Good evening, Aisha</span>
           </div>
           <h2 class="text-base font-bold text-ink">Recommended next session: Respiratory medicines, 15 questions</h2>
-          <div class="flex gap-4 text-xs text-ink-muted">
+          <div class="flex gap-4 text-xs text-slate">
             <span><strong>Weakest topic:</strong> Asthma and COPD</span>
             <span><strong>Strongest topic:</strong> Calculations</span>
           </div>
         </div>
-        <div class="flex flex-col justify-between border-t sm:border-t-0 sm:border-l border-border-subtle pt-4 sm:pt-0 sm:pl-6 space-y-2">
-          <div class="text-xs text-ink-muted">
+        <div class="flex flex-col justify-between border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-6 space-y-2">
+          <div class="text-xs text-slate">
             <div>Daily target: <strong>12 of 20 questions</strong></div>
             <div class="mt-1">Current streak: <strong>4 study days</strong></div>
           </div>
-          <a href="https://app.acepharm.co.uk/session/new" class="w-full">
+          <a href="https://app.acepharm.co.uk/register" class="w-full">
             <Button size="sm" variant="primary" className="w-full">Resume</Button>
           </a>
         </div>
@@ -65,16 +65,16 @@ import { Button, Card, Badge } from '@acepharm/ui';
   </section>
 
   {/* 2.3 Trust Strip */}
-  <section class="py-10 bg-surface-raised border-b border-border-subtle">
+  <section class="py-10 bg-canvas border-b border-border">
     <div class="max-w-6xl mx-auto px-4">
-      <p class="text-center text-xs font-bold uppercase tracking-widest text-ink-subtle mb-6">
+      <p class="text-center text-xs font-bold uppercase tracking-widest text-slate-light mb-6">
         Trusted revision. Evidence-led learning.
       </p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-xs text-ink-muted font-medium">
-        <div class="p-3 bg-white rounded-xl border border-border-subtle/60 shadow-xs">Every answer referenced to UK clinical guidance</div>
-        <div class="p-3 bg-white rounded-xl border border-border-subtle/60 shadow-xs">Triple review workflow: clinical, educational, editorial</div>
-        <div class="p-3 bg-white rounded-xl border border-border-subtle/60 shadow-xs">Isolated first-attempt vs practice calibration data</div>
-        <div class="p-3 bg-white rounded-xl border border-border-subtle/60 shadow-xs">Built exclusively for UK pharmacy practice</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-xs text-slate font-medium">
+        <div class="p-3 bg-surface rounded-card border border-border shadow-xs">Every answer referenced to UK clinical guidance</div>
+        <div class="p-3 bg-surface rounded-card border border-border shadow-xs">Triple review workflow: clinical, educational, editorial</div>
+        <div class="p-3 bg-surface rounded-card border border-border shadow-xs">Isolated first-attempt vs practice calibration data</div>
+        <div class="p-3 bg-surface rounded-card border border-border shadow-xs">Built exclusively for UK pharmacy practice</div>
       </div>
     </div>
   </section>
@@ -83,30 +83,30 @@ import { Button, Card, Badge } from '@acepharm/ui';
   <section class="py-20 max-w-5xl mx-auto px-4">
     <div class="text-center max-w-3xl mx-auto mb-12">
       <h2 class="text-3xl font-bold text-ink">Revision should not feel like guesswork.</h2>
-      <p class="mt-4 text-base text-ink-muted leading-relaxed">
+      <p class="mt-4 text-base text-slate leading-relaxed">
         Pharmacy students often have plenty of material but no clear way to decide what deserves attention. Notes become scattered, question banks show percentages without explaining what to do next, and revision plans quickly fall behind.
       </p>
-      <p class="mt-2 text-base font-semibold text-primary">
+      <p class="mt-2 text-base font-semibold text-indigo">
         AcePharm brings the important parts together, so every session has a purpose.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+      <Card className="p-6 bg-surface border border-border rounded-card shadow-xs">
         <h3 class="font-bold text-ink mb-2">Scattered resources</h3>
-        <p class="text-sm text-ink-muted leading-relaxed">
+        <p class="text-sm text-slate leading-relaxed">
           Switching between BNF tabs, lecture slides and disjointed practice PDFs makes revision fragmented and exhausting.
         </p>
       </Card>
-      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+      <Card className="p-6 bg-surface border border-border rounded-card shadow-xs">
         <h3 class="font-bold text-ink mb-2">Unclear progress metrics</h3>
-        <p class="text-sm text-ink-muted leading-relaxed">
+        <p class="text-sm text-slate leading-relaxed">
           A generic percentage score doesn't tell you whether you truly understand a topic or simply memorised the answer on a repeat attempt.
         </p>
       </Card>
-      <Card className="p-6 bg-white border border-border-subtle rounded-2xl shadow-sm">
+      <Card className="p-6 bg-surface border border-border rounded-card shadow-xs">
         <h3 class="font-bold text-ink mb-2">Overwhelming scope</h3>
-        <p class="text-sm text-ink-muted leading-relaxed">
+        <p class="text-sm text-slate leading-relaxed">
           Without adaptive guidance, students spend precious revision hours on comfortable topics instead of clinical blind spots.
         </p>
       </Card>
@@ -114,34 +114,34 @@ import { Button, Card, Badge } from '@acepharm/ui';
   </section>
 
   {/* 2.5 Learning Loop */}
-  <section class="py-20 bg-slate-50 border-y border-border-subtle">
+  <section class="py-20 bg-canvas border-y border-border">
     <div class="max-w-5xl mx-auto px-4">
       <div class="text-center max-w-2xl mx-auto mb-14">
-        <span class="text-xs font-bold uppercase tracking-wider text-primary">More than a question bank</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo">More than a question bank</span>
         <h2 class="text-3xl font-bold text-ink mt-2">A complete learning loop.</h2>
-        <p class="text-sm text-ink-muted mt-2">Every answer should help make the next study decision easier.</p>
+        <p class="text-sm text-slate mt-2">Every answer should help make the next study decision easier.</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
-          <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center mb-4 text-sm">1</span>
+        <div class="p-6 bg-surface rounded-card border border-border shadow-xs">
+          <span class="w-8 h-8 rounded-full bg-indigo-wash text-indigo font-bold flex items-center justify-center mb-4 text-sm">1</span>
           <h3 class="font-bold text-ink text-base mb-2">Focused Practice</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">Answer realistic single best answer and pharmacy calculation scenarios with pre-submission confidence ratings.</p>
+          <p class="text-xs text-slate leading-relaxed">Answer realistic single best answer and pharmacy calculation scenarios with pre-submission confidence ratings.</p>
         </div>
-        <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
-          <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center mb-4 text-sm">2</span>
+        <div class="p-6 bg-surface rounded-card border border-border shadow-xs">
+          <span class="w-8 h-8 rounded-full bg-indigo-wash text-indigo font-bold flex items-center justify-center mb-4 text-sm">2</span>
           <h3 class="font-bold text-ink text-base mb-2">Deep Explanations</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">Learn from structured 4-stage breakdowns: takeaway point, full clinical rationale, option-by-option analysis, and guidance links.</p>
+          <p class="text-xs text-slate leading-relaxed">Learn from structured 4-stage breakdowns: takeaway point, full clinical rationale, option-by-option analysis, and guidance links.</p>
         </div>
-        <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
-          <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center mb-4 text-sm">3</span>
+        <div class="p-6 bg-surface rounded-card border border-border shadow-xs">
+          <span class="w-8 h-8 rounded-full bg-indigo-wash text-indigo font-bold flex items-center justify-center mb-4 text-sm">3</span>
           <h3 class="font-bold text-ink text-base mb-2">Calibration Insights</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">Track first-attempt accuracy separately from repeat practice and uncover high-confidence blind spots.</p>
+          <p class="text-xs text-slate leading-relaxed">Track first-attempt accuracy separately from repeat practice and uncover high-confidence blind spots.</p>
         </div>
-        <div class="p-6 bg-white rounded-2xl border border-border-subtle shadow-sm">
-          <span class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center mb-4 text-sm">4</span>
+        <div class="p-6 bg-surface rounded-card border border-border shadow-xs">
+          <span class="w-8 h-8 rounded-full bg-indigo-wash text-indigo font-bold flex items-center justify-center mb-4 text-sm">4</span>
           <h3 class="font-bold text-ink text-base mb-2">Targeted Next Step</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">Receive an adaptive recommendation for your next session based on unseen volume and weak subtopics.</p>
+          <p class="text-xs text-slate leading-relaxed">Receive an adaptive recommendation for your next session based on unseen volume and weak subtopics.</p>
         </div>
       </div>
     </div>
@@ -151,16 +151,16 @@ import { Button, Card, Badge } from '@acepharm/ui';
   <section class="py-20 max-w-5xl mx-auto px-4">
     <div class="text-center max-w-3xl mx-auto mb-12">
       <h2 class="text-3xl font-bold text-ink">Questions designed to teach, not merely test.</h2>
-      <p class="mt-4 text-base text-ink-muted leading-relaxed">
+      <p class="mt-4 text-base text-slate leading-relaxed">
         Work through focused practice or timed sessions. Rate your confidence before submitting, compare your reasoning with the explanation, and revisit difficult questions when you need to.
       </p>
       <div class="mt-6 flex flex-wrap justify-center gap-2">
         {['Single best answer', 'Pharmacy calculations', 'Timed or untimed', 'Confidence rating', 'Bookmark and notes', 'Question flagging', 'Keyboard shortcuts', 'Detailed answer review', 'Referenced learning points'].map((feat) => (
-          <span class="px-3 py-1 bg-surface-raised border border-border-subtle rounded-full text-xs font-semibold text-ink-muted">{feat}</span>
+          <span class="px-3 py-1 bg-surface border border-border rounded-full text-xs font-semibold text-slate shadow-xs">{feat}</span>
         ))}
       </div>
       <div class="mt-8">
-        <a href="https://app.acepharm.co.uk/session/new">
+        <a href="https://app.acepharm.co.uk/register">
           <Button variant="primary">Try a sample question</Button>
         </a>
       </div>
@@ -168,12 +168,12 @@ import { Button, Card, Badge } from '@acepharm/ui';
   </section>
 
   {/* 2.9b Ace AI Section */}
-  <section class="py-20 bg-gradient-to-b from-primary-50/30 to-canvas border-y border-border-subtle">
+  <section class="py-20 bg-gradient-to-b from-indigo-wash/40 via-canvas to-canvas border-y border-border">
     <div class="max-w-5xl mx-auto px-4">
       <div class="text-center max-w-3xl mx-auto mb-12">
-        <span class="text-xs font-bold uppercase tracking-wider text-primary">Meet Ace</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo">Meet Ace</span>
         <h2 class="text-3xl font-bold text-ink mt-2">A tutor that has read every explanation, and remembers every answer you gave.</h2>
-        <p class="mt-4 text-base text-ink-muted leading-relaxed">
+        <p class="mt-4 text-base text-slate leading-relaxed">
           Ace sits beside every question. Ask it to explain something differently, challenge the answer, or test you on it — and it answers from AcePharm’s reviewed content, citing where each point came from.
         </p>
         <div class="mt-6 flex justify-center gap-4">
@@ -188,78 +188,78 @@ import { Button, Card, Badge } from '@acepharm/ui';
   <section class="py-20 max-w-5xl mx-auto px-4">
     <div class="text-center max-w-2xl mx-auto mb-12">
       <h2 class="text-3xl font-bold text-ink">Premium revision without premium-student pricing.</h2>
-      <p class="mt-4 text-sm text-ink-muted">
+      <p class="mt-4 text-sm text-slate">
         Start with the free question sampler. Upgrade when you are ready for full access.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
       {/* Monthly */}
-      <Card className="p-8 bg-white border border-border-subtle rounded-2xl shadow-sm flex flex-col justify-between">
+      <Card className="p-8 bg-surface border border-border rounded-card shadow-xs flex flex-col justify-between">
         <div>
           <h3 class="text-lg font-bold text-ink">Monthly Access</h3>
           <div class="mt-4 flex items-baseline gap-1">
             <span class="text-4xl font-extrabold text-ink">£4.99</span>
-            <span class="text-xs text-ink-muted">per month</span>
+            <span class="text-xs text-slate">per month</span>
           </div>
-          <p class="text-xs text-ink-muted mt-3 leading-relaxed">
+          <p class="text-xs text-slate mt-3 leading-relaxed">
             Flexible access for focused periods of revision.
           </p>
         </div>
         <div class="mt-8">
-          <a href="https://app.acepharm.co.uk/register">
+          <a href="/pricing">
             <Button variant="outline" className="w-full">Choose monthly</Button>
           </a>
         </div>
       </Card>
 
       {/* Yearly */}
-      <Card className="p-8 bg-primary-50/50 border-2 border-primary rounded-2xl shadow-md flex flex-col justify-between relative">
+      <Card className="p-8 bg-surface border-2 border-indigo rounded-card shadow-card flex flex-col justify-between relative">
         <div class="absolute -top-3 right-6">
-          <span class="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-full uppercase tracking-wider shadow-sm">
-            Most popular
+          <span class="px-3 py-1 bg-indigo text-white text-[11px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+            Most popular · Save £9.89
           </span>
         </div>
         <div>
           <h3 class="text-lg font-bold text-ink">Yearly Revision</h3>
           <div class="mt-4 flex items-baseline gap-1">
             <span class="text-4xl font-extrabold text-ink">£49.99</span>
-            <span class="text-xs text-ink-muted">per year</span>
+            <span class="text-xs text-slate">per year</span>
           </div>
-          <p class="text-xs text-primary font-semibold mt-1">Save £9.89 compared with twelve months.</p>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">
-            One payment for a full year of revision.
+          <p class="text-xs text-teal font-semibold mt-1">Equivalent to £4.16/month (billed annually).</p>
+          <p class="text-xs text-slate mt-2 leading-relaxed">
+            One payment for a full year of uninterrupted revision.
           </p>
         </div>
         <div class="mt-8">
-          <a href="https://app.acepharm.co.uk/register">
+          <a href="/pricing">
             <Button variant="primary" className="w-full">Choose yearly</Button>
           </a>
         </div>
       </Card>
     </div>
 
-    <p class="text-center text-xs text-ink-subtle mt-8">
+    <p class="text-center text-xs text-slate-light mt-8">
       Clear renewal information. Cancel online. Your completed progress remains available if your subscription ends.
     </p>
   </section>
 
   {/* 2.13 FAQ Preview */}
-  <section class="py-16 bg-surface-raised border-t border-border-subtle">
+  <section class="py-16 bg-canvas border-t border-border">
     <div class="max-w-4xl mx-auto px-4">
       <h2 class="text-2xl font-bold text-ink text-center mb-8">Frequently Asked Questions</h2>
       <div class="space-y-4">
-        <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <div class="p-5 bg-surface rounded-card border border-border shadow-xs">
           <h3 class="font-bold text-ink text-sm">Is AcePharm only for the Registration Assessment?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">No. AcePharm is being designed to support students throughout the MPharm degree and into foundation training. Available content is clearly labelled by pathway and stage.</p>
+          <p class="text-xs text-slate mt-2 leading-relaxed">No. AcePharm is being designed to support students throughout the MPharm degree and into foundation training. Available content is clearly labelled by pathway and stage.</p>
         </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <div class="p-5 bg-surface rounded-card border border-border shadow-xs">
           <h3 class="font-bold text-ink text-sm">Who writes the questions?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Questions are written and reviewed through AcePharm’s editorial process. Each published item has an identifiable authoring and review history.</p>
+          <p class="text-xs text-slate mt-2 leading-relaxed">Questions are written and reviewed through AcePharm’s editorial process. Each published item has an identifiable authoring and review history.</p>
         </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle">
+        <div class="p-5 bg-surface rounded-card border border-border shadow-xs">
           <h3 class="font-bold text-ink text-sm">Are the answers referenced?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Key learning points link to appropriate guidance, formularies, primary sources or other approved references. Review dates are shown where relevant.</p>
+          <p class="text-xs text-slate mt-2 leading-relaxed">Key learning points link to appropriate guidance, formularies, primary sources or other approved references. Review dates are shown where relevant.</p>
         </div>
       </div>
       <div class="text-center mt-8">
@@ -271,13 +271,13 @@ import { Button, Card, Badge } from '@acepharm/ui';
   {/* 2.14 Final CTA */}
   <section class="py-20 max-w-5xl mx-auto px-4 text-center">
     <h2 class="text-3xl sm:text-4xl font-bold text-ink">Your next revision session is already waiting.</h2>
-    <p class="text-base text-ink-muted max-w-xl mx-auto mt-4 leading-relaxed">
+    <p class="text-base text-slate max-w-xl mx-auto mt-4 leading-relaxed">
       Create your free account, choose your learning goal and begin with a focused set of pharmacy questions.
     </p>
     <div class="mt-8 flex justify-center gap-4">
       <a href="https://app.acepharm.co.uk/register"><Button size="lg" variant="primary">Start revising free</Button></a>
       <a href="/pricing"><Button size="lg" variant="outline">View pricing</Button></a>
     </div>
-    <p class="text-xs text-ink-subtle mt-3">No card required for free access.</p>
+    <p class="text-xs text-slate-light mt-3">No card required for free access.</p>
   </section>
 </BaseLayout>

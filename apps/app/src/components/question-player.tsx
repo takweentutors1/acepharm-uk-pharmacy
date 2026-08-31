@@ -6,6 +6,8 @@ import { ReportQuestionModal } from '@/components/report-modal';
 import { AskAcePanel } from '@/components/ask-ace-panel';
 import { FloatingHighlightMenu } from '@/components/floating-highlight-menu';
 import { FreeTierUpgradeModal } from '@/components/free-tier-upgrade-modal';
+import { GphcCalculator } from '@/components/gphc-calculator';
+import { ClinicalReferenceModal } from '@/components/clinical-reference-modal';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -21,7 +23,9 @@ import {
   Stethoscope,
   Info,
   FileEdit,
-  Save
+  Save,
+  Calculator,
+  BookOpen
 } from 'lucide-react';
 
 export interface Option {
@@ -137,6 +141,34 @@ export function QuestionPlayer({
   const [hideOptions, setHideOptions] = useState(userPreferences.hideOptionsByDefault);
   const [showConfidencePrompt, setShowConfidencePrompt] = useState(userPreferences.showConfidencePrompt);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isRefModalOpen, setIsRefModalOpen] = useState(false);
+
+  // Auto-save & resume state from localStorage for network resilience
+  useEffect(() => {
+    if (!sessionId) return;
+    const savedKey = `acepharm_session_${sessionId}_q_${question.id}`;
+    const saved = localStorage.getItem(savedKey);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.selectedOptionId) setSelectedOptionId(parsed.selectedOptionId);
+        if (parsed.confidence) setConfidence(parsed.confidence);
+        if (parsed.isSubmitted) setIsSubmitted(true);
+      } catch (e) {}
+    }
+  }, [sessionId, question.id]);
+
+  const persistResponse = (optId: string | null, conf: any, submitted: boolean) => {
+    if (!sessionId) return;
+    const savedKey = `acepharm_session_${sessionId}_q_${question.id}`;
+    localStorage.setItem(savedKey, JSON.stringify({
+      selectedOptionId: optId,
+      confidence: conf,
+      isSubmitted: submitted,
+      updatedAt: Date.now(),
+    }));
+  };
 
   const handleSaveNote = () => {
     if (!personalNote.trim()) return;
@@ -227,6 +259,7 @@ export function QuestionPlayer({
     if (!selectedOptionId || isSubmitted) return;
     // OPTIMISTIC-UI SUBMISSION: Immediate feedback rendering (<300ms perceived latency)
     setIsSubmitted(true);
+    persistResponse(selectedOptionId, confidence, true);
 
     // Free-tier milestone check: trigger upgrade modal AFTER question-30 explanation finishes rendering
     const currentAnsweredCount = Number(localStorage.getItem('acepharm_free_tier_count') || '0') + 1;
@@ -265,9 +298,38 @@ export function QuestionPlayer({
           <Badge variant="outline" className="capitalize text-[11px] hidden sm:inline-block">
             {question.sector} Pharmacy
           </Badge>
+          {question.questionType === 'calculation' && (
+            <Badge variant="teal" className="text-[11px] hidden md:inline-block font-mono">
+              Paper 1 Calculation
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
+          {/* GPhC Calculator Button */}
+          <button
+            type="button"
+            onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
+            className={`p-1.5 rounded hover:bg-surface transition-colors flex items-center gap-1 text-xs ${
+              isCalculatorOpen ? 'text-indigo bg-indigo/10 font-bold' : 'text-slate hover:text-ink'
+            }`}
+            title="Open Pearson VUE style GPhC exam calculator"
+          >
+            <Calculator className="w-4 h-4" />
+            <span className="hidden sm:inline">Calculator</span>
+          </button>
+
+          {/* Clinical & Lab References Button */}
+          <button
+            type="button"
+            onClick={() => setIsRefModalOpen(true)}
+            className="p-1.5 rounded hover:bg-surface transition-colors flex items-center gap-1 text-xs text-slate hover:text-ink"
+            title="Open Biochemical lab reference ranges and therapeutic drug levels"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="hidden sm:inline">Lab Ranges</span>
+          </button>
+
           {/* Hide Options Toggle */}
           <button
             type="button"
@@ -321,6 +383,19 @@ export function QuestionPlayer({
           </div>
         </div>
       </div>
+
+      {/* Floating Draggable-style GPhC Calculator */}
+      {isCalculatorOpen && (
+        <div className="fixed bottom-6 right-6 z-50 shadow-2xl animate-in slide-in-from-bottom-5">
+          <GphcCalculator onClose={() => setIsCalculatorOpen(false)} />
+        </div>
+      )}
+
+      {/* Clinical Lab Ranges Modal */}
+      <ClinicalReferenceModal
+        isOpen={isRefModalOpen}
+        onClose={() => setIsRefModalOpen(false)}
+      />
 
       {/* Personal Notes Drawer (Collapsible) */}
       {showNotesDrawer && (

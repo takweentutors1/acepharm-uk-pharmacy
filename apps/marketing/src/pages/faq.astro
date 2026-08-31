@@ -1,118 +1,121 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Button } from '@acepharm/ui';
+import { FaqAccordion } from '@acepharm/ui';
+
+const FAQ_GROUPS = [
+  {
+    category: 'Product & Question Bank',
+    items: [
+      {
+        question: 'What year of the MPharm is AcePharm for?',
+        answer: 'AcePharm is built specifically around MPharm years 2 to 4, foundation training, and GPhC registration candidates. Content is cleanly categorised by topic and clinical domain so you can align sessions directly with your current university module or revision schedule.',
+      },
+      {
+        question: 'Is AcePharm only for the Registration Assessment?',
+        answer: 'No. AcePharm is designed to support pharmacy students throughout undergraduate degree modules (therapeutics, pharmacology, pharmaceutics, and calculations) and continuously through foundation training into the registration assessment.',
+      },
+      {
+        question: 'How many questions are in the bank?',
+        answer: 'The question bank is continuously expanding across all major BNF clinical chapters and high-weighting calculations. You can see exact question counts broken down by topic and difficulty level in the question bank browser prior to starting a session.',
+      },
+      {
+        question: 'Can I choose which topics and formats to practise?',
+        answer: 'Yes. You have complete control over session creation. Choose specific topics (e.g. Cardiovascular, Respiratory, Calculations), question types (Single Best Answer, Extended Matching Questions), time modes (untimed study mode with immediate rationales or timed exam simulation), and difficulty levels.',
+      },
+    ],
+  },
+  {
+    category: 'Clinical Quality & AI Tutor (Ace)',
+    items: [
+      {
+        question: 'Who writes and reviews the questions?',
+        answer: 'All questions and clinical rationales are authored by qualified UK clinical pharmacists and subject matter experts. Every item passes through our triple-review workflow (clinical accuracy, educational design, and editorial clarity) before publication.',
+      },
+      {
+        question: 'Are the clinical rationales referenced?',
+        answer: 'Yes. Every question rationale links directly to authoritative UK reference sources including the BNF, NICE guidelines, MHRA drug safety updates, and NHS national frameworks with clearly stated review dates.',
+      },
+      {
+        question: 'Does Ace (AI Tutor) replace official guidance or give medical advice?',
+        answer: 'No. Ace is an educational tutor strictly grounded in AcePharm’s reviewed content and cited UK clinical guidelines. It does not provide patient-specific clinical advice and is never a substitute for the BNF, official guidance, or your own professional judgement.',
+      },
+    ],
+  },
+  {
+    category: 'Subscriptions & Account Access',
+    items: [
+      {
+        question: 'Is the Explorer plan completely free?',
+        answer: 'Yes. The Explorer plan provides 30 questions every month, resetting on your signup anniversary. It is permanently free—not a timed trial—and requires no debit or credit card to join.',
+      },
+      {
+        question: 'Can I cancel my subscription at any time?',
+        answer: 'Yes. You can cancel your Monthly or Yearly subscription online at any time in one click from your account settings. You will retain full Pro access until the end of your paid billing period.',
+      },
+      {
+        question: 'What happens to my study history if I cancel Pro?',
+        answer: 'Your study history, first-attempt accuracy calibration data, question bookmarks, and personal notes remain safely preserved in your account forever. If you decide to reactivate Pro in the future, your revision analytics will pick up right where you left off.',
+      },
+      {
+        question: 'Can I use AcePharm on mobile and tablet?',
+        answer: 'Yes. AcePharm is engineered from the ground up as a responsive, mobile-first web application. You can revise seamlessly across your phone, tablet, and desktop without installing heavy native apps.',
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
-  title="FAQ — AcePharm"
+  title="FAQ — Frequently Asked Questions — AcePharm"
   description="Frequently asked questions about AcePharm question bank, content review, subscriptions and technical support."
 >
   {/* FAQPage JSON-LD Structured Data for AEO/GEO */}
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'Is AcePharm only for the Registration Assessment?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'No. AcePharm is being designed to support students throughout the MPharm degree and into foundation training. Available content is clearly labelled by pathway and stage.'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: 'Who writes the questions?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Questions are written and reviewed through AcePharm’s editorial process. Each published item has an identifiable authoring and review history.'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: 'Are the answers referenced?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Key learning points link to appropriate guidance, formularies, primary sources or other approved references. Review dates are shown where relevant.'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: 'Does the AI tutor replace official guidance?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'No. Ace explains AcePharm’s own reviewed content and cites where each point came from. It does not give patient-specific advice, and it is not a substitute for the BNF, national guidance or your own clinical judgement.'
-        }
+    mainEntity: FAQ_GROUPS.flatMap((group) => group.items).map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
       }
-    ]
+    }))
   })} />
 
-  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-indigo-wash/50 via-canvas to-canvas border-b border-border text-center px-4">
     <div class="max-w-4xl mx-auto">
+      <div class="inline-block mb-4">
+        <span class="px-3.5 py-1 rounded-full bg-indigo-wash text-indigo text-xs font-semibold uppercase tracking-wider border border-indigo-200">
+          Support & Clarity
+        </span>
+      </div>
       <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
         Frequently Asked Questions
       </h1>
-      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
-        Everything you need to know about the platform, question bank and subscriptions.
+      <p class="mt-6 text-lg sm:text-xl text-slate max-w-2xl mx-auto leading-relaxed">
+        Everything you need to know about the question bank, clinical reviews, AI tutoring, and flexible plans.
       </p>
     </div>
   </section>
 
-  <section class="py-20 max-w-4xl mx-auto px-4 space-y-16">
-    {/* Product */}
-    <div>
-      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Product</h2>
-      <div class="space-y-4">
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">What year of the MPharm is AcePharm for?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">AcePharm is currently built around MPharm years 2 to 4. Content is labelled by topic so you can focus on what your course is covering now.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">How many questions are there?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">The question bank is growing. You can see exactly how many questions are available in each topic from the question bank browser before you start a session.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">Can I choose which topics to practise?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Yes. You can build a session from any combination of topics, question types and difficulty levels, or let AcePharm select a balanced mixture for you.</p>
-        </div>
-      </div>
-    </div>
+  <section class="py-20 max-w-4xl mx-auto px-4">
+    {/* Interactive Accordion Island */}
+    <FaqAccordion client:visible groups={FAQ_GROUPS} />
 
-    {/* Content */}
-    <div>
-      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Content</h2>
-      <div class="space-y-4">
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">How do I know the answers are correct?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Every published question passes clinical, educational and editorial review, and key learning points link to supporting guidance. If you think something is wrong, report it from the question itself — we review every report.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">What happens if guidance changes?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Content has a scheduled review date and is reviewed sooner when guidance changes. If a question you have answered is updated, we will tell you.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">Does the AI tutor replace official guidance?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">No. Ace explains AcePharm’s own reviewed content and cites where each point came from. It does not give patient-specific advice, and it is not a substitute for the BNF, national guidance or your own clinical judgement.</p>
-        </div>
-      </div>
-    </div>
-
-    {/* Account */}
-    <div>
-      <h2 class="text-xl font-bold text-ink mb-6 pb-2 border-b border-border-subtle">Account & Technical</h2>
-      <div class="space-y-4">
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">Can I use AcePharm on more than one device?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Yes. The platform is designed to work across mobile, tablet and desktop screens. Your progress syncs automatically.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">How do I delete my account?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">From Account settings. We will confirm the effective date by email and explain how to cancel the request if you change your mind.</p>
-        </div>
-        <div class="p-5 bg-white rounded-xl border border-border-subtle shadow-xs">
-          <h3 class="font-bold text-ink text-sm">Something isn’t working. What should I do?</h3>
-          <p class="text-xs text-ink-muted mt-2 leading-relaxed">Contact us through the Contact page and describe what happened. If it relates to a specific question, use the report option on that question so we capture the details automatically.</p>
-        </div>
+    {/* Contact CTA */}
+    <div class="mt-20 text-center bg-surface border border-border rounded-card p-8 shadow-xs">
+      <h3 class="text-base font-bold text-ink">Have a question not answered here?</h3>
+      <p class="text-xs text-slate mt-2">
+        Our clinical team is always available to help pharmacy students with questions, feedback, or guidance.
+      </p>
+      <div class="mt-6">
+        <a
+          href="/contact"
+          class="inline-flex items-center justify-center rounded-btn bg-indigo px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-deep transition-all shadow-sm"
+        >
+          Contact the team
+        </a>
       </div>
     </div>
   </section>

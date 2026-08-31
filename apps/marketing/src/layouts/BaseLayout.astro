@@ -1,17 +1,25 @@
 ---
 import '@acepharm/design-tokens/tokens.css';
 import '../styles/global.css';
-import { CookieConsentBanner } from '@acepharm/ui';
+import { CookieConsentBanner, MobileNav } from '@acepharm/ui';
 
 interface Props {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
 }
 
 const {
   title = 'AcePharm — Created by pharmacists. Built for pharmacy students.',
   description = 'A revision platform designed exclusively for UK MPharm students, foundation trainees, and GPhC candidates.',
+  canonicalUrl = Astro.url.href,
+  ogImage = 'https://acepharm.co.uk/og-image.png',
+  ogType = 'website',
 } = Astro.props;
+
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -21,6 +29,24 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    {/* Open Graph / Facebook / LinkedIn */}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="AcePharm" />
+    <meta property="og:locale" content="en_GB" />
+
+    {/* Twitter Cards */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -56,28 +82,38 @@ const {
           </div>
           <span class="text-xl font-bold tracking-tight text-ink group-hover:text-indigo transition-colors">AcePharm</span>
         </a>
+        
+        {/* Desktop Navigation */}
         <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate">
-          <a href="/features" class="hover:text-ink transition-colors">Features</a>
-          <a href="/question-bank" class="hover:text-ink transition-colors">Question Bank</a>
-          <a href="/ace" class="hover:text-ink transition-colors">Ace AI Tutor</a>
-          <a href="/pricing" class="hover:text-ink transition-colors">Pricing</a>
-          <a href="/about" class="hover:text-ink transition-colors">About</a>
-          <a href="/faq" class="hover:text-ink transition-colors">FAQ</a>
-          <a href="/contact" class="hover:text-ink transition-colors">Contact</a>
+          <a href="/features" class={`hover:text-ink transition-colors ${currentPath === '/features' ? 'text-indigo font-semibold' : ''}`}>Features</a>
+          <a href="/question-bank" class={`hover:text-ink transition-colors ${currentPath === '/question-bank' ? 'text-indigo font-semibold' : ''}`}>Question Bank</a>
+          <a href="/ace" class={`hover:text-ink transition-colors ${currentPath === '/ace' ? 'text-indigo font-semibold' : ''}`}>Ace AI Tutor</a>
+          <a href="/pricing" class={`hover:text-ink transition-colors ${currentPath === '/pricing' ? 'text-indigo font-semibold' : ''}`}>Pricing</a>
+          <a href="/blog" class={`hover:text-ink transition-colors ${currentPath.startsWith('/blog') ? 'text-indigo font-semibold' : ''}`}>Revision Guides</a>
+          <a href="/about" class={`hover:text-ink transition-colors ${currentPath === '/about' ? 'text-indigo font-semibold' : ''}`}>About</a>
+          <a href="/faq" class={`hover:text-ink transition-colors ${currentPath === '/faq' ? 'text-indigo font-semibold' : ''}`}>FAQ</a>
+          <a href="/contact" class={`hover:text-ink transition-colors ${currentPath === '/contact' ? 'text-indigo font-semibold' : ''}`}>Contact</a>
         </nav>
+
+        {/* Desktop Auth Actions & Mobile Hamburger */}
         <div class="flex items-center gap-3">
-          <a
-            href="https://app.acepharm.co.uk/login"
-            class="text-sm font-medium text-slate hover:text-ink px-3 py-2 transition-colors"
-          >
-            Log in
-          </a>
-          <a
-            href="https://app.acepharm.co.uk/register"
-            class="inline-flex items-center justify-center rounded-btn bg-indigo px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-deep active:bg-indigo-deep transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo focus-visible:ring-offset-2"
-          >
-            Start revising free
-          </a>
+          <div class="hidden sm:flex items-center gap-3">
+            <a
+              href="https://app.acepharm.co.uk/login"
+              class="text-sm font-medium text-slate hover:text-ink px-3 py-2 transition-colors"
+            >
+              Log in
+            </a>
+            <a
+              href="https://app.acepharm.co.uk/register"
+              class="inline-flex items-center justify-center rounded-btn bg-indigo px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-deep active:bg-indigo-deep transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo focus-visible:ring-offset-2"
+            >
+              Start revising free
+            </a>
+          </div>
+
+          {/* Accessible Mobile Menu Island */}
+          <MobileNav client:idle currentPath={currentPath} />
         </div>
       </div>
     </header>

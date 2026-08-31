@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { AnalyticsProvider } from '@/components/analytics-provider';
+import { AuthProvider } from '@/lib/auth-context';
 
 export const metadata: Metadata = {
   title: 'AcePharm App — Clinical Practice & Revision',
@@ -10,8 +12,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { AnalyticsProvider } from '@/components/analytics-provider';
-
 export default function RootLayout({
   children,
 }: {
@@ -20,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en-GB">
       <body className="min-h-screen bg-canvas text-ink antialiased font-sans flex flex-col">
-        <AnalyticsProvider>
-          {children}
-        </AnalyticsProvider>
+        <AuthProvider>
+          <AnalyticsProvider>
+            {children}
+          </AnalyticsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
