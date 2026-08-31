@@ -11,10 +11,25 @@ import {
 } from 'firebase/auth';
 import { auth, sendCustomEmailVerification } from '@/lib/firebase';
 
+export type UserRole = 
+  | 'student' 
+  | 'author' 
+  | 'clinical_reviewer' 
+  | 'educational_reviewer' 
+  | 'copy_editor' 
+  | 'content_lead' 
+  | 'support_agent' 
+  | 'finance_admin' 
+  | 'marketing_editor' 
+  | 'super_admin';
+
 export interface UserProfile {
   uid: string;
   email: string | null;
   displayName: string | null;
+  role: UserRole;
+  isAdmin: boolean;
+  isReviewer: boolean;
   stage?: 'mpharm_y2' | 'mpharm_y3' | 'mpharm_y4' | 'foundation' | 'oriel' | 'prescribing';
   isPro?: boolean;
 }
@@ -26,6 +41,7 @@ interface AuthContextType {
   signIn: (email: string, pass: string) => Promise<void>;
   signUp: (email: string, pass: string, name: string, stage: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -35,6 +51,7 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -42,19 +59,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        // Load local stage preference if available
-        const savedStage = typeof window !== 'undefined' ? localStorage.getItem(`acepharm_stage_${firebaseUser.uid}`) : null;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+
+  const fetchProfileFromD1 = async (firebaseUser: User) => {
+    try {
+      const token = await firebaseUser.getIdToken();
+      const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const savedStage = typeof window !== 'undefined' ? localStorage.getItem(`acepharm_stage_${firebaseUser.uid}`) : null;
+      
+      if (res.ok) {
+        const data = await res.json();
+        const role: UserRole = data?.user?.role || 'student';
+        const isAdmin = ['content_lead', 'super_admin', 'clinical_reviewer', 'educational_reviewer', 'author'].includes(role);
+        const isReviewer = ['clinical_reviewer', 'educational_reviewer', 'content_lead', 'super_admin'].includes(role);
+
+        setProfile({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: data?.user?.first_name || firebaseUser.displayName || 'Pharmacy Learner',
+          role,
+          isAdmin,
+          isReviewer,
+          stage: (savedStage as any) || 'foundation',
+          isPro: true,
+        });
+      } else {
+        // Fallback default student profile
         setProfile({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName || 'Pharmacy Learner',
+          role: 'student',
+          isAdmin: false,
+          isReviewer: false,
           stage: (savedStage as any) || 'foundation',
-          isPro: true, // Default to true or check D1 subscription claims
+          isPro: true,
         });
+      }
+    } catch {
+      setProfile({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName || 'Pharmacy Learner',
+        role: 'student',
+        isAdmin: false,
+        isReviewer: false,
+        stage: 'foundation',
+        isPro: true,
+      });
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        await fetchProfileFromD1(firebaseUser);
       } else {
         setProfile(null);
       }
@@ -87,8 +152,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await firebaseSignOut(auth);
   };
 
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfileFromD1(user);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

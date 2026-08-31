@@ -128,15 +128,24 @@ export default function StudentDashboardPage() {
               <a href="/session/new" className="hover:text-ink transition-colors flex items-center gap-1.5">
                 <SlidersHorizontal className="w-4 h-4" /> Practice Builder
               </a>
-              <a href="/admin/curriculum" className="hover:text-ink transition-colors flex items-center gap-1.5">
-                <Layers className="w-4 h-4" /> Admin Portal
+              <a href="/progress" className="hover:text-ink transition-colors flex items-center gap-1.5">
+                <TrendingUp className="w-4 h-4" /> Progress Analytics
               </a>
-              <a href="/admin/review" className="hover:text-ink transition-colors flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> Content Review
-              </a>
-              <a href="/admin/import" className="hover:text-ink transition-colors flex items-center gap-1.5">
-                <FileSpreadsheet className="w-4 h-4" /> Importer
-              </a>
+              
+              {/* Role-Based Admin Portal Links (Shown only for Admin, Reviewer, or Content Roles) */}
+              {profile?.isAdmin && (
+                <>
+                  <a href="/admin/curriculum" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
+                    <Layers className="w-4 h-4" /> Admin Portal
+                  </a>
+                  <a href="/admin/review" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
+                    <ShieldCheck className="w-4 h-4" /> Review Queue
+                  </a>
+                  <a href="/admin/import" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
+                    <FileSpreadsheet className="w-4 h-4" /> Importer
+                  </a>
+                </>
+              )}
             </nav>
           </div>
 
@@ -146,7 +155,7 @@ export default function StudentDashboardPage() {
                 <div className="hidden sm:flex flex-col text-right">
                   <span className="text-xs font-bold text-ink leading-none">{profile?.displayName || user.email?.split('@')[0]}</span>
                   <span className="text-[10px] text-slate uppercase tracking-wider font-semibold mt-0.5">
-                    {profile?.stage === 'foundation' ? 'Foundation Trainee' : 'MPharm Learner'}
+                    {profile?.isAdmin ? `${profile.role.replace('_', ' ')} (Admin)` : profile?.stage === 'foundation' ? 'Foundation Trainee' : 'MPharm Learner'}
                   </span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-indigo-wash border border-indigo/20 text-indigo flex items-center justify-center font-bold text-xs">
