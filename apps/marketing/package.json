@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@acepharm/design-tokens": "workspace:*",
+    "@acepharm/preferences": "workspace:*",
     "@acepharm/ui": "workspace:*",
     "@astrojs/cloudflare": "^11.1.0",
     "@astrojs/react": "^3.6.2",

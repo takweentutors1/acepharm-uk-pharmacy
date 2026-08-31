@@ -20,13 +20,23 @@ import {
   Eye, 
   EyeOff,
   ChevronRight,
+  ChevronLeft,
   Stethoscope,
   Info,
   FileEdit,
   Save,
   Calculator,
-  BookOpen
+  BookOpen,
+  SlidersHorizontal,
+  FileText,
+  ShieldCheck,
+  Zap,
+  Check,
+  X,
+  Volume2,
+  AlertCircle
 } from 'lucide-react';
+import { SessionStorageHelper, usePreferences } from '@acepharm/preferences';
 
 export interface Option {
   id: string;
@@ -144,30 +154,24 @@ export function QuestionPlayer({
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
 
-  // Auto-save & resume state from localStorage for network resilience
+  // Auto-save & resume state from SessionStorageHelper for network resilience
   useEffect(() => {
     if (!sessionId) return;
-    const savedKey = `acepharm_session_${sessionId}_q_${question.id}`;
-    const saved = localStorage.getItem(savedKey);
+    const saved = SessionStorageHelper.getResponse(sessionId, question.id);
     if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.selectedOptionId) setSelectedOptionId(parsed.selectedOptionId);
-        if (parsed.confidence) setConfidence(parsed.confidence);
-        if (parsed.isSubmitted) setIsSubmitted(true);
-      } catch (e) {}
+      if (saved.selectedOptionId) setSelectedOptionId(saved.selectedOptionId);
+      if (saved.confidence) setConfidence(saved.confidence);
+      if (saved.isSubmitted) setIsSubmitted(true);
     }
   }, [sessionId, question.id]);
 
   const persistResponse = (optId: string | null, conf: any, submitted: boolean) => {
     if (!sessionId) return;
-    const savedKey = `acepharm_session_${sessionId}_q_${question.id}`;
-    localStorage.setItem(savedKey, JSON.stringify({
+    SessionStorageHelper.saveResponse(sessionId, question.id, {
       selectedOptionId: optId,
       confidence: conf,
       isSubmitted: submitted,
-      updatedAt: Date.now(),
-    }));
+    });
   };
 
   const handleSaveNote = () => {

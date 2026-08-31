@@ -10,6 +10,7 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth, sendCustomEmailVerification } from '@/lib/firebase';
+import { AuthStorage } from '@acepharm/preferences';
 
 export type UserRole = 
   | 'student' 
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
 
-      const savedStage = typeof window !== 'undefined' ? localStorage.getItem(`acepharm_stage_${firebaseUser.uid}`) : null;
+      const savedStage = AuthStorage.getStage(firebaseUser.uid);
       
       if (res.ok) {
         const data = await res.json();
@@ -137,9 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     if (cred.user) {
       await updateProfile(cred.user, { displayName: name });
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`acepharm_stage_${cred.user.uid}`, stage);
-      }
+      AuthStorage.setStage(cred.user.uid, stage);
       try {
         await sendCustomEmailVerification(cred.user);
       } catch (e) {

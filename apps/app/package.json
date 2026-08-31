@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@acepharm/design-tokens": "workspace:*",
+    "@acepharm/preferences": "workspace:*",
     "@acepharm/ui": "workspace:*",
     "clsx": "^2.1.1",
     "firebase": "^12.18.0",
@@ -19,7 +20,9 @@
     "next": "^14.2.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.2"
+    "tailwind-merge": "^2.5.2",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.2",
