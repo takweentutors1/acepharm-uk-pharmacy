@@ -9,6 +9,7 @@ export * from './components/study-session-hero';
 export * from './components/contact-form';
 export * from './components/faq-accordion';
 export * from './components/topic-filter';
+export * from './components/skeleton';
 export * from './lib/consent';
 export * from './lib/tracker';
 export * from './lib/utils';

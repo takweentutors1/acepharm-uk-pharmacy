@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Badge } from '@acepharm/ui';
+import { 
+  Button, 
+  Badge, 
+  Card, 
+  HeroRecommendationSkeleton, 
+  StreakTrackerSkeleton, 
+  CategoryCardSkeleton,
+  Skeleton 
+} from '@acepharm/ui';
 import { StreakTracker } from '@/components/streak-tracker';
 import { CategoryResetModal } from '@/components/category-reset-modal';
 import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
@@ -195,54 +203,65 @@ export default function StudentDashboardPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* 1. Hero Recommendation & Quick Practice Launcher */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="p-6 lg:col-span-2 bg-surface border-indigo/30 ring-1 ring-indigo/10 shadow-sm flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <Badge variant="default" className="text-xs font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Recommended Focus Drill
-                </Badge>
-                <span className="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20">
-                  {profile?.displayName ? `Good evening, ${profile.displayName.split(' ')[0]}` : 'Active Session'}
-                </span>
+          {loading ? (
+            <>
+              <div className="lg:col-span-2">
+                <HeroRecommendationSkeleton />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-ink leading-tight">
-                {recommendation.topicName}: {recommendation.subtopicName}, {recommendation.targetCount} questions
-              </h2>
-              <p className="text-slate text-xs sm:text-sm mt-2 leading-relaxed">
-                {recommendation.explanation}
-              </p>
-            </div>
+              <StreakTrackerSkeleton />
+            </>
+          ) : (
+            <>
+              <Card className="p-6 lg:col-span-2 bg-surface border-indigo/30 ring-1 ring-indigo/10 shadow-sm flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <Badge variant="default" className="text-xs font-semibold">
+                      <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Recommended Focus Drill
+                    </Badge>
+                    <span className="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20">
+                      {profile?.displayName ? `Good evening, ${profile.displayName.split(' ')[0]}` : 'Active Session'}
+                    </span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-ink leading-tight">
+                    {recommendation.topicName}: {recommendation.subtopicName}, {recommendation.targetCount} questions
+                  </h2>
+                  <p className="text-slate text-xs sm:text-sm mt-2 leading-relaxed">
+                    {recommendation.explanation}
+                  </p>
+                </div>
 
-            <div className="pt-4 border-t border-border flex flex-wrap items-center gap-3">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => { window.location.href = '/session/active'; }}
-                className="flex items-center gap-2 text-xs font-bold shadow-md"
-              >
-                <Play className="w-4 h-4 fill-current" /> Start Recommended Focus Session
-              </Button>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => { window.location.href = '/session/new'; }}
-                className="text-xs font-semibold flex items-center gap-1.5"
-              >
-                <SlidersHorizontal className="w-4 h-4 text-indigo" /> Custom Session Builder
-              </Button>
-            </div>
-          </Card>
+                <div className="pt-4 border-t border-border flex flex-wrap items-center gap-3">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => { window.location.href = '/session/active'; }}
+                    className="flex items-center gap-2 text-xs font-bold shadow-md"
+                  >
+                    <Play className="w-4 h-4 fill-current" /> Start Recommended Focus Session
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => { window.location.href = '/session/new'; }}
+                    className="text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    <SlidersHorizontal className="w-4 h-4 text-indigo" /> Custom Session Builder
+                  </Button>
+                </div>
+              </Card>
 
-          {/* Meaningful Session Streak Widget */}
-          <StreakTracker 
-            currentStreak={streakMetrics.currentStreak} 
-            longestStreak={streakMetrics.longestStreak} 
-            isMeaningfulToday={streakMetrics.isMeaningfulToday} 
-            todayQuestionsCount={streakMetrics.todayQuestionsCount} 
-            todayActiveMinutes={streakMetrics.todayActiveMinutes}
-            dailyGoalTarget={dailyGoal.dailyTarget}
-            streakHistory={streakMetrics.streakHistory}
-          />
+              {/* Meaningful Session Streak Widget */}
+              <StreakTracker 
+                currentStreak={streakMetrics.currentStreak} 
+                longestStreak={streakMetrics.longestStreak} 
+                isMeaningfulToday={streakMetrics.isMeaningfulToday} 
+                todayQuestionsCount={streakMetrics.todayQuestionsCount} 
+                todayActiveMinutes={streakMetrics.todayActiveMinutes}
+                dailyGoalTarget={dailyGoal.dailyTarget}
+                streakHistory={streakMetrics.streakHistory}
+              />
+            </>
+          )}
         </div>
 
         {/* 2. Core Curriculum Systems & Category Reset (Dual-Store Management) */}
@@ -268,64 +287,70 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categoriesOverview.map((cat) => (
-              <div
-                key={cat.id}
-                className="p-4 rounded-lg border border-border bg-canvas/40 hover:bg-canvas transition-all flex flex-col justify-between space-y-3"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-xs font-bold text-ink leading-snug">{cat.name}</h3>
-                    <span className="text-[11px] text-slate font-mono">
-                      {cat.attempted} / {cat.total} questions attempted
-                    </span>
+            {loading ? (
+              Array.from({ length: 9 }).map((_, i) => (
+                <CategoryCardSkeleton key={i} />
+              ))
+            ) : (
+              categoriesOverview.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="p-4 rounded-lg border border-border bg-canvas/40 hover:bg-canvas transition-all flex flex-col justify-between space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="text-xs font-bold text-ink leading-snug">{cat.name}</h3>
+                      <span className="text-[11px] text-slate font-mono">
+                        {cat.attempted} / {cat.total} questions attempted
+                      </span>
+                    </div>
+                    <Badge
+                      variant={
+                        cat.status === 'Secure' ? 'success' :
+                        cat.status === 'Developing' ? 'info' :
+                        cat.status === 'Needs Attention' ? 'warning' : 'default'
+                      }
+                      className="text-[10px]"
+                    >
+                      {cat.status}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={
-                      cat.status === 'Secure' ? 'success' :
-                      cat.status === 'Developing' ? 'info' :
-                      cat.status === 'Needs Attention' ? 'warning' : 'default'
-                    }
-                    className="text-[10px]"
-                  >
-                    {cat.status}
-                  </Badge>
-                </div>
 
-                {/* Progress bar */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-slate font-mono">
-                    <span>Accuracy: {cat.accuracy}%</span>
-                    <span>{Math.round((cat.attempted / cat.total) * 100)}% Coverage</span>
+                  {/* Progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-slate font-mono">
+                      <span>Accuracy: {cat.accuracy}%</span>
+                      <span>{Math.round((cat.attempted / cat.total) * 100)}% Coverage</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+                      <div
+                        className="bg-indigo h-full rounded-full"
+                        style={{ width: `${(cat.attempted / cat.total) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                    <div
-                      className="bg-indigo h-full rounded-full"
-                      style={{ width: `${(cat.attempted / cat.total) * 100}%` }}
-                    />
+
+                  <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = `/session/new?categoryId=${cat.id}`; }}
+                      className="text-xs font-semibold text-indigo hover:text-indigo-deep flex items-center gap-1"
+                    >
+                      Practise <ArrowRight className="w-3 h-3" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedResetCategory({ id: cat.id, name: cat.name, count: cat.total })}
+                      className="text-[11px] text-slate hover:text-rose-600 flex items-center gap-1 transition-colors"
+                      title="Reset practice attempts for this category"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Reset Practice
+                    </button>
                   </div>
                 </div>
-
-                <div className="pt-2 border-t border-border/60 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => { window.location.href = `/session/new?categoryId=${cat.id}`; }}
-                    className="text-xs font-semibold text-indigo hover:text-indigo-deep flex items-center gap-1"
-                  >
-                    Practise <ArrowRight className="w-3 h-3" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedResetCategory({ id: cat.id, name: cat.name, count: cat.total })}
-                    className="text-[11px] text-slate hover:text-rose-600 flex items-center gap-1 transition-colors"
-                    title="Reset practice attempts for this category"
-                  >
-                    <RotateCcw className="w-3 h-3" /> Reset Practice
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Button } from '@acepharm/ui';
+import { Card, Badge, Button, Skeleton } from '@acepharm/ui';
 import { useAuth } from '@/lib/auth-context';
 import { AppHeader } from '@/components/app-header';
 import { SubscriptionModal } from '@/components/subscription-modal';
@@ -212,17 +212,34 @@ export default function ProgressPage() {
 
         {/* 1. DISTINCT ACCURACY SPLIT (Rule #1 & Section 7.2) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: First Attempt */}
-          <Card className="p-6 bg-surface border-border shadow-sm flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate">
-                  First-Attempt Accuracy
-                </span>
-                <Badge variant="default" className="text-[10px] font-mono">
-                  Immutable Baseline
-                </Badge>
-              </div>
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="p-6 bg-surface border-border shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-3.5 w-32" />
+                  <Skeleton className="h-4 w-20 rounded-full" />
+                </div>
+                <div className="space-y-2 py-2">
+                  <Skeleton className="h-9 w-24" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-4/5" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+              </Card>
+            ))
+          ) : (
+            <>
+              {/* Card 1: First Attempt */}
+              <Card className="p-6 bg-surface border-border shadow-sm flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate">
+                      First-Attempt Accuracy
+                    </span>
+                    <Badge variant="default" className="text-[10px] font-mono">
+                      Immutable Baseline
+                    </Badge>
+                  </div>
               
               {isZeroAttempts ? (
                 <div className="py-4 space-y-2">
@@ -343,7 +360,9 @@ export default function ProgressPage() {
               />
             </div>
           </Card>
-        </div>
+        </>
+      )}
+    </div>
 
         {/* 2. CONFIDENCE CALIBRATION MATRIX (Section 7.2) */}
         <Card className="p-6 bg-surface border-border shadow-sm space-y-6">
@@ -454,12 +473,30 @@ export default function ProgressPage() {
               onClick={() => { window.location.href = '/session/new'; }}
               className="text-xs self-start sm:self-auto font-semibold flex items-center gap-1.5"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" /> Start Custom Topic Session
+                  <SlidersHorizontal className="w-3.5 h-3.5" /> Start Custom Topic Session
             </Button>
           </div>
 
           <div className="space-y-6">
-            {data.coverageMap.map((cat) => {
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="p-4 rounded-lg border border-border bg-canvas/30 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1.5 flex-1">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <Skeleton className="h-12 w-full rounded-md" />
+                    <Skeleton className="h-12 w-full rounded-md" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              data.coverageMap.map((cat) => {
               const catAttempted = isZeroAttempts ? 0 : cat.attemptedQuestions;
               const catCoverage = isZeroAttempts ? 0 : cat.coveragePercentage;
               const catStatus = isZeroAttempts ? 'Not started' : cat.statusLabel;
@@ -533,7 +570,7 @@ export default function ProgressPage() {
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </Card>
       </main>

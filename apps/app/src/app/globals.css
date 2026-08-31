@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 body {
   color: var(--ink);
   background: var(--canvas);
