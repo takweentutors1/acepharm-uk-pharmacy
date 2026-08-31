@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  trailingSlash: true,
+  trailingSlash: false,
   reactStrictMode: true,
   transpilePackages: ['@acepharm/design-tokens', '@acepharm/ui'],
   images: {
