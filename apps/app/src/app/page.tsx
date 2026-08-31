@@ -6,6 +6,7 @@ import { StreakTracker } from '@/components/streak-tracker';
 import { CategoryResetModal } from '@/components/category-reset-modal';
 import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
 import { SubscriptionModal } from '@/components/subscription-modal';
+import { AppHeader } from '@/components/app-header';
 import { useAuth } from '@/lib/auth-context';
 import { 
   Play, 
@@ -112,83 +113,8 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-canvas">
-      {/* App Header Navigation */}
-      <header className="border-b border-border bg-surface sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-indigo flex items-center justify-center text-white font-bold text-base shadow-sm">
-                A
-              </span>
-              <span className="text-xl font-bold tracking-tight text-ink">AcePharm</span>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate">
-              <a href="/" className="text-indigo font-bold border-b-2 border-indigo py-5">Dashboard</a>
-              <a href="/session/new" className="hover:text-ink transition-colors flex items-center gap-1.5">
-                <SlidersHorizontal className="w-4 h-4" /> Practice Builder
-              </a>
-              <a href="/progress" className="hover:text-ink transition-colors flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4" /> Progress Analytics
-              </a>
-              
-              {/* Role-Based Admin Portal Links (Shown only for Admin, Reviewer, or Content Roles) */}
-              {profile?.isAdmin && (
-                <>
-                  <a href="/admin/curriculum" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
-                    <Layers className="w-4 h-4" /> Admin Portal
-                  </a>
-                  <a href="/admin/review" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
-                    <ShieldCheck className="w-4 h-4" /> Review Queue
-                  </a>
-                  <a href="/admin/import" className="hover:text-ink transition-colors flex items-center gap-1.5 text-indigo font-semibold">
-                    <FileSpreadsheet className="w-4 h-4" /> Importer
-                  </a>
-                </>
-              )}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {user ? (
-              <div className="flex items-center gap-2.5">
-                <div className="hidden sm:flex flex-col text-right">
-                  <span className="text-xs font-bold text-ink leading-none">{profile?.displayName || user.email?.split('@')[0]}</span>
-                  <span className="text-[10px] text-slate uppercase tracking-wider font-semibold mt-0.5">
-                    {profile?.isAdmin ? `${profile.role.replace('_', ' ')} (Admin)` : profile?.stage === 'foundation' ? 'Foundation Trainee' : 'MPharm Learner'}
-                  </span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-indigo-wash border border-indigo/20 text-indigo flex items-center justify-center font-bold text-xs">
-                  {profile?.displayName ? profile.displayName.charAt(0).toUpperCase() : 'P'}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => signOut()}
-                  title="Sign out"
-                  className="p-1.5 text-slate hover:text-danger hover:bg-canvas rounded-btn transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <a
-                  href="/auth/login"
-                  className="text-xs font-semibold text-slate hover:text-ink px-2.5 py-1.5 rounded-btn border border-border transition-colors"
-                >
-                  Sign In
-                </a>
-                <a
-                  href="/auth/register"
-                  className="text-xs font-semibold text-white bg-indigo hover:bg-indigo-deep px-3 py-1.5 rounded-btn shadow-xs transition-all"
-                >
-                  Register
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Responsive Unified Navigation Header */}
+      <AppHeader onOpenSubscription={() => setShowSubscriptionModal(true)} />
 
       {/* Main Dashboard Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
