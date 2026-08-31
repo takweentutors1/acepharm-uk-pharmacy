@@ -2,8 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { TopicFilter } from '@acepharm/ui';
 
-// High-Yield Clinical Articles
-const ARTICLES = [
+// Fetch dynamically from D1 API worker with fallback
+const API_URL = import.meta.env.PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+let articles = [];
+
+const DEFAULT_ARTICLES = [
   {
     slug: 'gphc-calculations-essential-methods',
     title: 'GPhC Calculations: 5 High-Yield Pitfalls and Step-by-Step Fixes',
@@ -46,6 +49,33 @@ const ARTICLES = [
   },
 ];
 
+try {
+  const res = await fetch(`${API_URL}/api/v1/blog`);
+  if (res.ok) {
+    const data = await res.json();
+    if (data.posts && data.posts.length > 0) {
+      articles = data.posts.map((p: any) => {
+        const tags = p.tagsJson ? JSON.parse(p.tagsJson) : [];
+        const primaryCat = tags[0] || 'Clinical Revision';
+        return {
+          slug: p.slug,
+          title: p.title,
+          category: primaryCat,
+          date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Recent',
+          readTime: `${p.readingTimeMinutes || 5} min read`,
+          excerpt: p.summary,
+        };
+      });
+    }
+  }
+} catch (e) {
+  console.warn('Could not fetch live blog posts from API:', e);
+}
+
+if (articles.length === 0) {
+  articles = DEFAULT_ARTICLES;
+}
+
 const CATEGORIES = [
   'MPharm Study',
   'Registration Assessment',
@@ -65,7 +95,7 @@ const CATEGORIES = [
     name: 'AcePharm Pharmacy Revision Guides & Clinical Notes',
     description: 'Evidence-led UK pharmacy revision articles, clinical therapeutics reviews, and calculation walkthroughs.',
     url: 'https://acepharm.co.uk/blog',
-    hasPart: ARTICLES.map((a) => ({
+    hasPart: articles.map((a) => ({
       '@type': 'Article',
       headline: a.title,
       description: a.excerpt,
@@ -96,6 +126,6 @@ const CATEGORIES = [
 
   <section class="py-20 max-w-5xl mx-auto px-4">
     {/* Interactive Topic Filter Island */}
-    <TopicFilter client:visible categories={CATEGORIES} articles={ARTICLES} />
+    <TopicFilter client:visible categories={CATEGORIES} articles={articles} />
   </section>
 </BaseLayout>

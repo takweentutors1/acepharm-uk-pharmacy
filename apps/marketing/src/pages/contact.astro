@@ -1,56 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Button, Card } from '@acepharm/ui';
+import { ContactForm } from '@acepharm/ui';
 ---
 
 <BaseLayout
   title="Contact Us — AcePharm"
   description="How can we help? Ask about your account, report a content concern, suggest a feature or speak to the AcePharm team."
 >
-  <section class="py-16 sm:py-24 bg-gradient-to-b from-primary-50/40 to-canvas border-b border-border-subtle text-center px-4">
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-indigo-wash/50 via-canvas to-canvas border-b border-border text-center px-4">
     <div class="max-w-4xl mx-auto">
+      <div class="inline-block mb-4">
+        <span class="px-3.5 py-1 rounded-full bg-indigo-wash text-indigo text-xs font-semibold uppercase tracking-wider border border-indigo-200">
+          Support & Inquiries
+        </span>
+      </div>
       <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-ink">
         How can we help?
       </h1>
-      <p class="mt-6 text-lg sm:text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+      <p class="mt-6 text-lg sm:text-xl text-slate max-w-2xl mx-auto leading-relaxed">
         Ask about your account, report a content concern, suggest a feature or speak to the AcePharm team.
       </p>
     </div>
   </section>
 
   <section class="py-20 max-w-2xl mx-auto px-4">
-    <Card className="p-8 bg-white border border-border-subtle rounded-2xl shadow-sm space-y-6">
-      <form class="space-y-4" onsubmit="event.preventDefault(); alert('Message received. Thank you for contacting AcePharm. We have sent a copy to your email and will respond as soon as possible.');">
-        <div>
-          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-2">Category</label>
-          <select class="w-full px-3 py-2 border border-border rounded-xl text-sm bg-white text-ink focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option>Account support</option>
-            <option>Billing</option>
-            <option>Content question</option>
-            <option>Report an error</option>
-            <option>Product feedback</option>
-            <option>Partnership</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-2">Your Name</label>
-          <input type="text" required placeholder="Enter your full name" class="w-full px-3 py-2 border border-border rounded-xl text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-2">Email Address</label>
-          <input type="email" required placeholder="name@university.ac.uk" class="w-full px-3 py-2 border border-border rounded-xl text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-2">Message</label>
-          <textarea rows="5" required placeholder="Describe your question, concern or feedback in detail..." class="w-full px-3 py-2 border border-border rounded-xl text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
-        </div>
-
-        <Button type="submit" variant="primary" className="w-full">Send message</Button>
-      </form>
-    </Card>
+    <ContactForm client:visible />
   </section>
 </BaseLayout>

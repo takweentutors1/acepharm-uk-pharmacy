@@ -221,6 +221,7 @@ import { aceRouter } from './routes/ace';
 
 import { blogRoutes } from './routes/blog';
 import { stripeRoutes } from './routes/stripe';
+import { contactRouter } from './routes/contact';
 
 admin.route('/curriculum', curriculumRouter);
 admin.route('/questions', questionsRouter);
@@ -234,6 +235,7 @@ app.route('/api/v1/analytics', analyticsRouter);
 app.route('/api/v1/ace', aceRouter);
 app.route('/api/v1/blog', blogRoutes);
 app.route('/api/v1/stripe', stripeRoutes);
+app.route('/api/v1/contact', contactRouter);
 
 import { runWeeklyInsightCron, generateSingleWeeklyInsight } from './lib/weekly-insight-generator';
 
