@@ -26,5 +26,5 @@
       "protobufjs"
     ]
   },
-  "packageManager": "pnpm@11.21.0"
+  "packageManager": "pnpm@9.15.4"
 }
