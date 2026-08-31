@@ -32,7 +32,14 @@ app.use('*', async (c, next) => {
 });
 
 app.use('*', cors({
-  origin: ['https://acepharm.co.uk', 'https://app.acepharm.co.uk', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: [
+    'https://acepharm.co.uk',
+    'https://app.acepharm.co.uk',
+    'https://acepharm-marketing.pages.dev',
+    'https://acepharm-app.pages.dev',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ],
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
