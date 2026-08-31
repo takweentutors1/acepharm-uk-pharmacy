@@ -172,7 +172,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     AuthStorage.removeSavedProfile();
     setProfile(null);
     setUser(null);
-    await firebaseSignOut(auth);
+    try {
+      await firebaseSignOut(auth);
+    } finally {
+      const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL || 'https://acepharm.co.uk';
+      window.location.href = marketingUrl;
+    }
   };
 
   const refreshProfile = async () => {
