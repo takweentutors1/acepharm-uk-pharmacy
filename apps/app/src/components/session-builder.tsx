@@ -9,10 +9,12 @@ import {
   CheckCircle2, 
   Sparkles, 
   Layers, 
-  SlidersHorizontal,
-  Flame,
-  Clock,
-  Target
+  SlidersHorizontal, 
+  Flame, 
+  Clock, 
+  Target,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 
 interface CategoryOption {
@@ -130,14 +132,23 @@ export function SessionBuilder() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
+      {/* Header with Back Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-indigo/10 text-indigo">
-              <SlidersHorizontal className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-bold tracking-tight text-ink">Custom Practice Session Builder</h1>
+          <div className="flex items-center gap-3">
+            <a
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate hover:text-ink px-2.5 py-1.5 rounded-btn bg-surface border border-border hover:border-slate transition-all shadow-2xs"
+            >
+              <ArrowRight className="w-3.5 h-3.5 rotate-180 text-indigo" />
+              <span>Back</span>
+            </a>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-indigo/10 text-indigo">
+                <SlidersHorizontal className="w-5 h-5" />
+              </span>
+              <h1 className="text-2xl font-bold tracking-tight text-ink">Custom Practice Session Builder</h1>
+            </div>
           </div>
           <p className="text-sm text-slate mt-1">
             Tailor your GPhC revision by clinical system, attempt history, and exam timing mode.

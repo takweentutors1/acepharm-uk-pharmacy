@@ -130,7 +130,13 @@ export function SessionSummary({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <a
+            href="/"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate hover:text-ink px-2.5 py-1.5 rounded-btn border border-border bg-canvas hover:border-slate transition-colors"
+          >
+            Dashboard
+          </a>
           <Button
             variant="outline"
             size="sm"
@@ -138,6 +144,14 @@ export function SessionSummary({
             className="text-xs flex items-center gap-1.5"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Start New Session
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => { window.location.href = '/'; }}
+            className="text-xs flex items-center gap-1.5 shadow-sm"
+          >
+            Done <ArrowRight className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>

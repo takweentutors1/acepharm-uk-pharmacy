@@ -286,9 +286,17 @@ export function QuestionPlayer({
         }}
       />
 
-      {/* Top Session Progress Bar */}
+      {/* Top Session Progress Bar with Back/Exit button */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border text-xs">
         <div className="flex items-center gap-3">
+          <a
+            href="/"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate hover:text-ink px-2 py-1 rounded-btn bg-canvas border border-border hover:border-slate transition-colors shadow-2xs"
+            title="Exit to Dashboard"
+          >
+            <ArrowRight className="w-3 h-3 rotate-180 text-indigo" />
+            <span>Exit</span>
+          </a>
           <span className="font-bold text-ink font-mono text-sm">
             Question {currentQuestionIndex} <span className="text-slate font-normal">/ {totalQuestions}</span>
           </span>
