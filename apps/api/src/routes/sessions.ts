@@ -266,10 +266,10 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
 
       // Trigger Usage Warning Email at 25 questions (5 remaining)
       if (freeTierCount === 25) {
-        const resendApiKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
-        const userEmail = (user as any).email || 'student@acepharm.co.uk';
+        const resendApiKey = c.env.RESEND_API_KEY || 're_mock_key';
+        const userEmail = user.email || 'student@acepharm.co.uk';
         const warningEmail = generateUsageWarningEmail({
-          learnerName: (user as any).displayName || 'Learner',
+          learnerName: user.firstName || 'Learner',
           questionsAnswered: 25,
           remainingQuestions: 5,
         });

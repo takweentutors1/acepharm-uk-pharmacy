@@ -164,4 +164,40 @@ describe('Stripe Checkout, Customer Portal & 5-Event Webhook (Milestone 6, Step 
     expect(updatedValues).not.toBeNull();
     expect(updatedValues.status).toBe('past_due');
   });
+
+  it('validates HMAC-SHA256 stripe signatures correctly with verifyStripeSignature', async () => {
+    const secret = 'whsec_test_secret_key_123';
+    const payload = JSON.stringify({ id: 'evt_test', type: 'ping' });
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signedPayload = `${timestamp}.${payload}`;
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
+    const validSignatureHex = Array.from(new Uint8Array(signatureBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    const validHeader = `t=${timestamp},v1=${validSignatureHex}`;
+    const invalidHeader = `t=${timestamp},v1=deadbeef1234567890`;
+    const expiredHeader = `t=${parseInt(timestamp, 10) - 400},v1=${validSignatureHex}`;
+
+    const { verifyStripeSignature } = await import('./routes/stripe');
+
+    // Valid signature within tolerance
+    expect(await verifyStripeSignature(payload, validHeader, secret)).toBe(true);
+
+    // Invalid signature mismatch
+    expect(await verifyStripeSignature(payload, invalidHeader, secret)).toBe(false);
+
+    // Expired timestamp (exceeds default 300s tolerance)
+    expect(await verifyStripeSignature(payload, expiredHeader, secret)).toBe(false);
+  });
 });
+

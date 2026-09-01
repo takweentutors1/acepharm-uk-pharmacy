@@ -12,6 +12,10 @@ export type Bindings = {
   ASSETS: R2Bucket;
   FIREBASE_ADMIN_KEY?: string;
   ZEN_API_KEY?: string;
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  STRIPE_PUBLISHABLE_KEY?: string;
+  RESEND_API_KEY?: string;
 };
 
 import { rateLimiter } from './middleware/rate-limit';
@@ -42,13 +46,14 @@ app.use('*', cors({
     'http://localhost:3000',
     'http://localhost:3001'
   ],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
-// Apply Rate Limiting to sensitive Auth & User endpoints (60 req/min)
+// Apply Rate Limiting to sensitive Auth, User, and Contact endpoints
 app.use('/api/v1/auth/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_auth' }));
 app.use('/api/v1/user/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_user' }));
+app.use('/api/v1/contact/*', rateLimiter({ limit: 5, windowSeconds: 60, keyPrefix: 'rl_contact' }));
 
 // Public health check
 app.get('/health', (c) => {

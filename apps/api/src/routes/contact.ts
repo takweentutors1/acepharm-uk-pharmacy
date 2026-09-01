@@ -8,14 +8,30 @@ export const contactRouter = new Hono<AuthContext>();
 
 contactRouter.post('/submit', async (c) => {
   const body = await c.req.json<{
-    name: string;
-    email: string;
-    category: string;
-    message: string;
+    name?: string;
+    email?: string;
+    category?: string;
+    message?: string;
   }>();
 
-  if (!body.name || !body.email || !body.message) {
-    return c.json({ error: 'Name, email and message are required.' }, 400);
+  const name = body.name?.trim();
+  const email = body.email?.trim().toLowerCase();
+  const category = body.category?.trim();
+  const message = body.message?.trim();
+
+  if (!name || !email || !message) {
+    return c.json({ error: 'Name, email, and message are required.' }, 400);
+  }
+
+  // Length limits to prevent payload abuse / DB bloat
+  if (name.length > 100) {
+    return c.json({ error: 'Name exceeds maximum length of 100 characters.' }, 400);
+  }
+  if (email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return c.json({ error: 'A valid email address is required.' }, 400);
+  }
+  if (message.length > 5000) {
+    return c.json({ error: 'Message exceeds maximum length of 5000 characters.' }, 400);
   }
 
   const db = drizzle(c.env.DB);
@@ -37,10 +53,10 @@ contactRouter.post('/submit', async (c) => {
     await db.insert(supportTickets).values({
       id: ticketId,
       userId: null,
-      email: body.email,
-      category: mapCategory(body.category),
-      subject: `[Contact Form] ${body.category || 'Inquiry'}: ${body.name}`,
-      message: `Sender: ${body.name} (${body.email})\nCategory: ${body.category}\n\nMessage:\n${body.message}`,
+      email: email,
+      category: mapCategory(category),
+      subject: `[Contact Form] ${category || 'Inquiry'}: ${name}`,
+      message: `Sender: ${name} (${email})\nCategory: ${category || 'General'}\n\nMessage:\n${message}`,
       status: 'open',
       createdAt: now,
       updatedAt: now,
@@ -51,17 +67,20 @@ contactRouter.post('/submit', async (c) => {
 
   // 2. Dispatch confirmation email to sender if configured
   try {
-    const resendKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
+    const resendKey = c.env.RESEND_API_KEY || 're_mock_key';
+    const sanitizedName = name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const sanitizedMessage = message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
     await sendTransactionalEmail(resendKey, {
-      to: body.email,
+      to: email,
       subject: 'We received your message — AcePharm Support',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b;">
           <h2 style="color: #4f46e5;">Thank you for contacting AcePharm</h2>
-          <p>Hi ${body.name},</p>
-          <p>We have received your message regarding <strong>${body.category || 'Support'}</strong>. A member of our clinical support team will review your inquiry and get back to you shortly.</p>
+          <p>Hi ${sanitizedName},</p>
+          <p>We have received your message regarding <strong>${category || 'Support'}</strong>. A member of our clinical support team will review your inquiry and get back to you shortly.</p>
           <div style="background: #f8fafc; border-left: 4px solid #4f46e5; padding: 12px 16px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0; font-size: 14px; color: #475569;">"${body.message}"</p>
+            <p style="margin: 0; font-size: 14px; color: #475569; white-space: pre-wrap;">"${sanitizedMessage}"</p>
           </div>
           <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">AcePharm UK &bull; Reference ID: ${ticketId}</p>
         </div>
@@ -77,3 +96,4 @@ contactRouter.post('/submit', async (c) => {
     message: 'Your message has been received. Our team will get back to you shortly.',
   });
 });
+

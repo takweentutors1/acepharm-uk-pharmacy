@@ -7,4 +7,10 @@ interface Bindings {
 	DB: D1Database;
 	VECTORIZE: VectorizeIndex;
 	AI: Ai;
+	FIREBASE_ADMIN_KEY?: string;
+	ZEN_API_KEY?: string;
+	STRIPE_SECRET_KEY?: string;
+	STRIPE_WEBHOOK_SECRET?: string;
+	STRIPE_PUBLISHABLE_KEY?: string;
+	RESEND_API_KEY?: string;
 }

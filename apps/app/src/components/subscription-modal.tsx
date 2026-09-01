@@ -56,11 +56,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
       const data = await res.json();
       if (data?.url) {
-        // Direct redirect or simulated instant upgrade
-        setFeedback('Plan selected successfully! Your account membership is active.');
-        setTimeout(() => {
-          onClose();
-        }, 1200);
+        window.location.href = data.url;
+      } else {
+        setFeedback('Unable to start checkout session. Please try again.');
       }
     } catch (err) {
       setFeedback('Unable to process membership change. Please try again.');

@@ -32,6 +32,67 @@ export const STRIPE_PLANS = {
   },
 };
 
+/**
+ * Verifies Stripe webhook HMAC-SHA256 signature using Web Crypto API.
+ */
+export async function verifyStripeSignature(
+  payload: string,
+  signatureHeader: string,
+  secret: string,
+  toleranceSeconds: number = 300
+): Promise<boolean> {
+  try {
+    const parts = signatureHeader.split(',');
+    let timestamp = '';
+    const signatures: string[] = [];
+
+    for (const part of parts) {
+      const [key, value] = part.trim().split('=');
+      if (key === 't') {
+        timestamp = value;
+      } else if (key === 'v1') {
+        signatures.push(value);
+      }
+    }
+
+    if (!timestamp || signatures.length === 0) {
+      return false;
+    }
+
+    // Verify timestamp within tolerance
+    const headerTime = parseInt(timestamp, 10);
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (isNaN(headerTime) || Math.abs(currentTime - headerTime) > toleranceSeconds) {
+      return false;
+    }
+
+    const signedPayload = `${timestamp}.${payload}`;
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(signedPayload)
+    );
+
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    return signatures.some((sig) => sig.toLowerCase() === expectedSignature.toLowerCase());
+  } catch (err) {
+    console.error('Error verifying Stripe signature:', err);
+    return false;
+  }
+}
+
 // 1. Get current subscription status
 stripeRoutes.get('/subscription', requireAuth, async (c) => {
   const user = c.get('user');
@@ -67,33 +128,106 @@ stripeRoutes.get('/subscription', requireAuth, async (c) => {
 stripeRoutes.post('/checkout', requireAuth, async (c) => {
   const user = c.get('user');
   const db = drizzle(c.env.DB);
-  const body = await c.req.json<{ plan: 'monthly' | 'yearly'; successUrl?: string; cancelUrl?: string }>();
+  const body = await c.req.json<{ 
+    plan: 'monthly' | 'yearly'; 
+    successUrl?: string; 
+    cancelUrl?: string;
+    allowPromotionCodes?: boolean;
+    promotionCode?: string;
+    couponId?: string;
+  }>();
 
   const selectedPlan = body.plan === 'yearly' ? STRIPE_PLANS.YEARLY : STRIPE_PLANS.MONTHLY;
-  const stripeSecretKey = (c.env as any).STRIPE_SECRET_KEY || 'sk_test_mock_acepharm_key';
+  const stripeSecretKey = c.env.STRIPE_SECRET_KEY;
 
-  const origin = c.req.header('origin') || 'https://app.acepharm.co.uk';
+  if (!stripeSecretKey) {
+    console.error('STRIPE_SECRET_KEY is not configured in environment');
+    return c.json({ error: 'Stripe configuration missing. Please contact support.' }, 500);
+  }
+
+  const origin = c.req.header('origin') || 'https://app.acepharmexams.co.uk';
   const successUrl = body.successUrl || `${origin}/session/new?upgraded=true`;
   const cancelUrl = body.cancelUrl || `${origin}/pricing?canceled=true`;
 
-  const sessionId = `cs_test_${crypto.randomUUID()}`;
-  const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;
+  // Look up or link existing Stripe customer ID
+  const [existingSub] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, user.id))
+    .limit(1);
 
-  // In test/mock mode or live stripe invocation:
-  return c.json({
-    sessionId,
-    url: checkoutUrl,
-    plan: selectedPlan.id,
-    amountPence: selectedPlan.unitAmountPence,
-    currency: selectedPlan.currency,
-  });
+  const params = new URLSearchParams();
+  params.append('mode', 'subscription');
+  params.append('payment_method_types[0]', 'card');
+  params.append('line_items[0][price]', selectedPlan.priceId);
+  params.append('line_items[0][quantity]', '1');
+  params.append('client_reference_id', user.id);
+  params.append('metadata[userId]', user.id);
+  params.append('metadata[plan]', selectedPlan.id);
+  params.append('metadata[priceId]', selectedPlan.priceId);
+  params.append('success_url', successUrl);
+  params.append('cancel_url', cancelUrl);
+  params.append('customer_email', user.email);
+
+  // Enable customer promotion / discount codes in Stripe Checkout
+  // Note: In Stripe API, allow_promotion_codes cannot be used simultaneously with discounts[]
+  if (body.promotionCode) {
+    params.append('discounts[0][promotion_code]', body.promotionCode);
+  } else if (body.couponId) {
+    params.append('discounts[0][coupon]', body.couponId);
+  } else {
+    // Default to allowing user-entered promotion code field on the Stripe-hosted checkout page
+    const allowCodes = body.allowPromotionCodes !== undefined ? body.allowPromotionCodes : true;
+    if (allowCodes) {
+      params.append('allow_promotion_codes', 'true');
+    }
+  }
+
+  if (existingSub?.stripeCustomerId) {
+    params.append('customer', existingSub.stripeCustomerId);
+  }
+
+  try {
+    const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+
+    if (!stripeRes.ok) {
+      const errorText = await stripeRes.text();
+      console.error('Stripe Checkout creation failed:', errorText);
+      return c.json({ error: 'Failed to create Stripe Checkout session', details: errorText }, 502);
+    }
+
+    const sessionData = await stripeRes.json<{ id: string; url: string }>();
+
+    return c.json({
+      sessionId: sessionData.id,
+      url: sessionData.url,
+      plan: selectedPlan.id,
+      amountPence: selectedPlan.unitAmountPence,
+      currency: selectedPlan.currency,
+    });
+  } catch (err: any) {
+    console.error('Stripe API network error:', err);
+    return c.json({ error: 'Payment gateway unavailable. Please try again.' }, 502);
+  }
 });
 
 // 3. Create Stripe Customer Billing Portal Session
 stripeRoutes.post('/customer-portal', requireAuth, async (c) => {
   const user = c.get('user');
   const db = drizzle(c.env.DB);
-  const origin = c.req.header('origin') || 'https://app.acepharm.co.uk';
+  const origin = c.req.header('origin') || 'https://app.acepharmexams.co.uk';
+  const stripeSecretKey = c.env.STRIPE_SECRET_KEY;
+
+  if (!stripeSecretKey) {
+    return c.json({ error: 'Stripe configuration missing.' }, 500);
+  }
 
   const [sub] = await db
     .select()
@@ -101,13 +235,38 @@ stripeRoutes.post('/customer-portal', requireAuth, async (c) => {
     .where(eq(subscriptions.userId, user.id))
     .limit(1);
 
-  const portalSessionId = `bps_test_${crypto.randomUUID()}`;
-  const portalUrl = `https://billing.stripe.com/p/session/${portalSessionId}`;
+  if (!sub?.stripeCustomerId) {
+    return c.json({ error: 'No active Stripe billing customer record found.' }, 404);
+  }
 
-  return c.json({
-    url: portalUrl,
-    returnUrl: `${origin}/account`,
-  });
+  const params = new URLSearchParams();
+  params.append('customer', sub.stripeCustomerId);
+  params.append('return_url', `${origin}/account`);
+
+  try {
+    const portalRes = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+
+    if (!portalRes.ok) {
+      const errText = await portalRes.text();
+      console.error('Stripe Customer Portal error:', errText);
+      return c.json({ error: 'Failed to create Customer Portal session' }, 502);
+    }
+
+    const portalData = await portalRes.json<{ url: string }>();
+    return c.json({
+      url: portalData.url,
+      returnUrl: `${origin}/account`,
+    });
+  } catch (err: any) {
+    return c.json({ error: 'Unable to open billing portal.' }, 502);
+  }
 });
 
 // 4. In-App Cancellation Endpoint (Non-negotiable: learner keeps access until paid period ends)
@@ -137,10 +296,11 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
   }
 
   // Trigger Resend Cancellation Confirmation Email
-  const resendApiKey = (c.env as any).RESEND_API_KEY || 're_mock_key';
-  const userEmail = (user as any).email || 'student@acepharm.co.uk';
+  const resendApiKey = c.env.RESEND_API_KEY || 're_mock_key';
+  const userEmail = user.email || 'student@acepharm.co.uk';
+  const learnerDisplayName = user.firstName || 'Learner';
   const cancelEmail = generateCancellationEmail({
-    learnerName: (user as any).displayName || 'Learner',
+    learnerName: learnerDisplayName,
     accessUntilFormatted: periodEnd.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'long',
@@ -163,7 +323,7 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
   });
 });
 
-// 4. Webhook handler with signature verification & idempotent event handling
+// 5. Webhook handler with signature verification & idempotent event handling
 // Handles all 5 required events:
 // 1. checkout.session.completed
 // 2. customer.subscription.created
@@ -295,6 +455,7 @@ export async function handleStripeWebhook(db: any, event: any) {
 
 stripeRoutes.post('/webhook', async (c) => {
   const signature = c.req.header('stripe-signature');
+  const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
   const db = drizzle(c.env.DB);
 
   let rawBody = '';
@@ -302,6 +463,19 @@ stripeRoutes.post('/webhook', async (c) => {
     rawBody = await c.req.text();
   } catch {
     return c.json({ error: 'Invalid payload' }, 400);
+  }
+
+  // Validate Stripe HMAC signature if secret is configured
+  if (webhookSecret) {
+    if (!signature) {
+      return c.json({ error: 'Unauthorized: Missing stripe-signature header' }, 401);
+    }
+    const isValid = await verifyStripeSignature(rawBody, signature, webhookSecret);
+    if (!isValid) {
+      return c.json({ error: 'Unauthorized: Invalid Stripe webhook signature' }, 401);
+    }
+  } else {
+    console.warn('STRIPE_WEBHOOK_SECRET not configured; webhook signature validation skipped in development/test');
   }
 
   let event: any;
