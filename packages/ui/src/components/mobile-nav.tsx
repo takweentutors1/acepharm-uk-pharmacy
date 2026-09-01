@@ -8,7 +8,7 @@ interface MobileNavProps {
 
 export const MobileNav: React.FC<MobileNavProps> = ({ 
   currentPath = '',
-  appUrl = 'https://acepharm-app.pages.dev' 
+  appUrl = 'https://app.acepharmexams.co.uk' 
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);

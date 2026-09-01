@@ -8,7 +8,7 @@ interface MarketingAuthNavProps {
 }
 
 export const MarketingAuthNav: React.FC<MarketingAuthNavProps> = ({
-  appUrl = 'https://acepharm-app.pages.dev',
+  appUrl = 'https://app.acepharmexams.co.uk',
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<{ displayName?: string | null; email?: string | null; role?: string } | null>(null);
