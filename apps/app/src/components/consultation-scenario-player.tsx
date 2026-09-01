@@ -60,7 +60,7 @@ export function ConsultationScenarioPlayer() {
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
   useEffect(() => {
     fetchScenario();

@@ -127,7 +127,7 @@ export default function ProgressPage() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCancellationModal, setShowCancellationModal] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
   useEffect(() => {
     async function loadLiveMetrics() {

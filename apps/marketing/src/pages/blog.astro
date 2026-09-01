@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { TopicFilter } from '@acepharm/ui';
 
 // Fetch dynamically from D1 API worker with fallback
-const API_URL = import.meta.env.PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+const API_URL = import.meta.env.PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 let articles: Array<{
   slug: string;
   title: string;

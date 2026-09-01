@@ -20,7 +20,8 @@ export const FreeTierUpgradeModal: React.FC<FreeTierUpgradeModalProps> = ({
   const handleSelectPlan = async (plan: 'monthly' | 'yearly') => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('acepharm_auth_token') : '';
-      const res = await fetch('https://acepharm-api.takweencentreuk.workers.dev/api/v1/stripe/checkout', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
+      const res = await fetch(`${apiBase}/api/v1/stripe/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -6,7 +6,7 @@ const { slug } = Astro.params;
 
 // Fetch dynamically from API worker / fallback default
 let post = null;
-const API_URL = import.meta.env.PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+const API_URL = import.meta.env.PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
 try {
   const res = await fetch(`${API_URL}/api/v1/blog/${slug}`);

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function AdminBlogPage() {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <AdminBlogEditor apiBaseUrl={apiBaseUrl} />

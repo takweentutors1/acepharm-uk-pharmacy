@@ -30,7 +30,7 @@ export const GET: APIRoute = async () => {
   ];
 
   try {
-    const API_URL = import.meta.env.PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+    const API_URL = import.meta.env.PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
     const res = await fetch(`${API_URL}/api/v1/blog`);
     if (res.ok) {
       const data = await res.json();

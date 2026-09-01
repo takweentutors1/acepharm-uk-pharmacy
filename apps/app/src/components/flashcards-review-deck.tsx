@@ -40,7 +40,7 @@ export function FlashcardsReviewDeck() {
   const [submitting, setSubmitting] = useState(false);
   const [reviewedCount, setReviewedCount] = useState(0);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
   useEffect(() => {
     fetchCards();

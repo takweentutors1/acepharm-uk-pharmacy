@@ -85,7 +85,7 @@ export default function StudentDashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
   useEffect(() => {
     async function loadLiveData() {

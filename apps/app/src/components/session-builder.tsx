@@ -101,7 +101,7 @@ export function SessionBuilder() {
   const [questionCount, setQuestionCount] = useState<number>(20);
   const [isStarting, setIsStarting] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
   useEffect(() => {
     async function loadLiveCurriculum() {

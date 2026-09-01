@@ -107,7 +107,7 @@ export function AskAcePanel({ questionId, questionPublicId, isCalculation, highl
     ]);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
       const res = await fetch(`${apiBase}/api/v1/ace/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

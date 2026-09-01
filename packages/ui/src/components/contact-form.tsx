@@ -14,7 +14,7 @@ export const ContactForm: React.FC = () => {
   const [status, setStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
   const [feedback, setFeedback] = React.useState('');
 
-  const API_URL = 'https://acepharm-api.takweencentreuk.workers.dev';
+  const API_URL = 'https://api.acepharmexams.co.uk';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

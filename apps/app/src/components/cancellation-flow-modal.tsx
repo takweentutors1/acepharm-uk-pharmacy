@@ -54,11 +54,12 @@ export const CancellationFlowModal: React.FC<CancellationFlowModalProps> = ({
     setIsSubmitting(true);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('acepharm_auth_token') : '';
-      await fetch('https://acepharm-api.takweencentreuk.workers.dev/api/v1/stripe/cancel', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
+      await fetch(`${apiBase}/api/v1/stripe/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token || 'guest'}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           reason: selectedReason,
