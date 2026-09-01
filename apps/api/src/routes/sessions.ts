@@ -266,7 +266,6 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
 
       // Trigger Usage Warning Email at 25 questions (5 remaining)
       if (freeTierCount === 25) {
-        const resendApiKey = c.env.RESEND_API_KEY || 're_mock_key';
         const userEmail = user.email || 'student@acepharm.co.uk';
         const warningEmail = generateUsageWarningEmail({
           learnerName: user.firstName || 'Learner',
@@ -276,7 +275,7 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
 
         // Fire-and-forget email dispatch
         c.executionCtx.waitUntil(
-          sendTransactionalEmail(resendApiKey, {
+          sendTransactionalEmail(c.env, {
             to: userEmail,
             subject: warningEmail.subject,
             html: warningEmail.html,

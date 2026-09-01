@@ -16,6 +16,12 @@ export type Bindings = {
   STRIPE_WEBHOOK_SECRET?: string;
   STRIPE_PUBLISHABLE_KEY?: string;
   RESEND_API_KEY?: string;
+  SMTP_HOST?: string;
+  SMTP_PORT?: string;
+  SMTP_USER?: string;
+  SMTP_PASS?: string;
+  SMTP_FROM?: string;
+  SUPPORT_INBOX_EMAIL?: string;
 };
 
 import { rateLimiter } from './middleware/rate-limit';
@@ -311,8 +317,8 @@ export default {
           try {
             const db = drizzle(env.DB);
             const zenApiKey = env.ZEN_API_KEY;
-            const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey);
-            console.log(`[Weekly Insight Cron Success]: processed ${result.processed}, cached ${result.cached}`);
+            const result = await runWeeklyInsightCron(db, env.CACHE, zenApiKey, env);
+            console.log(`[Weekly Insight Cron Success]: processed ${result.processed}, cached ${result.cached}, emails sent ${result.emailsSent}`);
           } catch (err) {
             console.error('[Weekly Insight Cron Error]:', err);
           }

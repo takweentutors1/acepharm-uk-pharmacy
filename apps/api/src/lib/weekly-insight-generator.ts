@@ -158,19 +158,27 @@ Rules:
   };
 }
 
+import { 
+  sendTransactionalEmail, 
+  generateWeeklyRevisionSummaryEmail,
+  type EmailEnvironment 
+} from './email-service';
+
 /**
  * Cron Execution Handler: Runs across active users, generates insights,
- * and caches results into KV (ace_weekly_insight:{userId}) for instant, 0-latency retrieval.
+ * caches results into KV, and dispatches the weekly summary email to the student.
  */
 export async function runWeeklyInsightCron(
   db: ReturnType<typeof drizzle>,
   kvCache?: KVNamespace,
-  zenApiKey?: string
-): Promise<{ processed: number; cached: number }> {
+  zenApiKey?: string,
+  emailEnv?: EmailEnvironment
+): Promise<{ processed: number; cached: number; emailsSent: number }> {
   // Fetch active students
   const activeUsers = await db
     .select({
       id: users.id,
+      email: users.email,
       firstName: users.firstName,
     })
     .from(users)
@@ -179,6 +187,7 @@ export async function runWeeklyInsightCron(
 
   let processed = 0;
   let cached = 0;
+  let emailsSent = 0;
 
   for (const user of activeUsers) {
     processed++;
@@ -201,7 +210,31 @@ export async function runWeeklyInsightCron(
         console.warn(`Failed to cache weekly insight for user ${user.id}:`, err);
       }
     }
+
+    // Dispatch branded weekly digest email if student has active questions and emailEnv is present
+    if (insight && insight.totalAttemptsThisWeek > 0 && user.email && emailEnv) {
+      try {
+        const emailContent = generateWeeklyRevisionSummaryEmail({
+          learnerName: user.firstName || 'Learner',
+          totalQuestionsAnswered: insight.totalAttemptsThisWeek,
+          accuracyPercentage: insight.accuracyThisWeek,
+          currentStreakDays: Math.min(insight.totalAttemptsThisWeek > 10 ? 7 : 3, 7),
+          topAreaToImprove: insight.weakestCategoryName || 'High-Weight BNF Clinical Topics',
+        });
+
+        await sendTransactionalEmail(emailEnv, {
+          to: user.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text,
+        });
+        emailsSent++;
+      } catch (emailErr) {
+        console.warn(`Could not dispatch weekly digest email to ${user.email}:`, emailErr);
+      }
+    }
   }
 
-  return { processed, cached };
+  return { processed, cached, emailsSent };
 }
+

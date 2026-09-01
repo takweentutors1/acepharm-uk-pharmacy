@@ -50,6 +50,11 @@ STRIPE_PRICE_ID_MONTHLY = "price_1U9ixsE4ZQJ9iwGZ7rF40bDe"
 STRIPE_PRICE_ID_YEARLY = "price_1U9j0pE4ZQJ9iwGZ0At7aZH8"
 STRIPE_WEBHOOK_ENDPOINT_ID = "we_1U9jWDE4ZQJ9iwGZuHESR1EC"
 STRIPE_PUBLISHABLE_KEY = "pk_test_51SbDyYE4ZQJ9iwGZD3Un8Ifrd06XPQ71eTwfWLCyn1y4hyP5HEcbLNdJYqgb4XeHIAqM2rbJ33KOAPseyGajXZLg00k2oGQRKk"
+SMTP_HOST = "smtp.hostinger.com"
+SMTP_PORT = "465"
+SMTP_USER = "info@acepharmexams.co.uk"
+SMTP_FROM = "AcePharm <info@acepharmexams.co.uk>"
+SUPPORT_INBOX_EMAIL = "info@acepharmexams.co.uk"
 
 # ==========================================
 # Staging Environment Configuration

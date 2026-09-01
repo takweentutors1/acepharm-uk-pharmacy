@@ -295,8 +295,7 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
       .where(eq(subscriptions.id, sub.id));
   }
 
-  // Trigger Resend Cancellation Confirmation Email
-  const resendApiKey = c.env.RESEND_API_KEY || 're_mock_key';
+  // Trigger Cancellation Confirmation Email via Hostinger SMTP
   const userEmail = user.email || 'student@acepharm.co.uk';
   const learnerDisplayName = user.firstName || 'Learner';
   const cancelEmail = generateCancellationEmail({
@@ -308,7 +307,7 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
     }),
   });
 
-  await sendTransactionalEmail(resendApiKey, {
+  await sendTransactionalEmail(c.env, {
     to: userEmail,
     subject: cancelEmail.subject,
     html: cancelEmail.html,
@@ -330,7 +329,7 @@ stripeRoutes.post('/cancel', requireAuth, async (c) => {
 // 3. customer.subscription.updated
 // 4. customer.subscription.deleted
 // 5. invoice.payment_failed
-export async function handleStripeWebhook(db: any, event: any) {
+export async function handleStripeWebhook(db: any, event: any, env?: any) {
   const eventType = event.type;
   const dataObject = event.data?.object;
 
@@ -376,6 +375,35 @@ export async function handleStripeWebhook(db: any, event: any) {
               updatedAt: now,
             },
           });
+
+        // Dispatch Stripe Pro Receipt Email if customer email is present and env is provided
+        const customerEmail = dataObject.customer_details?.email || dataObject.customer_email;
+        if (customerEmail && env) {
+          try {
+            const planName = plan === 'yearly_pro' ? 'AcePharm Yearly Pro' : 'AcePharm Monthly Pro';
+            const amountFormatted = plan === 'yearly_pro' ? '£49.99' : '£4.99';
+            const receipt = generateReceiptEmail({
+              learnerName: dataObject.customer_details?.name || 'Learner',
+              planName,
+              amountFormatted,
+              dateFormatted: now.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }),
+              invoiceId: dataObject.invoice || dataObject.id,
+            });
+
+            await sendTransactionalEmail(env, {
+              to: customerEmail,
+              subject: receipt.subject,
+              html: receipt.html,
+              text: receipt.text,
+            });
+          } catch (emailErr) {
+            console.warn('Could not dispatch Stripe checkout receipt email:', emailErr);
+          }
+        }
       }
       break;
     }
@@ -486,7 +514,7 @@ stripeRoutes.post('/webhook', async (c) => {
   }
 
   try {
-    const res = await handleStripeWebhook(db, event);
+    const res = await handleStripeWebhook(db, event, c.env);
     return c.json(res);
   } catch (err: any) {
     return c.json({ error: err?.message || 'Webhook failed' }, 400);
