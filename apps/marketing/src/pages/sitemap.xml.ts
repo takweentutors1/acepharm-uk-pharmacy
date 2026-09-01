@@ -24,7 +24,9 @@ export const GET: APIRoute = async () => {
   let blogSlugs = [
     'gphc-calculations-essential-methods',
     'asthma-bts-sign-vs-nice-guideline-comparison',
-    'mpharm-active-recall-spaced-repetition',
+    'high-risk-medicines-monitoring-guidelines',
+    'passmed-vs-quesmed-vs-acepharm-uk-pharmacy-comparison',
+    'oriel-pharmacy-sjt-foundation-training-guide',
   ];
 
   try {
