@@ -1,7 +1,7 @@
 ---
 import '@acepharm/design-tokens/tokens.css';
 import '../styles/global.css';
-import { CookieConsentBanner, MobileNav } from '@acepharm/ui';
+import { CookieConsentBanner, MobileNav, MarketingAuthNav } from '@acepharm/ui';
 
 interface Props {
   title?: string;
@@ -113,19 +113,8 @@ const currentPath = Astro.url.pathname;
 
         {/* Desktop Auth Actions & Mobile Hamburger */}
         <div class="flex items-center gap-3">
-          <div class="hidden sm:flex items-center gap-2.5">
-            <a
-              href="https://acepharm-app.pages.dev/auth/login"
-              class="text-xs font-semibold text-slate hover:text-ink px-3 py-2 rounded-btn border border-border hover:border-slate transition-colors"
-            >
-              Log in
-            </a>
-            <a
-              href="https://acepharm-app.pages.dev/auth/register"
-              class="text-xs font-semibold text-white bg-indigo hover:bg-indigo-deep px-3.5 py-2 rounded-btn shadow-xs transition-all"
-            >
-              Start revising free
-            </a>
+          <div class="hidden sm:flex items-center">
+            <MarketingAuthNav client:load />
           </div>
           <MobileNav client:idle currentPath={currentPath} />
         </div>

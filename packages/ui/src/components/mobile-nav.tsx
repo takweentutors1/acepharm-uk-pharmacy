@@ -1,11 +1,25 @@
 import * as React from 'react';
+import { AuthStorage } from '@acepharm/preferences';
 
 interface MobileNavProps {
   currentPath?: string;
+  appUrl?: string;
 }
 
-export const MobileNav: React.FC<MobileNavProps> = ({ currentPath = '' }) => {
+export const MobileNav: React.FC<MobileNavProps> = ({ 
+  currentPath = '',
+  appUrl = 'https://acepharm-app.pages.dev' 
+}) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  React.useEffect(() => {
+    const token = AuthStorage.getToken();
+    const savedProfile = AuthStorage.getSavedProfile();
+    if (token || savedProfile) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -103,20 +117,33 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentPath = '' }) => {
         </div>
 
         <div className="pt-6 border-t border-border space-y-3">
-          <a
-            href="https://acepharm-app.pages.dev/auth/login"
-            className="block text-center text-sm font-semibold text-slate hover:text-ink py-2.5 rounded-btn border border-border transition-colors"
-          >
-            Log in
-          </a>
-          <a
-            href="https://acepharm-app.pages.dev/auth/register"
-            className="block text-center text-sm font-semibold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
-          >
-            Start revising free
-          </a>
+          {isLoggedIn ? (
+            <a
+              href={appUrl}
+              className="flex items-center justify-center gap-2 text-center text-sm font-bold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
+            >
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Go to Dashboard</span>
+            </a>
+          ) : (
+            <>
+              <a
+                href={`${appUrl}/auth/login`}
+                className="block text-center text-sm font-semibold text-slate hover:text-ink py-2.5 rounded-btn border border-border transition-colors"
+              >
+                Log in
+              </a>
+              <a
+                href={`${appUrl}/auth/register`}
+                className="block text-center text-sm font-semibold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
+              >
+                Start revising free
+              </a>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 };
+

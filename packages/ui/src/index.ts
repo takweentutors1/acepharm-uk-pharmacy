@@ -4,6 +4,7 @@ export * from './components/card';
 export * from './components/cookie-consent';
 export * from './components/markdown-renderer';
 export * from './components/mobile-nav';
+export * from './components/marketing-auth-nav';
 export * from './components/pricing-toggle';
 export * from './components/study-session-hero';
 export * from './components/contact-form';
