@@ -102,8 +102,20 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
             </div>
           );
         }
+        if (block.type === 'hr') {
+          return <hr key={idx} className="my-8 border-t border-border/80" />;
+        }
+        if (block.type === 'code') {
+          return (
+            <div key={idx} className="my-4 rounded-card border border-border bg-canvas overflow-hidden shadow-xs">
+              <pre className="p-4 text-xs font-mono text-ink overflow-x-auto leading-relaxed">
+                <code>{block.content}</code>
+              </pre>
+            </div>
+          );
+        }
         return (
-          <p key={idx} className="text-sm text-ink leading-relaxed">
+          <p key={idx} className="text-sm sm:text-base text-ink/90 leading-relaxed">
             {renderInline(block.content)}
           </p>
         );
@@ -191,6 +203,26 @@ function parseMarkdownBlocks(text: string): any[] {
       continue;
     }
 
+    // Code blocks (```)
+    if (line.trim().startsWith('```')) {
+      i++;
+      const codeLines: string[] = [];
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // skip closing ```
+      blocks.push({ type: 'code', content: codeLines.join('\n') });
+      continue;
+    }
+
+    // Horizontal Rule Dividers (--- or ***)
+    if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
+      blocks.push({ type: 'hr' });
+      i++;
+      continue;
+    }
+
     // Headers
     if (line.startsWith('# ')) {
       blocks.push({ type: 'h1', content: line.substring(2).trim() });
@@ -271,7 +303,16 @@ function parseMarkdownBlocks(text: string): any[] {
     // Paragraph
     const pLines = [line];
     i++;
-    while (i < lines.length && lines[i].trim() && !lines[i].startsWith('#') && !lines[i].startsWith('> ') && !lines[i].trim().startsWith('- ') && !lines[i].includes('|')) {
+    while (
+      i < lines.length && 
+      lines[i].trim() && 
+      !lines[i].startsWith('#') && 
+      !lines[i].startsWith('> ') && 
+      !lines[i].trim().startsWith('- ') && 
+      !lines[i].trim().startsWith('```') && 
+      lines[i].trim() !== '---' && 
+      !lines[i].includes('|')
+    ) {
       pLines.push(lines[i]);
       i++;
     }
