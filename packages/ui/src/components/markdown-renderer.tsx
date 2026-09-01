@@ -243,19 +243,22 @@ function parseMarkdownBlocks(text: string): any[] {
     }
 
     // Tables (| col | col |)
-    if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('---')) {
-      const headers = line
-        .split('|')
-        .map((h) => h.trim())
-        .filter(Boolean);
+    if (line.includes('|') && (i + 1 < lines.length && (lines[i + 1].includes('---') || lines[i + 1].includes(':-')))) {
+      const rawHeaderCells = line.split('|').map((h) => h.trim());
+      // Filter out leading/trailing empty cells if row started/ended with |
+      const headers = (line.trim().startsWith('|') && line.trim().endsWith('|'))
+        ? rawHeaderCells.slice(1, -1)
+        : rawHeaderCells.filter(Boolean);
+
       i += 2; // skip header and delimiter row
 
       const rows: string[][] = [];
       while (i < lines.length && lines[i].includes('|')) {
-        const row = lines[i]
-          .split('|')
-          .map((c) => c.trim())
-          .filter((_, idx, arr) => idx > 0 && idx < arr.length);
+        const rawCells = lines[i].split('|').map((c) => c.trim());
+        const row = (lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|'))
+          ? rawCells.slice(1, -1)
+          : rawCells.filter(Boolean);
+
         if (row.length > 0) {
           rows.push(row);
         }

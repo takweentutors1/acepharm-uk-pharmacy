@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Button } from '@acepharm/ui';
+import { Button, MarkdownRenderer } from '@acepharm/ui';
 
 const { slug } = Astro.params;
 
@@ -21,18 +21,6 @@ try {
 if (!post) {
   return Astro.redirect('/blog');
 }
-
-// Convert markdown to clean HTML paragraphs
-const renderMarkdown = (md: string) => {
-  return md
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-ink mt-6 mb-2">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-ink mt-8 mb-3 pb-2 border-b border-border-subtle">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-ink mt-8 mb-4">$1</h1>')
-    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-    .replace(/```([\s\S]*?)```/gim, '<pre class="bg-surface-raised p-4 rounded-xl border border-border text-xs font-mono my-4 overflow-x-auto"><code>$1</code></pre>')
-    .replace(/\n\n/gim, '</p><p class="mt-4 leading-relaxed text-sm text-ink-muted">')
-    .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc text-sm text-ink-muted">$1</li>');
-};
 
 const tags = post.tagsJson ? JSON.parse(post.tagsJson) : [];
 const dateStr = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
@@ -65,32 +53,36 @@ const dateStr = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString
     }
   })} />
 
-  <article class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/blog" class="inline-flex items-center gap-1 text-xs font-bold text-primary mb-8 hover:underline">
-      ← Back to revision guides
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <a href="/blog" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo hover:text-indigo-deep mb-8 transition-colors">
+      <span>←</span>
+      <span>Back to revision guides</span>
     </a>
 
-    <header class="space-y-4 mb-10 pb-8 border-b border-border-subtle">
+    <header class="space-y-4 mb-10 pb-8 border-b border-border">
       <div class="flex flex-wrap gap-2 items-center">
         {tags.map((tag: string) => (
-          <span class="px-3 py-0.5 rounded-full bg-primary-50 text-primary text-xs font-bold">
+          <span class="px-3 py-1 rounded-full bg-indigo/10 text-indigo text-xs font-bold">
             {tag}
           </span>
         ))}
-        {dateStr && <span class="text-xs text-ink-subtle ml-2">{dateStr}</span>}
-        <span class="text-xs text-ink-subtle">· {post.readingTimeMinutes || 4} min read</span>
+        {dateStr && <span class="text-xs text-slate ml-2">{dateStr}</span>}
+        <span class="text-xs text-slate">· {post.readingTimeMinutes || 4} min read</span>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-ink leading-tight">
         {post.title}
       </h1>
 
-      <p class="text-base text-ink-muted italic border-l-4 border-primary pl-4 py-1 bg-surface-raised/40 rounded-r-lg">
+      <p class="text-base sm:text-lg text-slate italic border-l-4 border-indigo pl-4 py-2 bg-canvas rounded-r-lg">
         {post.summary}
       </p>
     </header>
 
-    <div class="prose prose-sm max-w-none text-ink leading-relaxed" set:html={`<p class="text-sm text-ink-muted leading-relaxed">${renderMarkdown(post.contentMarkdown)}</p>`} />
+    {/* Rich UI Markdown Content Rendering with High-Yield Tables & Code Styling */}
+    <div class="blog-content-wrapper my-8">
+      <MarkdownRenderer content={post.contentMarkdown} />
+    </div>
 
     <footer class="mt-16 pt-8 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
