@@ -3,19 +3,19 @@
 > Created by pharmacists. Built for pharmacy students. Designed exclusively for UK MPharm students, foundation trainees, and GPhC registration assessment candidates.
 
 ## What is AcePharm?
-AcePharm (https://acepharm.co.uk) is an independent UK pharmacy educational revision platform combining single best answer clinical questions, pharmaceutical calculations, four-stage structured explanations, and pre-submission confidence-accuracy calibration analytics.
+AcePharm (https://acepharmexams.co.uk) is an independent UK pharmacy educational revision platform combining single best answer clinical questions, pharmaceutical calculations, four-stage structured explanations, and pre-submission confidence-accuracy calibration analytics.
 
 ## Core Resources & Pages
-- Homepage: https://acepharm.co.uk/
-- Platform Features: https://acepharm.co.uk/features
-- Question Bank Overview: https://acepharm.co.uk/question-bank
-- Ace AI Clinical Tutor: https://acepharm.co.uk/ace
-- Pricing & Plans (£4.99/mo or £49.99/yr): https://acepharm.co.uk/pricing
-- About & Mission: https://acepharm.co.uk/about
-- Clinical Editorial Standards: https://acepharm.co.uk/editorial-standards
-- Student FAQ: https://acepharm.co.uk/faq
-- Revision Guides & Clinical Blog: https://acepharm.co.uk/blog
-- Contact Support: https://acepharm.co.uk/contact
+- Homepage: https://acepharmexams.co.uk/
+- Platform Features: https://acepharmexams.co.uk/features
+- Question Bank Overview: https://acepharmexams.co.uk/question-bank
+- Ace AI Clinical Tutor: https://acepharmexams.co.uk/ace
+- Pricing & Plans (£4.99/mo or £49.99/yr): https://acepharmexams.co.uk/pricing
+- About & Mission: https://acepharmexams.co.uk/about
+- Clinical Editorial Standards: https://acepharmexams.co.uk/editorial-standards
+- Student FAQ: https://acepharmexams.co.uk/faq
+- Revision Guides & Clinical Blog: https://acepharmexams.co.uk/blog
+- Contact Support: https://acepharmexams.co.uk/contact
 
 ## Clinical & Grounding Invariants
 - All questions undergo triple review: clinical, educational, and editorial.

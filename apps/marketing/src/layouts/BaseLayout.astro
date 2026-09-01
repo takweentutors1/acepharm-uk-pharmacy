@@ -15,7 +15,7 @@ const {
   title = 'AcePharm — Created by pharmacists. Built for pharmacy students.',
   description = 'A revision platform designed exclusively for UK MPharm students, foundation trainees, and GPhC candidates.',
   canonicalUrl = Astro.url.href,
-  ogImage = 'https://acepharm.co.uk/og-image.png',
+  ogImage = 'https://acepharmexams.co.uk/og-image.png',
   ogType = 'website',
 } = Astro.props;
 
@@ -47,6 +47,9 @@ const currentPath = Astro.url.pathname;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
+    {/* Favicon */}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -54,17 +57,18 @@ const currentPath = Astro.url.pathname;
       rel="stylesheet"
     />
     
-    {/* Organization Structured Data (JSON-LD) for AEO/GEO */}
+    {/* Global Structured Data (Organization / Schema.org) */}
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'AcePharm',
-      url: 'https://acepharm.co.uk',
-      logo: 'https://acepharm.co.uk/logo.png',
+      url: 'https://acepharmexams.co.uk',
+      logo: 'https://acepharmexams.co.uk/logo.png',
       description: 'Educational revision platform designed exclusively for UK pharmacy students, foundation trainees, and GPhC registration candidates.',
       sameAs: [],
       knowsAbout: [
-        'Pharmacy Education',
+        'GPhC Registration Assessment',
+        'MPharm Degree Curriculum',
         'GPhC Registration Assessment',
         'Clinical Pharmacology',
         'Pharmaceutical Calculations',

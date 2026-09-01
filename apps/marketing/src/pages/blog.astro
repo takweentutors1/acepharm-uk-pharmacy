@@ -100,19 +100,17 @@ const CATEGORIES = [
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'AcePharm Pharmacy Revision Guides & Clinical Notes',
-    description: 'Evidence-led UK pharmacy revision articles, clinical therapeutics reviews, and calculation walkthroughs.',
-    url: 'https://acepharm.co.uk/blog',
-    hasPart: articles.map((a) => ({
-      '@type': 'Article',
-      headline: a.title,
-      description: a.excerpt,
-      url: `https://acepharm.co.uk/blog/${a.slug}`,
-      datePublished: '2026-09-01',
-      author: {
-        '@type': 'Organization',
-        name: 'AcePharm Clinical Editorial Team'
-      }
-    }))
+    description: 'High-yield clinical revision guides, GPhC calculation walkthroughs, and evidence-led study strategies.',
+    url: 'https://acepharmexams.co.uk/blog',
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: articles.map((a, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `https://acepharmexams.co.uk/blog/${a.slug}`,
+        name: a.title,
+      }))
+    }
   })} />
 
   <section class="py-16 sm:py-24 bg-gradient-to-b from-indigo-wash/50 via-canvas to-canvas border-b border-border text-center px-4">

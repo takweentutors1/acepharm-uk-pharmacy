@@ -26,13 +26,15 @@ app.use('*', async (c, next) => {
   c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   c.header(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://*.firebaseapp.com; connect-src 'self' https://*.workers.dev https://*.pages.dev https://api.acepharm.co.uk https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://opencode.ai; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://*.firebaseapp.com; connect-src 'self' https://*.workers.dev https://*.pages.dev https://api.acepharmexams.co.uk https://acepharmexams.co.uk https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://opencode.ai; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
   );
   await next();
 });
 
 app.use('*', cors({
   origin: [
+    'https://acepharmexams.co.uk',
+    'https://app.acepharmexams.co.uk',
     'https://acepharm.co.uk',
     'https://app.acepharm.co.uk',
     'https://acepharm-marketing.pages.dev',

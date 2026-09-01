@@ -25,7 +25,7 @@ export const auth = getAuth(firebaseApp);
  * custom-designed /auth/action router without requiring manual Firebase Console action URL customization.
  */
 export function getCustomActionCodeSettings(continuePath: string = '/session/new'): ActionCodeSettings {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.acepharm.co.uk';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.acepharmexams.co.uk';
   return {
     url: `${origin}/auth/action?continueUrl=${encodeURIComponent(continuePath)}`,
     handleCodeInApp: true,

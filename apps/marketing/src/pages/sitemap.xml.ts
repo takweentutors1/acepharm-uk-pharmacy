@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-const SITE_URL = 'https://acepharm.co.uk';
+const SITE_URL = 'https://acepharmexams.co.uk';
 
 const STATIC_PAGES = [
   '',

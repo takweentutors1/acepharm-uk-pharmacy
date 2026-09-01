@@ -1,4 +1,4 @@
-# robots.txt for AcePharm UK (https://acepharm.co.uk)
+# robots.txt for AcePharm UK (https://acepharmexams.co.uk)
 # Explicit AEO/GEO & Search Crawler Policy (Section 14)
 
 # ==============================================================================
@@ -70,4 +70,4 @@ Disallow: /api/
 # ==============================================================================
 # 3. XML Sitemap Reference
 # ==============================================================================
-Sitemap: https://acepharm.co.uk/sitemap.xml
+Sitemap: https://acepharmexams.co.uk/sitemap.xml
