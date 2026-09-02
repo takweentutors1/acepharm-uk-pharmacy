@@ -154,29 +154,71 @@ export function QuestionPlayer({
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
 
-  // Auto-save & resume state from SessionStorageHelper for network resilience
+  // Auto-save & resume state from SessionStorage for network resilience and reload recovery
   useEffect(() => {
-    if (!sessionId) return;
-    const saved = SessionStorageHelper.getResponse(sessionId, question.id);
+    if (typeof window === 'undefined') return;
+    const sessionKey = sessionId || 'adhoc-practice';
+
+    // 1. Restore response state (selected option, confidence, submission state)
+    const saved = SessionStorageHelper.getResponse(sessionKey, question.id);
     if (saved) {
       if (saved.selectedOptionId) setSelectedOptionId(saved.selectedOptionId);
       if (saved.confidence) setConfidence(saved.confidence);
       if (saved.isSubmitted) setIsSubmitted(true);
     }
+
+    // 2. Restore drafted personal notes from session storage
+    try {
+      const savedNote = sessionStorage.getItem(`acepharm_note_${sessionKey}_${question.id}`);
+      if (savedNote) {
+        setPersonalNote(savedNote);
+        setShowNotesDrawer(true);
+      }
+    } catch {
+      // Ignored if storage unavailable
+    }
+
+    // 3. Restore timer state
+    try {
+      const savedTime = sessionStorage.getItem(`acepharm_timer_${sessionKey}_${question.id}`);
+      if (savedTime) {
+        setSecondsElapsed(parseInt(savedTime, 10) || 0);
+      }
+    } catch {
+      // Ignored if storage unavailable
+    }
   }, [sessionId, question.id]);
 
   const persistResponse = (optId: string | null, conf: any, submitted: boolean) => {
-    if (!sessionId) return;
-    SessionStorageHelper.saveResponse(sessionId, question.id, {
+    if (typeof window === 'undefined') return;
+    const sessionKey = sessionId || 'adhoc-practice';
+    SessionStorageHelper.saveResponse(sessionKey, question.id, {
       selectedOptionId: optId,
       confidence: conf,
       isSubmitted: submitted,
     });
   };
 
+  const handleSelectOption = (optId: string) => {
+    if (isSubmitted) return;
+    setSelectedOptionId(optId);
+    persistResponse(optId, confidence, false);
+  };
+
+  const handleSelectConfidence = (conf: 'low' | 'medium' | 'high') => {
+    setConfidence(conf);
+    persistResponse(selectedOptionId, conf, isSubmitted);
+  };
+
   const handleSaveNote = () => {
     if (!personalNote.trim()) return;
     setIsSavingNote(true);
+    const sessionKey = sessionId || 'adhoc-practice';
+    try {
+      sessionStorage.setItem(`acepharm_note_${sessionKey}_${question.id}`, personalNote);
+    } catch {
+      // Ignored
+    }
     setTimeout(() => {
       setIsSavingNote(false);
       setNoteSavedFeedback(true);
@@ -188,14 +230,25 @@ export function QuestionPlayer({
     setIsBookmarked(!isBookmarked);
   };
 
-  // Timer tick
+  // Timer tick & session persistence
   useEffect(() => {
     if (isSubmitted) return;
+    const sessionKey = sessionId || 'adhoc-practice';
     const interval = setInterval(() => {
-      setSecondsElapsed((prev) => prev + 1);
+      setSecondsElapsed((prev) => {
+        const nextTime = prev + 1;
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem(`acepharm_timer_${sessionKey}_${question.id}`, nextTime.toString());
+          } catch {
+            // Ignored
+          }
+        }
+        return nextTime;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isSubmitted]);
+  }, [isSubmitted, sessionId, question.id]);
 
   // Keyboard shortcut listener (A–E, 1–3 for confidence, Enter, Space), guarded against text-field focus
   useEffect(() => {
@@ -216,19 +269,19 @@ export function QuestionPlayer({
         const optIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(key);
         if (optIndex >= 0 && optIndex < question.options.length) {
           e.preventDefault();
-          setSelectedOptionId(question.options[optIndex].id);
+          handleSelectOption(question.options[optIndex].id);
         }
 
         // 2. Confidence rating: 1 (Low), 2 (Medium), 3 (High)
         if (e.key === '1') {
           e.preventDefault();
-          setConfidence('low');
+          handleSelectConfidence('low');
         } else if (e.key === '2') {
           e.preventDefault();
-          setConfidence('medium');
+          handleSelectConfidence('medium');
         } else if (e.key === '3') {
           e.preventDefault();
-          setConfidence('high');
+          handleSelectConfidence('high');
         }
 
         // 3. Submit: Enter or Space (if option is selected)
@@ -494,10 +547,10 @@ export function QuestionPlayer({
                 onKeyDown={(e) => {
                   if (!isSubmitted && (e.key === ' ' || e.key === 'Enter')) {
                     e.preventDefault();
-                    setSelectedOptionId(opt.id);
+                    handleSelectOption(opt.id);
                   }
                 }}
-                onClick={() => !isSubmitted && setSelectedOptionId(opt.id)}
+                onClick={() => handleSelectOption(opt.id)}
                 className={`p-4 rounded-card border transition-all select-none ${
                   !isSubmitted ? 'cursor-pointer' : 'cursor-default'
                 } ${optionStyles}`}
@@ -561,7 +614,7 @@ export function QuestionPlayer({
                   <button
                     key={level}
                     type="button"
-                    onClick={() => setConfidence(level)}
+                    onClick={() => handleSelectConfidence(level)}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold capitalize transition-all border ${
                       confidence === level
                         ? 'bg-indigo text-white border-indigo shadow-sm'

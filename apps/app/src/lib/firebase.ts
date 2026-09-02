@@ -20,6 +20,8 @@ const firebaseConfig = {
 export const firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 
+import { apiClient } from './api-client';
+
 /**
  * Returns dynamic ActionCodeSettings that redirect the learner directly to our
  * custom-designed /auth/action router without requiring manual Firebase Console action URL customization.
@@ -33,17 +35,35 @@ export function getCustomActionCodeSettings(continuePath: string = '/session/new
 }
 
 /**
- * Sends a password reset email with automatic redirection to our custom design-system page.
+ * Sends a password reset email via Hostinger SMTP using our custom design-system template.
  */
 export async function sendCustomPasswordResetEmail(email: string, continuePath?: string) {
-  const actionCodeSettings = getCustomActionCodeSettings(continuePath);
-  return firebaseSendPasswordResetEmail(auth, email, actionCodeSettings);
+  try {
+    const res = await apiClient.post('/api/v1/auth/send-custom-password-reset', {
+      email,
+    });
+    return res;
+  } catch (err) {
+    // Fallback to client SDK if API backend is temporarily unreachable
+    const actionCodeSettings = getCustomActionCodeSettings(continuePath);
+    return firebaseSendPasswordResetEmail(auth, email, actionCodeSettings);
+  }
 }
 
 /**
- * Sends an email verification link with automatic redirection to our custom design-system page.
+ * Sends an email verification link via Hostinger SMTP using our custom design-system template.
  */
 export async function sendCustomEmailVerification(user: User, continuePath?: string) {
-  const actionCodeSettings = getCustomActionCodeSettings(continuePath);
-  return firebaseSendEmailVerification(user, actionCodeSettings);
+  try {
+    if (!user.email) return;
+    const res = await apiClient.post('/api/v1/auth/send-custom-verification', {
+      email: user.email,
+      name: user.displayName || undefined,
+    });
+    return res;
+  } catch (err) {
+    // Fallback to client SDK if API backend is temporarily unreachable
+    const actionCodeSettings = getCustomActionCodeSettings(continuePath);
+    return firebaseSendEmailVerification(user, actionCodeSettings);
+  }
 }

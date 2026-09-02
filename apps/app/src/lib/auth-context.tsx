@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { auth, sendCustomEmailVerification } from '@/lib/firebase';
 import { AuthStorage } from '@acepharm/preferences';
+import { apiClient } from '@/lib/api-client';
 
 export type UserRole = 
   | 'student' 
@@ -70,18 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = await firebaseUser.getIdToken();
       AuthStorage.setToken(token);
 
-      const res = await fetch(`${API_URL}/api/v1/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
       const savedStage = AuthStorage.getStage(firebaseUser.uid);
-      
       let nextProfile: UserProfile;
 
-      if (res.ok) {
-        const data = await res.json();
+      try {
+        const data = await apiClient.get('/api/v1/auth/me', { token });
         const role: UserRole = data?.user?.role || 'student';
         const isAdmin = ['content_lead', 'super_admin', 'clinical_reviewer', 'educational_reviewer', 'author', 'marketing_editor'].includes(role);
         const isReviewer = ['clinical_reviewer', 'educational_reviewer', 'content_lead', 'super_admin'].includes(role);
@@ -96,8 +90,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           stage: (savedStage as any) || 'foundation',
           isPro: true,
         };
-      } else {
-        // Fallback default student profile
+      } catch (apiErr) {
+        // Fallback default student profile if endpoint returns error
         nextProfile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,

@@ -340,39 +340,49 @@ export function generateEmailVerificationEmail(data: {
  * 3. Password Reset Request Template
  */
 export function generatePasswordResetEmail(data: {
-  learnerName: string;
+  learnerName?: string;
+  name?: string;
   resetLink: string;
+  requestIp?: string;
 }): { subject: string; html: string; text: string } {
-  const name = data.learnerName || 'there';
+  const displayName = data.name || data.learnerName || 'Learner';
   const bodyContent = `
-    <p class="body-text">Hi ${name},</p>
-    <p class="body-text">We received a request to reset the password for your AcePharm account. Click the button below to choose a new, secure password.</p>
+    <p class="body-text">Hi ${displayName},</p>
+    <p class="body-text">We received a request to reset the password for your AcePharm account. Click the button below to choose a new, secure password in our portal:</p>
     
-    <div style="text-align: center; margin: 32px 0;">
-      <a href="${data.resetLink}" class="btn-primary">Reset Password &rarr;</a>
+    <div style="text-align: center; margin: 32px 0 24px 0;">
+      <a href="${data.resetLink}" class="btn-primary" style="padding: 14px 28px; font-size: 14px; font-weight: 700; background-color: #4F46E5;">Reset Password &rarr;</a>
     </div>
 
-    <div style="background-color: #FFFBEB; border-left: 4px solid #F59E0B; padding: 14px 16px; border-radius: 4px; margin: 24px 0;">
-      <p style="margin: 0; font-size: 13px; color: #92400E; font-weight: 600;">
-        Security Notice: This link will expire in 1 hour. If you did not request a password reset, your account is secure and you can ignore this message.
-      </p>
-    </div>
+    <table role="presentation" width="100%" style="background-color: #FEF2F2; border: 1px solid #FEE2E2; border-radius: 10px; margin: 24px 0; padding: 14px;" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="font-size: 12px; color: #991B1B; line-height: 1.5;">
+          <strong>Security Notice:</strong> This link will expire in 1 hour. If you did not request a password reset, your account remains secure and you can safely ignore this message.
+          ${data.requestIp ? `<br /><span style="color: #B91C1C; font-size: 11px;">Request originating IP: ${data.requestIp}</span>` : ''}
+        </td>
+      </tr>
+    </table>
 
-    <p class="body-text" style="font-size: 12px; color: #94A3B8;">
-      Direct link: <a href="${data.resetLink}" style="color: #4F46E5; word-break: break-all;">${data.resetLink}</a>
-    </p>
+    <table role="presentation" width="100%" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; margin: 16px 0; padding: 12px;" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="font-size: 11px; color: #64748B; line-height: 1.6;">
+          Direct link: <a href="${data.resetLink}" style="color: #4F46E5; word-break: break-all; font-family: monospace;">${data.resetLink}</a>
+        </td>
+      </tr>
+    </table>
   `;
 
   return {
     subject: `Reset your AcePharm password`,
     html: wrapEmailInDesignSystem({
       title: 'Password Reset Request',
-      badgeText: 'Account Security',
-      badgeBgColor: '#FEF3C7',
-      badgeTextColor: '#D97706',
+      badgeText: 'Security Alert',
+      badgeBgColor: '#FEF2F2',
+      badgeTextColor: '#DC2626',
+      headerAccentGradient: 'linear-gradient(90deg, #DC2626 0%, #4F46E5 100%)',
       bodyContent,
     }),
-    text: `Hi ${name},\n\nClick the link below to reset your AcePharm password:\n${data.resetLink}\n\nThis link will expire in 1 hour.`,
+    text: `Hi ${displayName},\n\nClick the link below to reset your AcePharm password:\n${data.resetLink}\n\nThis link expires in 1 hour.\n\nAcePharm Security Team`,
   };
 }
 
@@ -606,5 +616,88 @@ export function generateWeeklyRevisionSummaryEmail(data: {
       bodyContent,
     }),
     text: `Hi ${data.learnerName},\n\nWeekly Progress:\nQuestions: ${data.totalQuestionsAnswered}\nAccuracy: ${data.accuracyPercentage}%\nStreak: ${data.currentStreakDays} days\nFocus: ${data.topAreaToImprove}\n\nContinue at https://app.acepharmexams.co.uk`,
+  };
+}
+
+/**
+ * 9. Custom Email Verification Template
+ */
+export function generateVerificationEmail(data: {
+  name?: string;
+  verificationLink: string;
+  stage?: string;
+}): { subject: string; html: string; text: string } {
+  const stageName = data.stage ? data.stage.replace(/_/g, ' ').toUpperCase() : 'PHARMACY LEARNER';
+  const bodyContent = `
+    <p class="body-text">Hi ${data.name || 'Learner'},</p>
+    <p class="body-text">Welcome to <strong>AcePharm</strong>. You have registered for the GPhC preparation program under <strong>${stageName}</strong>.</p>
+    <p class="body-text">To activate your full question bank access, diagnostic analytics, and spaced-repetition drills, please verify your email address below:</p>
+
+    <div style="text-align: center; margin: 32px 0 24px 0;">
+      <a href="${data.verificationLink}" class="btn-primary" style="padding: 14px 28px; font-size: 14px; font-weight: 700;">Verify Email Address &rarr;</a>
+    </div>
+
+    <table role="presentation" width="100%" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; margin: 24px 0; padding: 14px;" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="font-size: 12px; color: #64748B; line-height: 1.6;">
+          <strong>Security note:</strong> If the button above does not work, copy and paste this link into your browser:<br />
+          <a href="${data.verificationLink}" style="color: #4F46E5; word-break: break-all; font-family: monospace; font-size: 11px;">${data.verificationLink}</a>
+        </td>
+      </tr>
+    </table>
+
+    <p class="body-text" style="font-size: 12px; color: #64748B;">If you did not create an AcePharm account, you can safely ignore this email.</p>
+  `;
+
+  return {
+    subject: 'Verify your AcePharm account — Activate full exam bank access',
+    html: wrapEmailInDesignSystem({
+      title: 'Verify Your Email',
+      badgeText: 'Account Verification',
+      badgeBgColor: '#F1F2FC',
+      badgeTextColor: '#4F46E5',
+      bodyContent,
+    }),
+    text: `Hi ${data.name || 'Learner'},\n\nPlease verify your AcePharm account by opening the following link:\n${data.verificationLink}\n\nAcePharm Academic Team`,
+  };
+}
+
+
+
+/**
+ * 11. Custom Password Changed Confirmation Template
+ */
+export function generatePasswordChangedConfirmationEmail(data: {
+  name?: string;
+}): { subject: string; html: string; text: string } {
+  const bodyContent = `
+    <p class="body-text">Hi ${data.name || 'Learner'},</p>
+    <p class="body-text">This is a confirmation that your <strong>AcePharm</strong> account password was successfully updated.</p>
+    
+    <table role="presentation" width="100%" style="background-color: #ECFDF5; border: 1px solid #D1FAE5; border-radius: 10px; margin: 20px 0; padding: 14px;" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="font-size: 13px; color: #065F46; line-height: 1.5;">
+          <strong>Account Protected:</strong> Your new password is now active across all AcePharm study platforms and mock exam simulators.
+        </td>
+      </tr>
+    </table>
+
+    <div style="text-align: center; margin: 28px 0 16px 0;">
+      <a href="https://app.acepharmexams.co.uk/auth/login" class="btn-primary">Sign In to Dashboard &rarr;</a>
+    </div>
+
+    <p class="body-text" style="font-size: 12px; color: #64748B;">If you did not make this change, please contact our support team immediately at <a href="mailto:support@acepharmexams.co.uk" style="color: #4F46E5;">support@acepharmexams.co.uk</a>.</p>
+  `;
+
+  return {
+    subject: 'Your AcePharm account password has been updated',
+    html: wrapEmailInDesignSystem({
+      title: 'Password Updated',
+      badgeText: 'Security Confirmation',
+      badgeBgColor: '#ECFDF5',
+      badgeTextColor: '#059669',
+      bodyContent,
+    }),
+    text: `Hi ${data.name || 'Learner'},\n\nYour AcePharm account password was changed successfully.\n\nIf you did not do this, please contact support@acepharmexams.co.uk immediately.`,
   };
 }

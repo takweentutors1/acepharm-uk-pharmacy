@@ -3,6 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
+import { Button, Card, Skeleton } from '@acepharm/ui';
 import { 
   ArrowLeft, 
   Layers, 
@@ -14,7 +16,9 @@ import {
   Activity, 
   LifeBuoy, 
   Users,
-  BookOpen
+  BookOpen,
+  Lock,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -23,6 +27,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user, profile, loading } = useAuth();
 
   const navItems = [
     { href: '/admin/curriculum', label: 'Curriculum', icon: Layers },
@@ -37,6 +42,80 @@ export default function AdminLayout({
     { href: '/admin/users', label: 'Users', icon: Users },
   ];
 
+  // 1. Loading State
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col min-h-screen bg-canvas">
+        <header className="border-b border-border bg-surface h-14 flex items-center px-6">
+          <Skeleton className="h-6 w-36 rounded-md" />
+        </header>
+        <div className="max-w-7xl mx-auto w-full p-8 space-y-6">
+          <Skeleton className="h-8 w-64 rounded-md" />
+          <Skeleton className="h-64 w-full rounded-card" />
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated Guard
+  if (!user) {
+    return (
+      <div className="flex-1 flex flex-col min-h-screen bg-canvas items-center justify-center p-4">
+        <Card className="max-w-md w-full p-6 text-center space-y-4 bg-surface border-border shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-crimson-light text-crimson mx-auto flex items-center justify-center border border-crimson/20">
+            <Lock className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-ink">Authentication Required</h2>
+            <p className="text-xs text-slate mt-1.5 leading-relaxed">
+              You must be signed in with an authorized pharmacy educator or clinical reviewer account to access the AcePharm Admin Portal.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 pt-2">
+            <Link href="/auth/login" className="w-full">
+              <Button variant="primary" size="md" className="w-full text-xs font-bold">
+                Sign In to Continue
+              </Button>
+            </Link>
+            <Link href="/" className="w-full">
+              <Button variant="outline" size="md" className="w-full text-xs font-semibold">
+                Back to Student Dashboard
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 3. Unauthorized Role Guard
+  const hasAdminAccess = Boolean(profile?.isAdmin || profile?.isReviewer);
+  if (!hasAdminAccess) {
+    return (
+      <div className="flex-1 flex flex-col min-h-screen bg-canvas items-center justify-center p-4">
+        <Card className="max-w-md w-full p-6 text-center space-y-4 bg-surface border-border shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-amber-light text-amber mx-auto flex items-center justify-center border border-amber/20">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-ink">Access Restricted</h2>
+            <p className="text-xs text-slate mt-1.5 leading-relaxed">
+              Your account ({user.email}) does not have administrative or reviewer permissions. If you are an author or clinical reviewer, please contact your content lead.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link href="/" className="w-full inline-block">
+              <Button variant="primary" size="md" className="w-full text-xs font-bold">
+                Return to Student Dashboard
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 4. Authorized Admin Portal Render
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-canvas">
       {/* Top Admin Header with Back Button */}

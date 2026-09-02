@@ -16,6 +16,7 @@ import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
 import { SubscriptionModal } from '@/components/subscription-modal';
 import { AppHeader } from '@/components/app-header';
 import { useAuth } from '@/lib/auth-context';
+import { apiClient } from '@/lib/api-client';
 import { 
   Play, 
   Target, 
@@ -91,14 +92,11 @@ export default function StudentDashboardPage() {
     async function loadLiveData() {
       try {
         // 1. Fetch real curriculum tree from Cloudflare D1
-        const res = await fetch(`${API_URL}/api/v1/curriculum/tree`);
-        let baseCategories: CategoryItem[] = [];
-
-        if (res.ok) {
-          const data = await res.json();
-          const pathway = data.pathways?.[0];
+        try {
+          const data = await apiClient.get('/api/v1/curriculum/tree');
+          const pathway = data?.pathways?.[0];
           if (pathway && pathway.categories) {
-            baseCategories = pathway.categories.map((cat: any) => {
+            const baseCategories: CategoryItem[] = pathway.categories.map((cat: any) => {
               const subCount = cat.subtopics?.length || 1;
               const totalEst = subCount * 5;
               return {
@@ -112,18 +110,18 @@ export default function StudentDashboardPage() {
             });
             setCategoriesOverview(baseCategories);
           }
+        } catch (curriculumErr) {
+          console.warn('Could not load curriculum tree:', curriculumErr);
         }
 
         // 2. Fetch live user streak metrics, daily goal & progress metrics if authenticated
         if (user) {
           const token = await user.getIdToken();
-          const headers = { Authorization: `Bearer ${token}` };
 
           // Fetch Live Progress Metrics & Coverage Map
-          const metricsRes = await fetch(`${API_URL}/api/v1/analytics/metrics`, { headers });
-          if (metricsRes.ok) {
-            const mData = await metricsRes.json();
-            if (mData.coverageMap && mData.coverageMap.length > 0) {
+          try {
+            const mData = await apiClient.get('/api/v1/analytics/metrics', { token });
+            if (mData?.coverageMap && mData.coverageMap.length > 0) {
               const liveCategories: CategoryItem[] = mData.coverageMap.map((cov: any) => {
                 const subAccuracies = (cov.subtopics || [])
                   .map((s: any) => s.firstPassAccuracy || 0)
@@ -143,37 +141,44 @@ export default function StudentDashboardPage() {
               });
               setCategoriesOverview(liveCategories);
             }
+          } catch (metricsErr) {
+            console.warn('Could not load analytics metrics:', metricsErr);
           }
 
           // Fetch Streak
-          const streakRes = await fetch(`${API_URL}/api/v1/analytics/streak`, { headers });
-          if (streakRes.ok) {
-            const sData = await streakRes.json();
-            setStreakMetrics({
-              currentStreak: sData.currentStreak ?? 0,
-              longestStreak: sData.longestStreak ?? 0,
-              todayQuestionsCount: sData.todayQuestionsCount ?? 0,
-              todayActiveMinutes: sData.todayActiveMinutes ?? 0,
-              isMeaningfulToday: Boolean(sData.isMeaningfulToday),
-              streakHistory: sData.streakHistory,
-            });
+          try {
+            const sData = await apiClient.get('/api/v1/analytics/streak', { token });
+            if (sData) {
+              setStreakMetrics({
+                currentStreak: sData.currentStreak ?? 0,
+                longestStreak: sData.longestStreak ?? 0,
+                todayQuestionsCount: sData.todayQuestionsCount ?? 0,
+                todayActiveMinutes: sData.todayActiveMinutes ?? 0,
+                isMeaningfulToday: Boolean(sData.isMeaningfulToday),
+                streakHistory: sData.streakHistory,
+              });
+            }
+          } catch (streakErr) {
+            console.warn('Could not load streak metrics:', streakErr);
           }
 
           // Fetch Daily Goal
-          const goalRes = await fetch(`${API_URL}/api/v1/analytics/daily-goal`, { headers });
-          if (goalRes.ok) {
-            const gData = await goalRes.json();
-            setDailyGoal({
-              answeredToday: gData.answeredToday ?? 0,
-              dailyTarget: gData.dailyTarget ?? 20,
-            });
+          try {
+            const gData = await apiClient.get('/api/v1/analytics/daily-goal', { token });
+            if (gData) {
+              setDailyGoal({
+                answeredToday: gData.answeredToday ?? 0,
+                dailyTarget: gData.dailyTarget ?? 20,
+              });
+            }
+          } catch (goalErr) {
+            console.warn('Could not load daily goal:', goalErr);
           }
 
           // Fetch Recommendation
-          const recRes = await fetch(`${API_URL}/api/v1/analytics/recommendation`, { headers });
-          if (recRes.ok) {
-            const rData = await recRes.json();
-            if (rData.recommendation) {
+          try {
+            const rData = await apiClient.get('/api/v1/analytics/recommendation', { token });
+            if (rData?.recommendation) {
               setRecommendation({
                 topicName: rData.recommendation.topicName || 'Therapeutics',
                 subtopicName: rData.recommendation.subtopicName || 'Clinical Guidelines',
@@ -182,6 +187,8 @@ export default function StudentDashboardPage() {
                 estimatedAccuracy: rData.recommendation.estimatedAccuracy || 50,
               });
             }
+          } catch (recErr) {
+            console.warn('Could not load recommendation:', recErr);
           }
         }
       } catch (err) {
