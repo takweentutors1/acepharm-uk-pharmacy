@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { PricingToggle, Card } from '@acepharm/ui';
+import PlanComparisonMatrix from '../components/PlanComparisonMatrix';
 ---
 
 <BaseLayout
@@ -60,6 +61,9 @@ import { PricingToggle, Card } from '@acepharm/ui';
   <section class="py-20 max-w-5xl mx-auto px-4">
     {/* Interactive Island for Pricing */}
     <PricingToggle client:visible />
+
+    {/* Plan Comparison Matrix Table & Discount Code */}
+    <PlanComparisonMatrix client:visible />
 
     {/* University & Institutional Licensing Section */}
     <div class="mt-24 bg-surface border border-border rounded-card p-8 sm:p-12 text-center max-w-3xl mx-auto shadow-xs">

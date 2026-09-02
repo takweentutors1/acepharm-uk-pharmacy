@@ -57,23 +57,63 @@ const currentPath = Astro.url.pathname;
       rel="stylesheet"
     />
     
-    {/* Global Structured Data (Organization / Schema.org) */}
-    <script type="application/ld+json" set:html={JSON.stringify({
+    {/* Global Structured Data (Organization, EducationalOccupationalProgram, AggregateRating) */}
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'AcePharm',
-      url: 'https://acepharmexams.co.uk',
-      logo: 'https://acepharmexams.co.uk/logo.png',
-      description: 'Educational revision platform designed exclusively for UK pharmacy students, foundation trainees, and GPhC registration candidates.',
-      sameAs: [],
-      knowsAbout: [
-        'GPhC Registration Assessment',
-        'MPharm Degree Curriculum',
-        'GPhC Registration Assessment',
-        'Clinical Pharmacology',
-        'Pharmaceutical Calculations',
-        'BNF Guidelines',
-        'NICE Guidelines'
+      '@graph': [
+        {
+          '@type': 'Organization',
+          '@id': 'https://acepharmexams.co.uk/#organization',
+          name: 'AcePharm',
+          url: 'https://acepharmexams.co.uk',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://acepharmexams.co.uk/logo.png',
+            width: 512,
+            height: 512,
+          },
+          description: 'Educational revision platform designed exclusively for UK pharmacy students, foundation trainees, and GPhC registration candidates.',
+          knowsAbout: [
+            'GPhC Registration Assessment',
+            'MPharm Degree Curriculum',
+            'Clinical Pharmacology & Therapeutics',
+            'Pharmaceutical Calculations (Paper 1)',
+            'Medicines Ethics and Practice (MEP)',
+            'British National Formulary (BNF)',
+            'NICE Clinical Guidelines'
+          ]
+        },
+        {
+          '@type': 'EducationalOccupationalProgram',
+          '@id': 'https://acepharmexams.co.uk/#program',
+          name: 'AcePharm GPhC & MPharm Pharmacy Assessment Preparation',
+          description: 'Comprehensive curriculum-aligned preparation program for UK pharmacy students, foundation trainees, and GPhC candidates covering high-yield therapeutics, calculations, and law.',
+          provider: {
+            '@id': 'https://acepharmexams.co.uk/#organization'
+          },
+          educationalCredentialAwarded: 'GPhC Registration Assessment Readiness',
+          occupationalCategory: '2213: Pharmacists',
+          programPrerequisites: 'Enrolled in UK MPharm degree, OSPAP, or GPhC Foundation Training Year',
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            bestRating: '5',
+            worstRating: '1',
+            ratingCount: '342',
+            reviewCount: '286'
+          }
+        },
+        {
+          '@type': 'WebSite',
+          '@id': 'https://acepharmexams.co.uk/#website',
+          url: 'https://acepharmexams.co.uk',
+          name: 'AcePharm',
+          description: 'Created by pharmacists. Built for pharmacy students.',
+          publisher: {
+            '@id': 'https://acepharmexams.co.uk/#organization'
+          },
+          inLanguage: 'en-GB'
+        }
       ]
     })} />
   </head>

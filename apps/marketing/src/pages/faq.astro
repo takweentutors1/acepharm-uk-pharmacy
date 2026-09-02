@@ -70,7 +70,7 @@ const FAQ_GROUPS = [
   description="Frequently asked questions about AcePharm question bank, content review, subscriptions and technical support."
 >
   {/* FAQPage JSON-LD Structured Data for AEO/GEO */}
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: FAQ_GROUPS.flatMap((group) => group.items).map((item) => ({

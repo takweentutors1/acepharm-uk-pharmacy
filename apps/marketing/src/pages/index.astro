@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Button, Card, StudySessionHero } from '@acepharm/ui';
+import { Button, Card } from '@acepharm/ui';
+import InteractiveSampleQuestion from '../components/InteractiveSampleQuestion';
 ---
 
 <BaseLayout 
@@ -38,19 +39,9 @@ import { Button, Card, StudySessionHero } from '@acepharm/ui';
         Built for MPharm students and the next generation of pharmacists.
       </p>
 
-      {/* Hero Visual Live Preview Card */}
+      {/* Interactive Micro-Demo Practice Island */}
       <div class="mt-12">
-        <StudySessionHero 
-          client:visible
-          recommendationTopic="Respiratory medicines"
-          questionCount={15}
-          weakestTopic="Asthma and COPD"
-          strongestTopic="Calculations"
-          dailyGoalAnswered={12}
-          dailyGoalTarget={20}
-          currentStreakDays={4}
-          resumeUrl="https://app.acepharm.co.uk/auth/register"
-        />
+        <InteractiveSampleQuestion client:visible />
       </div>
     </div>
   </section>

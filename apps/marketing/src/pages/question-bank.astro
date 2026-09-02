@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Button, Card } from '@acepharm/ui';
+import InteractiveSampleQuestion from '../components/InteractiveSampleQuestion';
+import SyllabusCategoryExplorer from '../components/SyllabusCategoryExplorer';
 ---
 
 <BaseLayout
@@ -39,10 +41,10 @@ import { Button, Card } from '@acepharm/ui';
       <p class="mt-6 text-lg sm:text-xl text-slate max-w-2xl mx-auto leading-relaxed">
         Every question should help you recognise an important principle, avoid a common error or make a safer clinical decision.
       </p>
-      <div class="mt-8">
-        <a href="https://app.acepharmexams.co.uk/auth/register">
-          <Button size="lg" variant="primary">Try a sample question</Button>
-        </a>
+
+      {/* Live Interactive Sample Question Micro-Demo Island */}
+      <div class="mt-12">
+        <InteractiveSampleQuestion client:visible />
       </div>
     </div>
   </section>
@@ -78,6 +80,19 @@ import { Button, Card } from '@acepharm/ui';
           <p class="text-xs text-slate mt-1">Advanced therapeutics, differential diagnosis and prescribing safety.</p>
         </Card>
       </div>
+    </div>
+
+    {/* GPhC Therapeutic Categories & Syllabus Explorer */}
+    <div>
+      <div class="mb-6">
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo">Comprehensive Curriculum Coverage</span>
+        <h2 class="text-2xl font-bold text-ink mt-1">Explore GPhC Therapeutic Categories</h2>
+        <p class="text-xs sm:text-sm text-slate mt-1">
+          Search and filter across all 19 official GPhC syllabus domains, BNF chapters, and high-yield weighting priorities.
+        </p>
+      </div>
+
+      <SyllabusCategoryExplorer client:visible />
     </div>
 
     {/* Modes */}
