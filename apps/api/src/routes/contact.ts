@@ -37,6 +37,22 @@ contactRouter.post('/submit', async (c) => {
     return c.json({ error: 'Message exceeds maximum length of 5000 characters.' }, 400);
   }
 
+  // Rate Limiting on Contact Form Submissions (Anti-bot / Anti-spam)
+  const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'anon_client';
+  if (c.env.RATE_LIMIT) {
+    try {
+      const rateLimitKey = `contact_rl:${clientIp}`;
+      const currentCountStr = await c.env.RATE_LIMIT.get(rateLimitKey);
+      const currentCount = currentCountStr ? parseInt(currentCountStr, 10) : 0;
+      if (currentCount >= 5) {
+        return c.json({ error: 'Too many contact inquiries submitted. Please wait a few minutes before trying again.' }, 429);
+      }
+      await c.env.RATE_LIMIT.put(rateLimitKey, (currentCount + 1).toString(), { expirationTtl: 600 }); // 10 minutes window
+    } catch (rlErr) {
+      console.warn('Rate limiter error for contact form:', rlErr);
+    }
+  }
+
   const db = drizzle(c.env.DB);
   const ticketId = `ticket-${crypto.randomUUID()}`;
   const now = new Date();

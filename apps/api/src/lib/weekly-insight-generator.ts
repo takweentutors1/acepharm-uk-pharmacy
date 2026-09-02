@@ -189,52 +189,61 @@ export async function runWeeklyInsightCron(
   let cached = 0;
   let emailsSent = 0;
 
-  for (const user of activeUsers) {
-    processed++;
-    const insight = await generateSingleWeeklyInsight(
-      db,
-      user.id,
-      user.firstName || 'Learner',
-      zenApiKey
-    );
-
-    if (insight && kvCache) {
-      try {
-        await kvCache.put(
-          `ace_weekly_insight:${user.id}`,
-          JSON.stringify(insight),
-          { expirationTtl: 86400 * 8 } // 8-day retention
+  // Process students in concurrent chunks of 5 to respect Cloudflare Worker CPU limits
+  const chunkSize = 5;
+  for (let i = 0; i < activeUsers.length; i += chunkSize) {
+    const chunk = activeUsers.slice(i, i + chunkSize);
+    
+    await Promise.allSettled(
+      chunk.map(async (user) => {
+        processed++;
+        const insight = await generateSingleWeeklyInsight(
+          db,
+          user.id,
+          user.firstName || 'Learner',
+          zenApiKey
         );
-        cached++;
-      } catch (err) {
-        console.warn(`Failed to cache weekly insight for user ${user.id}:`, err);
-      }
-    }
 
-    // Dispatch branded weekly digest email if student has active questions and emailEnv is present
-    if (insight && insight.totalAttemptsThisWeek > 0 && user.email && emailEnv) {
-      try {
-        const emailContent = generateWeeklyRevisionSummaryEmail({
-          learnerName: user.firstName || 'Learner',
-          totalQuestionsAnswered: insight.totalAttemptsThisWeek,
-          accuracyPercentage: insight.accuracyThisWeek,
-          currentStreakDays: Math.min(insight.totalAttemptsThisWeek > 10 ? 7 : 3, 7),
-          topAreaToImprove: insight.weakestCategoryName || 'High-Weight BNF Clinical Topics',
-        });
+        if (insight && kvCache) {
+          try {
+            await kvCache.put(
+              `ace_weekly_insight:${user.id}`,
+              JSON.stringify(insight),
+              { expirationTtl: 86400 * 8 } // 8-day retention
+            );
+            cached++;
+          } catch (err) {
+            console.warn(`Failed to cache weekly insight for user ${user.id}:`, err);
+          }
+        }
 
-        await sendTransactionalEmail(emailEnv, {
-          to: user.email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        });
-        emailsSent++;
-      } catch (emailErr) {
-        console.warn(`Could not dispatch weekly digest email to ${user.email}:`, emailErr);
-      }
-    }
+        // Dispatch branded weekly digest email if student has active questions and emailEnv is present
+        if (insight && insight.totalAttemptsThisWeek > 0 && user.email && emailEnv) {
+          try {
+            const emailContent = generateWeeklyRevisionSummaryEmail({
+              learnerName: user.firstName || 'Learner',
+              totalQuestionsAnswered: insight.totalAttemptsThisWeek,
+              accuracyPercentage: insight.accuracyThisWeek,
+              currentStreakDays: Math.min(insight.totalAttemptsThisWeek > 10 ? 7 : 3, 7),
+              topAreaToImprove: insight.weakestCategoryName || 'High-Weight BNF Clinical Topics',
+            });
+
+            await sendTransactionalEmail(emailEnv, {
+              to: user.email,
+              subject: emailContent.subject,
+              html: emailContent.html,
+              text: emailContent.text,
+            });
+            emailsSent++;
+          } catch (emailErr) {
+            console.warn(`Could not dispatch weekly digest email to ${user.email}:`, emailErr);
+          }
+        }
+      })
+    );
   }
 
   return { processed, cached, emailsSent };
 }
+
 

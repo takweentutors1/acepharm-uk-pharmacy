@@ -174,85 +174,100 @@ export async function sendHostingerSmtpEmail(options: SmtpOptions): Promise<Smtp
     };
   }
 
-  let socket: any = null;
-  try {
-    // Open direct TLS connection on Port 465
-    socket = connectFn(
-      { hostname: host, port: port },
-      { secureTransport: 'on', allowHalfOpen: false }
-    );
+  let lastError: Error | null = null;
+  const maxRetries = 2; // Total up to 3 attempts
 
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-    const writer = socket.writable.getWriter();
-    const reader = socket.readable.getReader();
-
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    let socket: any = null;
     try {
-      // 1. Initial Greeting (Expect 220)
-      await sendSmtpCommand(writer, reader, encoder, decoder, '', /^220/);
-
-      // 2. EHLO Handshake (Expect 250)
-      await sendSmtpCommand(writer, reader, encoder, decoder, 'EHLO acepharmexams.co.uk', /^250/);
-
-      // 3. AUTH LOGIN (Expect 334)
-      await sendSmtpCommand(writer, reader, encoder, decoder, 'AUTH LOGIN', /^334/);
-
-      // 4. Send Base64 Username (Expect 334)
-      await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(user), /^334/);
-
-      // 5. Send Base64 Password (Expect 235 Authentication Successful)
-      await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(pass), /^235/);
-
-      // 6. MAIL FROM (Expect 250)
-      await sendSmtpCommand(writer, reader, encoder, decoder, `MAIL FROM:<${senderEmail}>`, /^250/);
-
-      // 7. RCPT TO (Expect 250)
-      await sendSmtpCommand(writer, reader, encoder, decoder, `RCPT TO:<${recipientEmail}>`, /^250/);
-
-      // 8. DATA (Expect 354)
-      await sendSmtpCommand(writer, reader, encoder, decoder, 'DATA', /^354/);
-
-      // 9. Send MIME message body followed by \r\n.\r\n (Expect 250 OK)
-      const mimePayload = buildMimeMessage({
-        from,
-        to,
-        replyTo: options.replyTo,
-        subject: options.subject,
-        html: options.html,
-        text: options.text,
-        messageId,
-      });
-
-      await sendSmtpCommand(writer, reader, encoder, decoder, `${mimePayload}\r\n.`, /^250/);
-
-      // 10. QUIT
-      try {
-        await sendSmtpCommand(writer, reader, encoder, decoder, 'QUIT', /^221/);
-      } catch {
-        // Ignore quit acknowledgement
+      if (attempt > 0) {
+        console.warn(`[Hostinger SMTP Retry] Retrying email dispatch to ${to} (Attempt ${attempt + 1}/${maxRetries + 1})...`);
+        await new Promise((resolve) => setTimeout(resolve, 400 * Math.pow(2, attempt - 1)));
       }
 
-      return {
-        success: true,
-        messageId,
-      };
-    } finally {
-      writer.releaseLock();
-      reader.releaseLock();
-    }
-  } catch (error: any) {
-    console.error(`[Hostinger SMTP Error] Failed to send email to ${to}:`, error);
-    return {
-      success: false,
-      error: error?.message || 'Hostinger SMTP connection error',
-    };
-  } finally {
-    if (socket) {
+      // Open direct TLS connection on Port 465
+      socket = connectFn(
+        { hostname: host, port: port },
+        { secureTransport: 'on', allowHalfOpen: false }
+      );
+
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+      const writer = socket.writable.getWriter();
+      const reader = socket.readable.getReader();
+
       try {
-        socket.close();
-      } catch {
-        // Socket closed
+        // 1. Initial Greeting (Expect 220)
+        await sendSmtpCommand(writer, reader, encoder, decoder, '', /^220/);
+
+        // 2. EHLO Handshake (Expect 250)
+        await sendSmtpCommand(writer, reader, encoder, decoder, 'EHLO acepharmexams.co.uk', /^250/);
+
+        // 3. AUTH LOGIN (Expect 334)
+        await sendSmtpCommand(writer, reader, encoder, decoder, 'AUTH LOGIN', /^334/);
+
+        // 4. Send Base64 Username (Expect 334)
+        await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(user), /^334/);
+
+        // 5. Send Base64 Password (Expect 235 Authentication Successful)
+        await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(pass), /^235/);
+
+        // 6. MAIL FROM (Expect 250)
+        await sendSmtpCommand(writer, reader, encoder, decoder, `MAIL FROM:<${senderEmail}>`, /^250/);
+
+        // 7. RCPT TO (Expect 250)
+        await sendSmtpCommand(writer, reader, encoder, decoder, `RCPT TO:<${recipientEmail}>`, /^250/);
+
+        // 8. DATA (Expect 354)
+        await sendSmtpCommand(writer, reader, encoder, decoder, 'DATA', /^354/);
+
+        // 9. Send MIME message body followed by \r\n.\r\n (Expect 250 OK)
+        const mimePayload = buildMimeMessage({
+          from,
+          to,
+          replyTo: options.replyTo,
+          subject: options.subject,
+          html: options.html,
+          text: options.text,
+          messageId,
+        });
+
+        await sendSmtpCommand(writer, reader, encoder, decoder, `${mimePayload}\r\n.`, /^250/);
+
+        // 10. QUIT
+        try {
+          await sendSmtpCommand(writer, reader, encoder, decoder, 'QUIT', /^221/);
+        } catch {
+          // Ignore quit acknowledgement
+        }
+
+        return {
+          success: true,
+          messageId,
+        };
+      } finally {
+        try {
+          writer.releaseLock();
+        } catch {}
+        try {
+          reader.releaseLock();
+        } catch {}
+      }
+    } catch (error: any) {
+      lastError = error;
+      console.error(`[Hostinger SMTP Error] Attempt ${attempt + 1} failed for recipient ${to}:`, error?.message || error);
+    } finally {
+      if (socket) {
+        try {
+          socket.close();
+        } catch {}
       }
     }
   }
+
+  return {
+    success: false,
+    error: lastError?.message || 'Hostinger SMTP connection error after retries',
+  };
 }
+

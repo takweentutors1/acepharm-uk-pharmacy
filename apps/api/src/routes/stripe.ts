@@ -513,6 +513,22 @@ stripeRoutes.post('/webhook', async (c) => {
     return c.json({ error: 'Webhook payload is not valid JSON' }, 400);
   }
 
+  // Idempotency / Replay Attack Protection via KV
+  const eventId = event.id;
+  if (eventId && c.env.CACHE) {
+    try {
+      const alreadyProcessed = await c.env.CACHE.get(`stripe_evt:${eventId}`);
+      if (alreadyProcessed) {
+        console.log(`[Stripe Webhook Idempotency] Skipping already processed event: ${eventId}`);
+        return c.json({ received: true, event: event.type, duplicate: true });
+      }
+      // Cache event ID for 24 hours
+      await c.env.CACHE.put(`stripe_evt:${eventId}`, 'processed', { expirationTtl: 86400 });
+    } catch (kvErr) {
+      console.warn('KV Idempotency check error:', kvErr);
+    }
+  }
+
   try {
     const res = await handleStripeWebhook(db, event, c.env);
     return c.json(res);

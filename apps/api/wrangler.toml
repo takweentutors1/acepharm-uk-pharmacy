@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2024-09-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Smart Placement (Automatic geographic co-location with Western Europe D1 DB)
+[placement]
+mode = "smart"
+
 # D1 Database (Single System of Record - region pinned to weur)
 [[d1_databases]]
 binding = "DB"

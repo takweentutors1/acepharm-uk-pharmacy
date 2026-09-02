@@ -97,6 +97,20 @@ export async function executeD1BackupToR2(
     },
   });
 
+  // 3. Automated 30-Day Snapshot Pruning in R2
+  try {
+    const listed = await r2Bucket.list({ prefix: 'backups/d1/' });
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    for (const obj of listed.objects) {
+      if (obj.uploaded.getTime() < thirtyDaysAgo) {
+        await r2Bucket.delete(obj.key);
+        console.log(`[Backup Prune]: Deleted expired D1 snapshot ${obj.key}`);
+      }
+    }
+  } catch (pruneErr) {
+    console.warn('Backup pruning non-fatal error:', pruneErr);
+  }
+
   return {
     timestamp: now.toISOString(),
     backupKey,
