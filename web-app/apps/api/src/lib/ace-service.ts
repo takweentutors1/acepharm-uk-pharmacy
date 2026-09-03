@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { eq, inArray } from 'drizzle-orm';
 import { generateText, streamText } from 'ai';
-import { contentChunks, aceMessages, aceUsage, questions, questionExplanations } from '../db/schema';
+import { contentChunks, aceMessages, aceUsage, questions, questionExplanations, subtopics, references } from '../db/schema';
 import { getMimoModel } from './zen-ai-client';
 
 export type AceContextType = 'question' | 'dashboard' | 'planner' | 'calculation' | 'simulator';
@@ -34,6 +34,50 @@ export interface CitationItem {
   sourceType: string;
   sourceId: string;
   label?: string;
+  url?: string;
+}
+
+/**
+ * Resolves each retrieved chunk's opaque (sourceType, sourceId) pair into
+ * a human-readable citation label. Today the chunking pipeline only ever
+ * indexes 'subtopic_note' and 'explanation' chunks (never 'reference'),
+ * so those two are the only branches that resolve in practice — the
+ * 'reference' branch is kept for when/if the BNF/NICE references table
+ * is indexed into the RAG pipeline directly.
+ */
+export async function resolveCitationLabels(
+  db: ReturnType<typeof drizzle>,
+  chunks: RetrievedChunk[]
+): Promise<CitationItem[]> {
+  const subtopicIds = [...new Set(chunks.filter((c) => c.sourceType === 'subtopic_note').map((c) => c.sourceId))];
+  const questionIds = [...new Set(chunks.filter((c) => c.sourceType === 'explanation').map((c) => c.sourceId))];
+  const referenceIds = [...new Set(chunks.filter((c) => c.sourceType === 'reference').map((c) => c.sourceId))];
+
+  const [subtopicRows, questionRows, referenceRows] = await Promise.all([
+    subtopicIds.length > 0 ? db.select().from(subtopics).where(inArray(subtopics.id, subtopicIds)) : Promise.resolve([]),
+    questionIds.length > 0 ? db.select().from(questions).where(inArray(questions.id, questionIds)) : Promise.resolve([]),
+    referenceIds.length > 0 ? db.select().from(references).where(inArray(references.id, referenceIds)) : Promise.resolve([]),
+  ]);
+
+  const subtopicMap = new Map(subtopicRows.map((s) => [s.id, s.name]));
+  const questionMap = new Map(questionRows.map((q) => [q.id, q.publicId]));
+  const referenceMap = new Map(referenceRows.map((r) => [r.id, r]));
+
+  return chunks.map((c) => {
+    if (c.sourceType === 'subtopic_note') {
+      const subtopicName = subtopicMap.get(c.sourceId);
+      return { id: c.id, sourceType: c.sourceType, sourceId: c.sourceId, label: subtopicName ? `${subtopicName} — subtopic notes` : undefined };
+    }
+    if (c.sourceType === 'explanation') {
+      const publicId = questionMap.get(c.sourceId);
+      return { id: c.id, sourceType: c.sourceType, sourceId: c.sourceId, label: publicId ? `Question ${publicId} — clinical explanation` : undefined };
+    }
+    if (c.sourceType === 'reference') {
+      const ref = referenceMap.get(c.sourceId);
+      return { id: c.id, sourceType: c.sourceType, sourceId: c.sourceId, label: ref ? `${ref.sourceName} — ${ref.title}` : undefined, url: ref?.url ?? undefined };
+    }
+    return { id: c.id, sourceType: c.sourceType, sourceId: c.sourceId };
+  });
 }
 
 export interface GenerateAceResponseResult {
@@ -46,8 +90,21 @@ export interface GenerateAceResponseResult {
   costPence: number;
   retrievedChunkIds: string[];
   citations: CitationItem[];
+  /** True when this was a deterministic out-of-coverage refusal — no
+   * relevant reviewed content was retrieved, so the model was never
+   * called at all (see REFUSAL_MESSAGE below). */
+  refused: boolean;
   streamResult?: any;
 }
+
+/**
+ * Fixed refusal copy for queries with zero retrieved grounding. Not
+ * LLM-generated: this is a deterministic short-circuit, not a prompted
+ * behaviour the model might or might not comply with (Non-Negotiable
+ * Rule #2, Section 5.4 — "never an unexplained/ungrounded answer").
+ */
+const REFUSAL_MESSAGE =
+  "I can't find this specific clinical guidance in our reviewed question bank or subtopic notes, so I won't guess. Please refer directly to the current BNF or NICE guidance for this query.";
 
 /**
  * System prompt strictly enforcing clinical grounding, UK English,
@@ -180,11 +237,47 @@ export async function generateAceResponse(params: GenerateAceRequest): Promise<G
   const retrievedChunks = await retrieveRelevantChunks(db, userPrompt, ai, vectorize, 4);
   const retrievedChunkIds = retrievedChunks.map((c) => c.id);
 
-  const citations: CitationItem[] = retrievedChunks.map((c) => ({
-    id: c.id,
-    sourceType: c.sourceType,
-    sourceId: c.sourceId,
-  }));
+  const citations: CitationItem[] = await resolveCitationLabels(db, retrievedChunks);
+
+  // 2b. Deterministic graceful refusal. If retrieval genuinely found
+  // nothing, refuse outright rather than asking the model to decide —
+  // relying purely on prompt compliance risks an occasional ungrounded
+  // (hallucinated) answer slipping through. Also skips the model call
+  // entirely, so it's free.
+  if (retrievedChunks.length === 0) {
+    const assistantMessageId = `msg-ast-${crypto.randomUUID()}`;
+    const latencyMs = Date.now() - startTime;
+    const completionTokens = Math.ceil(REFUSAL_MESSAGE.length / 4);
+
+    await db.insert(aceMessages).values({
+      id: assistantMessageId,
+      threadId,
+      role: 'assistant',
+      content: REFUSAL_MESSAGE,
+      intent,
+      retrievedChunkIds: JSON.stringify(retrievedChunkIds),
+      citations: JSON.stringify(citations),
+      model: modelIdentifier,
+      promptTokens: 0,
+      completionTokens,
+      latencyMs,
+      costPence: 0,
+      createdAt: new Date(),
+    });
+
+    return {
+      messageId: assistantMessageId,
+      content: REFUSAL_MESSAGE,
+      model: modelIdentifier,
+      promptTokens: 0,
+      completionTokens,
+      latencyMs,
+      costPence: 0,
+      retrievedChunkIds,
+      citations,
+      refused: true,
+    };
+  }
 
   // Format context block
   const contextBlock = retrievedChunks.length > 0
@@ -297,6 +390,7 @@ ${contextBlock}
       costPence: 0,
       retrievedChunkIds,
       citations,
+      refused: false,
       streamResult,
     };
   } else {
@@ -371,6 +465,7 @@ ${contextBlock}
       costPence: 0,
       retrievedChunkIds,
       citations,
+      refused: false,
     };
   }
 }

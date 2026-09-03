@@ -80,8 +80,8 @@ app.get('/api/v1/meta/curriculum-summary', (c) => {
   });
 });
 
-import { userProfiles } from './db/schema';
-import { eq } from 'drizzle-orm';
+import { userProfiles, universities } from './db/schema';
+import { eq, asc } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/d1';
 
 // Authenticated current user profile with preferences
@@ -94,6 +94,11 @@ app.get('/api/v1/auth/me', requireAuth, async (c) => {
     .from(userProfiles)
     .where(eq(userProfiles.userId, user.id))
     .limit(1);
+
+  // A row only ever exists once the learner has completed the 5-step
+  // onboarding flow (see PUT /api/v1/user/onboarding) — capture that
+  // before substituting display defaults below.
+  const hasCompletedOnboarding = Boolean(profile);
 
   if (!profile) {
     // Default fallback
@@ -125,6 +130,13 @@ app.get('/api/v1/auth/me', requireAuth, async (c) => {
       email_verified_at: user.emailVerifiedAt,
       created_at: user.createdAt,
     },
+    onboarding: {
+      completed: hasCompletedOnboarding,
+      stage: profile.stage,
+      primaryGoal: profile.primaryGoal,
+      assessmentDate: profile.assessmentDate,
+      universityId: profile.universityId,
+    },
     preferences: {
       showConfidencePrompt: Boolean(profile.showConfidencePrompt),
       hideOptionsByDefault: Boolean(profile.hideOptionsByDefault),
@@ -132,6 +144,72 @@ app.get('/api/v1/auth/me', requireAuth, async (c) => {
       dailyQuestionTarget: profile.dailyQuestionTarget,
     },
   });
+});
+
+// Complete/update the 5-step onboarding flow (Milestone 2, Section 3.4):
+// training stage, primary revision target, exam date, daily question
+// goal, and university affiliation. Upserts the same `user_profiles` row
+// `/user/preferences` writes to, so onboarding-set values pre-populate
+// Settings, and vice versa.
+app.put('/api/v1/user/onboarding', requireAuth, async (c) => {
+  const user = c.get('user');
+  const body = await c.req.json<{
+    stage?: 'year_2' | 'year_3' | 'year_4' | 'foundation_trainee' | 'oriel' | 'ip' | 'other';
+    primaryGoal?: string;
+    assessmentDate?: string;
+    dailyQuestionTarget?: number;
+    universityId?: string;
+  }>();
+
+  const db = drizzle(c.env.DB);
+  const now = new Date();
+
+  const [existing] = await db
+    .select()
+    .from(userProfiles)
+    .where(eq(userProfiles.userId, user.id))
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(userProfiles)
+      .set({
+        stage: body.stage ?? existing.stage,
+        primaryGoal: body.primaryGoal ?? existing.primaryGoal,
+        assessmentDate: body.assessmentDate ?? existing.assessmentDate,
+        dailyQuestionTarget: body.dailyQuestionTarget ?? existing.dailyQuestionTarget,
+        universityId: body.universityId ?? existing.universityId,
+        updatedAt: now,
+      })
+      .where(eq(userProfiles.id, existing.id));
+  } else {
+    await db.insert(userProfiles).values({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      stage: body.stage ?? 'other',
+      primaryGoal: body.primaryGoal ?? null,
+      assessmentDate: body.assessmentDate ?? null,
+      dailyQuestionTarget: body.dailyQuestionTarget ?? 20,
+      universityId: body.universityId ?? null,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return c.json({ status: 'onboarded' });
+});
+
+// List active universities/institutions for the onboarding affiliation
+// step. Reference data — no write path exists yet for adding new ones.
+app.get('/api/v1/universities', requireAuth, async (c) => {
+  const db = drizzle(c.env.DB);
+  const rows = await db
+    .select({ id: universities.id, name: universities.name })
+    .from(universities)
+    .where(eq(universities.active, true))
+    .orderBy(asc(universities.name));
+
+  return c.json({ universities: rows });
 });
 
 // Update user preferences (hideOptionsByDefault, showConfidencePrompt)

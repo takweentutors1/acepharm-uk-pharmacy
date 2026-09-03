@@ -57,7 +57,7 @@ export const userProfiles = sqliteTable('user_profiles', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
   stage: text('stage', {
-    enum: ['year_2', 'year_3', 'year_4', 'foundation_trainee', 'other'],
+    enum: ['year_2', 'year_3', 'year_4', 'foundation_trainee', 'oriel', 'ip', 'other'],
   }),
   primaryGoal: text('primary_goal'),
   assessmentDate: text('assessment_date'),
