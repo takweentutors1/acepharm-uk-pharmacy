@@ -15,6 +15,7 @@ import {
 } from '../db/schema';
 import { requireAuth, type AuthContext } from '../middleware/auth';
 import { sendTransactionalEmail, generateUsageWarningEmail } from '../lib/email-service';
+import { calculateDueForReviewAt } from '../lib/progress-calculator';
 
 const sessionsRouter = new Hono<AuthContext>();
 
@@ -192,6 +193,7 @@ sessionsRouter.post('/answer', requireAuth, async (c) => {
       confidence: body.confidence || null,
       timeTakenSeconds: body.timeTakenSeconds || 0,
       mode: body.mode || 'learn',
+      dueForReviewAt: calculateDueForReviewAt(isCorrect, body.confidence, now),
       answeredAt: now,
     })
   );
@@ -482,7 +484,7 @@ sessionsRouter.post('/reset-category', requireAuth, async (c) => {
 // Helper: Filtered Question Resolver
 // ==========================================
 
-async function fetchFilteredQuestions(
+export async function fetchFilteredQuestions(
   db: ReturnType<typeof drizzle>,
   userId: string,
   filters: SessionBuilderQuery
@@ -528,6 +530,34 @@ async function fetchFilteredQuestions(
       .where(and(eq(questionAttempts.userId, userId), eq(questionAttempts.isCorrect, false)));
     const incorrectSet = new Set(incorrectAttempts.map((a) => a.questionId));
     return candidateIds.filter((id) => incorrectSet.has(id));
+  }
+
+  if (filters.statusFilter === 'due_for_review') {
+    const attempts = await db
+      .select({
+        questionId: questionAttempts.questionId,
+        dueForReviewAt: questionAttempts.dueForReviewAt,
+        answeredAt: questionAttempts.answeredAt,
+      })
+      .from(questionAttempts)
+      .where(eq(questionAttempts.userId, userId));
+
+    // Only the most recent attempt per question decides its freshness.
+    const latestByQuestion = new Map<string, { dueForReviewAt: Date | null; answeredAt: Date }>();
+    for (const a of attempts) {
+      const existing = latestByQuestion.get(a.questionId);
+      if (!existing || a.answeredAt > existing.answeredAt) {
+        latestByQuestion.set(a.questionId, { dueForReviewAt: a.dueForReviewAt, answeredAt: a.answeredAt });
+      }
+    }
+
+    const now = Date.now();
+    const dueSet = new Set(
+      [...latestByQuestion.entries()]
+        .filter(([, a]) => a.dueForReviewAt && a.dueForReviewAt.getTime() <= now)
+        .map(([questionId]) => questionId)
+    );
+    return candidateIds.filter((id) => dueSet.has(id));
   }
 
   return candidateIds;

@@ -83,6 +83,7 @@ app.get('/api/v1/meta/curriculum-summary', (c) => {
 import { userProfiles, universities } from './db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/d1';
+import { deleteUserAccount } from './lib/account-service';
 
 // Authenticated current user profile with preferences
 app.get('/api/v1/auth/me', requireAuth, async (c) => {
@@ -262,6 +263,19 @@ app.put('/api/v1/user/preferences', requireAuth, async (c) => {
       showDifficultyLabels: body.showDifficultyLabels,
     },
   });
+});
+
+// Permanently deletes the signed-in user's account and all associated
+// data (GDPR right to erasure / Apple Guideline 5.1.1(v)). The client is
+// responsible for re-authenticating before calling this — Firebase's own
+// `user.delete()` (called after this succeeds) enforces recent sign-in.
+app.delete('/api/v1/user/account', requireAuth, async (c) => {
+  const user = c.get('user');
+  const db = drizzle(c.env.DB);
+
+  await deleteUserAccount(db, user.id, c.env.STRIPE_SECRET_KEY);
+
+  return c.json({ status: 'deleted' });
 });
 
 // ==========================================

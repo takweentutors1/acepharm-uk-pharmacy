@@ -69,6 +69,36 @@ export interface ProgressAnalyticsResult {
 }
 
 /**
+ * Freshness interval for the "Due for review" mastery status: how long an
+ * attempt stays fresh before its subtopic should resurface. Deliberately
+ * stateless — unlike `flashcards`' full SM-2 loop (sm2-engine.ts), the
+ * `question_attempts` table carries no persisted ease/interval, so each
+ * attempt just recalculates a flat interval from its own correctness and
+ * confidence, biased toward faster recall of shakier answers.
+ */
+const DUE_FOR_REVIEW_INTERVAL_DAYS = {
+  incorrect: 1,
+  correctLowConfidence: 3,
+  correctMediumConfidence: 7,
+  correctHighConfidence: 21,
+} as const;
+
+export function calculateDueForReviewAt(
+  isCorrect: boolean,
+  confidence: 'low' | 'medium' | 'high' | null | undefined,
+  answeredAt: Date
+): Date {
+  const days = !isCorrect
+    ? DUE_FOR_REVIEW_INTERVAL_DAYS.incorrect
+    : confidence === 'high'
+      ? DUE_FOR_REVIEW_INTERVAL_DAYS.correctHighConfidence
+      : confidence === 'medium'
+        ? DUE_FOR_REVIEW_INTERVAL_DAYS.correctMediumConfidence
+        : DUE_FOR_REVIEW_INTERVAL_DAYS.correctLowConfidence;
+  return new Date(answeredAt.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+/**
  * Calculates distinct progress metrics per Section 7.2 of the Specification:
  * - First-attempt accuracy: from question_first_attempts
  * - Practice accuracy: from question_attempts
@@ -172,6 +202,19 @@ export async function calculateProgressMetrics(
         statusLabel = 'First pass';
       }
 
+      // A Secure subtopic lapses into "Due for review" once its most
+      // recent attempt's freshness window (dueForReviewAt) has passed.
+      if (statusLabel === 'Secure') {
+        const subAttempts = allAttempts.filter((a) => subQs.some((q) => q.id === a.questionId));
+        const latestAttempt = subAttempts.reduce<(typeof subAttempts)[number] | null>(
+          (latest, a) => (!latest || a.answeredAt > latest.answeredAt ? a : latest),
+          null
+        );
+        if (latestAttempt?.dueForReviewAt && latestAttempt.dueForReviewAt.getTime() <= Date.now()) {
+          statusLabel = 'Due for review';
+        }
+      }
+
       catTotalQ += total;
       catAttemptedQ += attempted;
 
@@ -192,6 +235,12 @@ export async function calculateProgressMetrics(
     else if (catCoverage >= 80) catStatus = 'Secure';
     else if (catCoverage >= 40) catStatus = 'Developing';
     else catStatus = 'First pass';
+
+    // A category is only ever as fresh as its shakiest secure subtopic —
+    // surface the same lapse at the category level.
+    if (catStatus === 'Secure' && subtopicStats.some((s) => s.statusLabel === 'Due for review')) {
+      catStatus = 'Due for review';
+    }
 
     return {
       categoryId: cat.id,
