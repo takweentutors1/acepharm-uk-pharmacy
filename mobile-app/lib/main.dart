@@ -6,6 +6,7 @@ import 'core/api/api_client.dart';
 import 'core/curriculum/curriculum_repository.dart';
 import 'core/theme/ace_theme.dart';
 import 'core/user/user_repository.dart';
+import 'features/account/account_repository.dart';
 import 'features/auth/auth_repository.dart';
 import 'features/auth/login_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
@@ -72,6 +73,7 @@ class _AuthGate extends StatelessWidget {
             aceRepository: AceRepository(dio),
             progressRepository: ProgressRepository(dio),
             subscriptionRepository: SubscriptionRepository(dio),
+            accountRepository: AccountRepository(dio),
           ),
         );
       },

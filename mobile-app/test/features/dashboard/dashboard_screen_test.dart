@@ -14,6 +14,7 @@ import 'package:mobile_app/features/dashboard/weekly_insight_repository.dart';
 import 'package:mobile_app/features/practice/ace_repository.dart';
 import 'package:mobile_app/features/practice/question_repository.dart';
 import 'package:mobile_app/features/practice/session_repository.dart';
+import 'package:mobile_app/features/account/account_repository.dart';
 import 'package:mobile_app/features/progress/progress_repository.dart';
 import 'package:mobile_app/features/subscription/subscription_repository.dart';
 
@@ -90,6 +91,7 @@ Widget _dashboard({
       aceRepository: AceRepository(dio),
       progressRepository: ProgressRepository(dio),
       subscriptionRepository: SubscriptionRepository(dio),
+      accountRepository: AccountRepository(dio),
     ),
   );
 }
@@ -209,5 +211,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Subscription'), findsOneWidget);
+  });
+
+  testWidgets('the settings icon opens the settings screen', (tester) async {
+    await tester.pumpWidget(
+      _dashboard(weeklyInsight: _FakeWeeklyInsightRepository()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Delete account'), findsOneWidget);
   });
 }

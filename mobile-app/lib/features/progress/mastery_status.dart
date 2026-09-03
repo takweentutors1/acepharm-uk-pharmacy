@@ -2,11 +2,6 @@
 /// Not started → First pass → Needs attention → Developing → Secure →
 /// Due for review. Mirrors the `statusLabel` union in
 /// `web-app/apps/api/src/lib/progress-calculator.ts`.
-///
-/// Note: 'Due for review' is defined server-side but never actually
-/// assigned yet — the spaced-repetition write path (`dueForReviewAt`)
-/// that would populate it doesn't exist. Handled here regardless so the
-/// UI is correct the moment that lands.
 enum MasteryStatus {
   notStarted,
   firstPass,

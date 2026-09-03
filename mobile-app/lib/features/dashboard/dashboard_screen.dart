@@ -4,6 +4,8 @@ import '../../core/curriculum/curriculum_repository.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/user/user_profile.dart';
 import '../../core/widgets/widgets.dart';
+import '../account/account_repository.dart';
+import '../account/settings_screen.dart';
 import '../auth/auth_repository.dart';
 import '../practice/ace_repository.dart';
 import '../practice/practice_session_player.dart';
@@ -38,6 +40,7 @@ class DashboardScreen extends StatelessWidget {
     required this.aceRepository,
     required this.progressRepository,
     required this.subscriptionRepository,
+    required this.accountRepository,
   });
 
   /// Resolved once upstream by `OnboardingGate`. Null only if that
@@ -53,6 +56,7 @@ class DashboardScreen extends StatelessWidget {
   final AceRepository aceRepository;
   final ProgressRepository progressRepository;
   final SubscriptionRepository subscriptionRepository;
+  final AccountRepository accountRepository;
 
   void _openSessionBuilder(BuildContext context) {
     final userId = profile?.id;
@@ -102,6 +106,17 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  void _openSettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(
+          authRepository: AuthRepository(),
+          accountRepository: accountRepository,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +132,11 @@ class DashboardScreen extends StatelessWidget {
             icon: const Icon(Icons.workspace_premium_outlined),
             tooltip: 'Subscription',
             onPressed: () => _openSubscription(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () => _openSettings(context),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
