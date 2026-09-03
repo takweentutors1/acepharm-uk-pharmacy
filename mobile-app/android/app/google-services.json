@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1066048447991",
+    "project_id": "acepharm-uk",
+    "storage_bucket": "acepharm-uk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066048447991:android:43d08dec4349a33cc63af2",
+        "android_client_info": {
+          "package_name": "com.acepharm.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcE6zrsQNhx3J5PPeduflQCXNP2kmVtw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
