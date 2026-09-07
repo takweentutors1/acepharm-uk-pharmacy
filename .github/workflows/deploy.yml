@@ -58,6 +58,7 @@ jobs:
     name: Apply D1 Migrations & Sync Vectorize
     needs: validate
     runs-on: ubuntu-latest
+    environment: acepharma
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -97,6 +98,7 @@ jobs:
     name: Deploy API Worker
     needs: migrations-and-vectorize
     runs-on: ubuntu-latest
+    environment: acepharma
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -125,6 +127,7 @@ jobs:
     name: Deploy Astro Marketing Pages
     needs: migrations-and-vectorize
     runs-on: ubuntu-latest
+    environment: acepharma
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -156,6 +159,7 @@ jobs:
     name: Deploy Next.js Learner App / Admin
     needs: migrations-and-vectorize
     runs-on: ubuntu-latest
+    environment: acepharma
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
