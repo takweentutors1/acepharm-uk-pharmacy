@@ -145,7 +145,7 @@ export default function AdminReportedContentPage() {
                 </h3>
               </div>
 
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 ${
                 report.status === 'pending' ? 'bg-amber-100 text-amber-800' :
                 report.status === 'in_review' ? 'bg-blue-100 text-blue-800' :
                 report.status === 'resolved' ? 'bg-teal-100 text-teal-800' :

@@ -46,7 +46,13 @@ export function FloatingHighlightMenu({ onAskAce, containerRef }: FloatingHighli
       const top = rect.top + window.scrollY - 44;
       const left = rect.left + window.scrollX + rect.width / 2;
 
-      setPosition({ top: Math.max(10, top), left: Math.max(20, left) });
+      // Clamp horizontally so the pill (translated -50%) can't run off either edge on narrow screens
+      const halfButtonWidth = 100;
+      const minLeft = window.scrollX + 20 + halfButtonWidth;
+      const maxLeft = window.scrollX + window.innerWidth - 20 - halfButtonWidth;
+      const clampedLeft = Math.min(Math.max(left, minLeft), Math.max(minLeft, maxLeft));
+
+      setPosition({ top: Math.max(10, top), left: clampedLeft });
       setSelectedText(text);
     } catch {
       setPosition(null);

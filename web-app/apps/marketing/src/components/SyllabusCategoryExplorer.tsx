@@ -263,11 +263,11 @@ export default function SyllabusCategoryExplorer() {
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-mono font-semibold text-slate">
+                <span className="text-[11px] font-mono font-semibold text-slate truncate">
                   {cat.bnfChapter}
                 </span>
                 <span
-                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 ${
                     cat.weighting === 'High'
                       ? 'bg-rose-50 text-rose-700 border-rose-200'
                       : cat.weighting === 'Medium'

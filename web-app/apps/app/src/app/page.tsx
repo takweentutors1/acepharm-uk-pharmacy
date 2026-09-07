@@ -221,11 +221,11 @@ export default function StudentDashboardPage() {
             <>
               <Card className="p-6 lg:col-span-2 bg-surface border-indigo/30 ring-1 ring-indigo/10 shadow-sm flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <Badge variant="default" className="text-xs font-semibold">
                       <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Recommended Focus Drill
                     </Badge>
-                    <span className="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20">
+                    <span className="px-2.5 py-0.5 rounded-full bg-teal-light text-teal text-xs font-bold border border-teal/20 whitespace-nowrap shrink-0">
                       {profile?.displayName ? `Good evening, ${profile.displayName.split(' ')[0]}` : 'Active Session'}
                     </span>
                   </div>

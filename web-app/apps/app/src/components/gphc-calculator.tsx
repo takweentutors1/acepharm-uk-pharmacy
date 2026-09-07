@@ -118,7 +118,7 @@ export const GphcCalculator: React.FC<GphcCalculatorProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="w-72 bg-surface border-2 border-indigo/40 rounded-card shadow-modal p-4 font-sans text-ink select-none animate-in zoom-in-95 duration-150">
+    <div className="w-72 max-w-[calc(100vw-2rem)] bg-surface border-2 border-indigo/40 rounded-card shadow-modal p-4 font-sans text-ink select-none animate-in zoom-in-95 duration-150">
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-border mb-3">
         <div className="flex items-center gap-1.5 text-xs font-bold text-ink">

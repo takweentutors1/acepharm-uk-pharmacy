@@ -344,8 +344,8 @@ export function QuestionPlayer({
       />
 
       {/* Top Session Progress Bar with Back/Exit button */}
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border text-xs">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 pb-2 border-b border-border text-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <a
             href="/"
             className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate hover:text-ink px-2 py-1 rounded-btn bg-canvas border border-border hover:border-slate transition-colors shadow-2xs"
@@ -370,7 +370,7 @@ export function QuestionPlayer({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           {/* GPhC Calculator Button */}
           <button
             type="button"

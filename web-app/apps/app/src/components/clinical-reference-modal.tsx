@@ -100,9 +100,9 @@ export const ClinicalReferenceModal: React.FC<ClinicalReferenceModalProps> = ({ 
             <div className="space-y-3">
               {tdmRanges.map((tdm) => (
                 <div key={tdm.drug} className="p-3.5 rounded-btn bg-canvas border border-border space-y-1.5">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                     <span className="font-bold text-ink text-xs sm:text-sm">{tdm.drug}</span>
-                    <span className="font-mono text-xs font-bold text-teal bg-teal-light px-2.5 py-0.5 rounded-full">
+                    <span className="font-mono text-xs font-bold text-teal bg-teal-light px-2.5 py-0.5 rounded-full self-start sm:self-auto">
                       {tdm.range}
                     </span>
                   </div>

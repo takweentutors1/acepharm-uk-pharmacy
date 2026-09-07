@@ -154,10 +154,10 @@ export function FlashcardsReviewDeck() {
         }`}>
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-slate-100 text-slate-700">
+              <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-slate-100 text-slate-700 truncate">
                 {currentCard.subtopicName || 'Clinical Pharmacology'}
               </span>
-              <span className="text-xs text-ink-muted flex items-center gap-1">
+              <span className="text-xs text-ink-muted flex items-center gap-1 whitespace-nowrap shrink-0">
                 <RotateCw className="w-3 h-3" /> Click to {isFlipped ? 'show question' : 'reveal answer'}
               </span>
             </div>

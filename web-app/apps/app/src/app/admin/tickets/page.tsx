@@ -141,7 +141,7 @@ export default function AdminSupportTicketsPage() {
             >
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <span className="text-xs font-mono text-slate">{ticket.id}</span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full capitalize ${
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full capitalize whitespace-nowrap shrink-0 ${
                   ticket.status === 'open' ? 'bg-amber-100 text-amber-800' :
                   ticket.status === 'waiting_on_student' ? 'bg-blue-100 text-blue-800' :
                   'bg-teal-100 text-teal-800'
