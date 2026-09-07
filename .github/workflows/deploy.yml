@@ -116,7 +116,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Deploy Cloudflare Worker (apps/api)
-        run: pnpm --filter @acepharm/api deploy
+        run: pnpm --filter @acepharm/api run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -152,6 +152,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: web-app
+          wranglerVersion: '3.90.0'
           command: pages deploy apps/marketing/dist --project-name=acepharm-marketing --branch=main
 
   deploy-app:
@@ -193,4 +194,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: web-app
+          wranglerVersion: '3.90.0'
           command: pages deploy apps/app/out --project-name=acepharm-app --branch=main
