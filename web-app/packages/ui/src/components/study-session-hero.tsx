@@ -30,7 +30,7 @@ export const StudySessionHero: React.FC<StudySessionHeroProps> = ({
   dailyGoalAnswered = 12,
   dailyGoalTarget = 20,
   currentStreakDays = 4,
-  resumeUrl = 'https://app.acepharm.co.uk/session/new',
+  resumeUrl = 'https://app.acepharmexams.co.uk/session/new',
   isLoading = false,
 }) => {
   // Compute contextual time greeting if not provided
