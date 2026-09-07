@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { AuthStorage } from '@acepharm/preferences';
 
 interface MobileNavProps {
@@ -12,6 +13,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   React.useEffect(() => {
     const token = AuthStorage.getToken();
@@ -76,73 +82,80 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         )}
       </button>
 
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-xs transition-opacity"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/* Backdrop + Drawer are portaled to <body> so the header's backdrop-blur
+          (which creates a containing block for fixed descendants) can't break
+          their viewport-relative positioning. */}
+      {mounted &&
+        createPortal(
+          <>
+            {isOpen && (
+              <div
+                className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-xs transition-opacity"
+                onClick={() => setIsOpen(false)}
+                aria-hidden="true"
+              />
+            )}
 
-      {/* Drawer */}
-      <div
-        className={`fixed top-16 right-0 bottom-0 z-50 w-full max-w-xs bg-surface border-l border-border shadow-modal p-6 flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navigation Menu"
-      >
-        <div className="overflow-y-auto">
-          <nav className="flex flex-col space-y-1">
-            {navLinks.map((link) => {
-              const isActive = currentPath === link.href;
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`px-3 py-2.5 rounded-btn text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-indigo-wash text-indigo font-semibold'
-                      : 'text-slate hover:text-ink hover:bg-canvas'
-                  }`}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-          </nav>
-        </div>
-
-        <div className="pt-6 border-t border-border space-y-3">
-          {isLoggedIn ? (
-            <a
-              href={appUrl}
-              className="flex items-center justify-center gap-2 text-center text-sm font-bold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
+            <div
+              className={`fixed top-16 right-0 bottom-0 z-50 w-full max-w-xs bg-surface border-l border-border shadow-modal p-6 flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
+                isOpen ? 'translate-x-0' : 'translate-x-full'
+              }`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation Menu"
             >
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Go to Dashboard</span>
-            </a>
-          ) : (
-            <>
-              <a
-                href={`${appUrl}/auth/login`}
-                className="block text-center text-sm font-semibold text-slate hover:text-ink py-2.5 rounded-btn border border-border transition-colors"
-              >
-                Log in
-              </a>
-              <a
-                href={`${appUrl}/auth/register`}
-                className="block text-center text-sm font-semibold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
-              >
-                Start revising free
-              </a>
-            </>
-          )}
-        </div>
-      </div>
+              <div className="overflow-y-auto">
+                <nav className="flex flex-col space-y-1">
+                  {navLinks.map((link) => {
+                    const isActive = currentPath === link.href;
+                    return (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        className={`px-3 py-2.5 rounded-btn text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-indigo-wash text-indigo font-semibold'
+                            : 'text-slate hover:text-ink hover:bg-canvas'
+                        }`}
+                      >
+                        {link.label}
+                      </a>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="pt-6 border-t border-border space-y-3">
+                {isLoggedIn ? (
+                  <a
+                    href={appUrl}
+                    className="flex items-center justify-center gap-2 text-center text-sm font-bold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Go to Dashboard</span>
+                  </a>
+                ) : (
+                  <>
+                    <a
+                      href={`${appUrl}/auth/login`}
+                      className="block text-center text-sm font-semibold text-slate hover:text-ink py-2.5 rounded-btn border border-border transition-colors"
+                    >
+                      Log in
+                    </a>
+                    <a
+                      href={`${appUrl}/auth/register`}
+                      className="block text-center text-sm font-semibold text-white bg-indigo hover:bg-indigo-deep py-2.5 rounded-btn shadow-sm transition-all"
+                    >
+                      Start revising free
+                    </a>
+                  </>
+                )}
+              </div>
+            </div>
+          </>,
+          document.body
+        )}
     </div>
   );
 };
