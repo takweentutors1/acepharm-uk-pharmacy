@@ -9,6 +9,10 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+defaults:
+  run:
+    working-directory: web-app
+
 jobs:
   validate:
     name: Validate
@@ -25,6 +29,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 9.15.4
           run_install: false
 
       - name: Get pnpm store directory
@@ -65,6 +70,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 9.15.4
           run_install: false
 
       - name: Install dependencies
@@ -103,6 +109,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 9.15.4
           run_install: false
 
       - name: Install dependencies
@@ -130,6 +137,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 9.15.4
           run_install: false
 
       - name: Install dependencies
@@ -143,6 +151,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web-app
           command: pages deploy apps/marketing/dist --project-name=acepharm-marketing --branch=main
 
   deploy-app:
@@ -161,6 +170,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 9.15.4
           run_install: false
 
       - name: Install dependencies
@@ -182,4 +192,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web-app
           command: pages deploy apps/app/out --project-name=acepharm-app --branch=main
