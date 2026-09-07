@@ -147,13 +147,10 @@ jobs:
         run: pnpm --filter @acepharm/marketing build
 
       - name: Deploy to Cloudflare Pages (Marketing)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: web-app
-          wranglerVersion: '3.90.0'
-          command: pages deploy apps/marketing/dist --project-name=acepharm-marketing --branch=main
+        run: npx --yes wrangler@3.90.0 pages deploy apps/marketing/dist --project-name=acepharm-marketing --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-app:
     name: Deploy Next.js Learner App / Admin
@@ -189,10 +186,7 @@ jobs:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev' }}
 
       - name: Deploy to Cloudflare Pages (App)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: web-app
-          wranglerVersion: '3.90.0'
-          command: pages deploy apps/app/out --project-name=acepharm-app --branch=main
+        run: npx --yes wrangler@3.90.0 pages deploy apps/app/out --project-name=acepharm-app --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
