@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_app/core/curriculum/category.dart';
 import 'package:mobile_app/core/curriculum/curriculum_repository.dart';
+import 'package:mobile_app/core/offline/offline_answer_queue.dart';
+import 'package:mobile_app/core/offline/offline_answer_sync_service.dart';
 import 'package:mobile_app/core/user/user_profile.dart';
 import 'package:mobile_app/features/dashboard/dashboard_screen.dart';
 import 'package:mobile_app/features/dashboard/daily_goal.dart';
@@ -73,6 +75,25 @@ class _FakeCurriculumRepository extends CurriculumRepository {
   Future<List<Category>> fetchCategories({String? pathwayId}) async => const [];
 }
 
+class _FakeOfflineAnswerQueue extends OfflineAnswerQueue {
+  @override
+  Stream<int> watchCount() => const Stream.empty();
+}
+
+class _FakeOfflineAnswerSyncService extends OfflineAnswerSyncService {
+  _FakeOfflineAnswerSyncService()
+    : super(
+        queue: OfflineAnswerQueue(),
+        sessionRepository: SessionRepository(Dio()),
+      );
+
+  @override
+  void start() {}
+
+  @override
+  void dispose() {}
+}
+
 Widget _dashboard({
   UserProfile? profile,
   required WeeklyInsightRepository weeklyInsight,
@@ -92,6 +113,8 @@ Widget _dashboard({
       progressRepository: ProgressRepository(dio),
       subscriptionRepository: SubscriptionRepository(dio),
       accountRepository: AccountRepository(dio),
+      offlineAnswerQueue: _FakeOfflineAnswerQueue(),
+      offlineAnswerSyncService: _FakeOfflineAnswerSyncService(),
     ),
   );
 }

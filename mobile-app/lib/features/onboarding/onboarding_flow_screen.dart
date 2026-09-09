@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/widgets/widgets.dart';
@@ -20,10 +23,12 @@ class OnboardingFlowScreen extends StatefulWidget {
     super.key,
     required this.onboardingRepository,
     required this.onComplete,
+    this.analyticsService,
   });
 
   final OnboardingRepository onboardingRepository;
   final VoidCallback onComplete;
+  final AnalyticsService? analyticsService;
 
   @override
   State<OnboardingFlowScreen> createState() => _OnboardingFlowScreenState();
@@ -31,9 +36,18 @@ class OnboardingFlowScreen extends StatefulWidget {
 
 class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   static const _totalSteps = 5;
+  static const _stepNames = [
+    'training_stage',
+    'primary_goal',
+    'exam_date',
+    'daily_goal',
+    'university',
+  ];
 
   final _pageController = PageController();
   final _customGoalController = TextEditingController();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
 
   int _step = 0;
   TrainingStage? _stage;
@@ -44,6 +58,17 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   bool _isSubmitting = false;
   String? _submitError;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      _analyticsService.logOnboardingStepViewed(
+        step: _stepNames[0],
+        stepIndex: 0,
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -63,6 +88,12 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   void _goToStep(int step) {
     setState(() => _step = step);
+    unawaited(
+      _analyticsService.logOnboardingStepViewed(
+        step: _stepNames[step],
+        stepIndex: step,
+      ),
+    );
     _pageController.animateToPage(
       step,
       duration: const Duration(milliseconds: 250),
@@ -99,6 +130,12 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
         assessmentDate: _assessmentDate,
         dailyQuestionTarget: _dailyQuestionTarget,
         universityId: _universityId,
+      );
+      unawaited(
+        _analyticsService.logOnboardingCompleted(
+          stage: _stage!.apiValue,
+          primaryGoal: goal,
+        ),
       );
       widget.onComplete();
     } catch (_) {

@@ -1,10 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
 import 'package:mobile_app/features/subscription/subscription_plan.dart';
 import 'package:mobile_app/features/subscription/subscription_repository.dart';
 import 'package:mobile_app/features/subscription/subscription_status.dart';
 import 'package:mobile_app/features/subscription/subscription_status_screen.dart';
+
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logSubscriptionPortalOpened() async {}
+}
 
 class _FakeSubscriptionRepository extends SubscriptionRepository {
   _FakeSubscriptionRepository(this._result) : super(Dio());
@@ -139,6 +145,7 @@ void main() {
             openedUrl = url;
             return true;
           },
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -168,6 +175,7 @@ void main() {
         home: SubscriptionStatusScreen(
           repository: repo,
           urlOpener: (_) async => false,
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );

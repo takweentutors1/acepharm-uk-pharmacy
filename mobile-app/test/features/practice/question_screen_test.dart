@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
+import 'package:mobile_app/core/offline/offline_answer_queue.dart';
+import 'package:mobile_app/core/offline/pending_answer.dart';
 import 'package:mobile_app/core/theme/ace_colors.dart';
 import 'package:mobile_app/core/widgets/widgets.dart';
 import 'package:mobile_app/features/practice/ace_citation.dart';
@@ -13,6 +16,7 @@ import 'package:mobile_app/features/practice/question_repository.dart';
 import 'package:mobile_app/features/practice/question_screen.dart';
 import 'package:mobile_app/features/practice/session_mode.dart';
 import 'package:mobile_app/features/practice/session_repository.dart';
+import 'package:mobile_app/features/practice/widgets/question_option_list.dart';
 
 final _question = const PracticeQuestion(
   id: 'q-1',
@@ -42,15 +46,29 @@ final _question = const PracticeQuestion(
   ],
 );
 
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logQuestionAnswered({
+    required bool isCorrect,
+    required String mode,
+    String? confidence,
+  }) async {}
+
+  @override
+  Future<void> logAskAceMessageSent() async {}
+}
+
 class _FakeSessionRepository extends SessionRepository {
   _FakeSessionRepository({
     this.isFirstEverAttempt = true,
     this.fail = false,
+    this.failType = DioExceptionType.unknown,
     this.explanation,
   }) : super(Dio());
 
   final bool isFirstEverAttempt;
   final bool fail;
+  final DioExceptionType failType;
   final QuestionExplanation? explanation;
   final List<String> selectedOptionIds = [];
   final List<Confidence?> confidences = [];
@@ -67,7 +85,9 @@ class _FakeSessionRepository extends SessionRepository {
   }) async {
     selectedOptionIds.add(selectedOptionId);
     confidences.add(confidence);
-    if (fail) throw DioException(requestOptions: RequestOptions());
+    if (fail) {
+      throw DioException(requestOptions: RequestOptions(), type: failType);
+    }
     return AnswerResult(
       isCorrect: selectedOptionId == 'opt-b',
       isFirstEverAttempt: isFirstEverAttempt,
@@ -76,6 +96,13 @@ class _FakeSessionRepository extends SessionRepository {
       explanation: explanation,
     );
   }
+}
+
+class _FakeOfflineAnswerQueue extends OfflineAnswerQueue {
+  final List<PendingAnswer> enqueued = [];
+
+  @override
+  Future<void> enqueue(PendingAnswer answer) async => enqueued.add(answer);
 }
 
 class _FakeAceRepository extends AceRepository {
@@ -162,6 +189,7 @@ void main() {
             sessionRepository: _FakeSessionRepository(),
             questionRepository: _FakeQuestionRepository(),
             aceRepository: _noopAceRepository(),
+            analyticsService: _FakeAnalyticsService(),
           ),
         ),
       );
@@ -190,6 +218,7 @@ void main() {
           sessionRepository: _FakeSessionRepository(),
           questionRepository: _FakeQuestionRepository(),
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -214,6 +243,7 @@ void main() {
           sessionRepository: _FakeSessionRepository(),
           questionRepository: _FakeQuestionRepository(),
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -245,6 +275,7 @@ void main() {
           sessionRepository: sessions,
           questionRepository: _FakeQuestionRepository(),
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -275,6 +306,7 @@ void main() {
             sessionRepository: sessions,
             questionRepository: _FakeQuestionRepository(),
             aceRepository: _noopAceRepository(),
+            analyticsService: _FakeAnalyticsService(),
           ),
         ),
       );
@@ -305,6 +337,7 @@ void main() {
           sessionRepository: _FakeSessionRepository(),
           questionRepository: questions,
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -330,6 +363,7 @@ void main() {
           sessionRepository: _FakeSessionRepository(fail: true),
           questionRepository: _FakeQuestionRepository(),
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -347,6 +381,92 @@ void main() {
       findsOneWidget,
     );
     expect(_findButton(tester, 'Submit answer').onPressed, isNotNull);
+  });
+
+  testWidgets(
+    'queues the answer offline on a connectivity error, instead of showing '
+    'a hard error',
+    (tester) async {
+      final offlineQueue = _FakeOfflineAnswerQueue();
+
+      await tester.pumpWidget(
+        _wrap(
+          QuestionScreen(
+            question: _question,
+            mode: SessionMode.learn,
+            sessionRepository: _FakeSessionRepository(
+              fail: true,
+              failType: DioExceptionType.connectionError,
+            ),
+            questionRepository: _FakeQuestionRepository(),
+            aceRepository: _noopAceRepository(),
+            analyticsService: _FakeAnalyticsService(),
+            offlineAnswerQueue: offlineQueue,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('A. Option A'));
+      await tester.pump();
+      await tester.tap(find.text('Medium'));
+      await tester.pump();
+      await tester.tap(find.text('Submit answer'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining("you're offline", findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.text("Couldn't submit your answer. Try again."),
+        findsNothing,
+      );
+      expect(offlineQueue.enqueued.single.questionId, 'q-1');
+      expect(offlineQueue.enqueued.single.selectedOptionId, 'opt-a');
+      expect(offlineQueue.enqueued.single.confidence, 'medium');
+      expect(offlineQueue.enqueued.single.mode, 'learn');
+
+      // Once queued, the footer offers Next rather than blocking on a
+      // correctness result that can't be known yet.
+      expect(find.text('Next question'), findsOneWidget);
+      expect(find.text('Submit answer'), findsNothing);
+    },
+  );
+
+  testWidgets('locks option selection once an answer is queued offline', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        QuestionScreen(
+          question: _question,
+          mode: SessionMode.learn,
+          sessionRepository: _FakeSessionRepository(
+            fail: true,
+            failType: DioExceptionType.connectionTimeout,
+          ),
+          questionRepository: _FakeQuestionRepository(),
+          aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
+          offlineAnswerQueue: _FakeOfflineAnswerQueue(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('A. Option A'));
+    await tester.pump();
+    await tester.tap(find.text('Medium'));
+    await tester.pump();
+    await tester.tap(find.text('Submit answer'));
+    await tester.pumpAndSettle();
+
+    // The answer is locked in, pending sync — no further selection.
+    final optionList = tester.widget<QuestionOptionList>(
+      find.byType(QuestionOptionList),
+    );
+    expect(optionList.onSelect, isNull);
   });
 
   testWidgets(
@@ -373,6 +493,7 @@ void main() {
             ),
             questionRepository: _FakeQuestionRepository(),
             aceRepository: _noopAceRepository(),
+            analyticsService: _FakeAnalyticsService(),
           ),
         ),
       );
@@ -402,6 +523,7 @@ void main() {
           sessionRepository: _FakeSessionRepository(),
           questionRepository: _FakeQuestionRepository(),
           aceRepository: _noopAceRepository(),
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -437,6 +559,7 @@ void main() {
           ),
           questionRepository: _FakeQuestionRepository(),
           aceRepository: ace,
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );
@@ -495,6 +618,7 @@ void main() {
             ),
             questionRepository: _FakeQuestionRepository(),
             aceRepository: _FakeAceRepository(refuse: true),
+            analyticsService: _FakeAnalyticsService(),
           ),
         ),
       );

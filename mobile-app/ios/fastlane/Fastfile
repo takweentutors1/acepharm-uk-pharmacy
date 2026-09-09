@@ -1,0 +1,51 @@
+default_platform(:ios)
+
+BUNDLE_ID = ENV["IOS_BUNDLE_ID"] || "com.acepharm.app"
+
+platform :ios do
+  desc "Build and upload a release build to TestFlight"
+  lane :beta do
+    setup_ci if ENV["CI"]
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_CONTENT"],
+      is_key_content_base64: true
+    )
+
+    # No `match` repo required — fetches/refreshes the distribution cert
+    # and an App Store provisioning profile directly via the API key.
+    get_certificates(type: "appstore", api_key: api_key)
+    get_provisioning_profile(api_key: api_key, app_identifier: BUNDLE_ID)
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      code_sign_identity: "Apple Distribution",
+      bundle_identifier: BUNDLE_ID,
+      profile_name: ENV["sigh_#{BUNDLE_ID}_appstore_profile-name"]
+    )
+
+    # Runs Flutter's own build pipeline (pub get, pod install, asset
+    # bundling) unsigned; fastlane's `build_app` below re-archives and
+    # signs the already-prepared Xcode workspace.
+    sh("flutter", "build", "ios", "--release", "--no-codesign", chdir: "../..")
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          BUNDLE_ID => ENV["sigh_#{BUNDLE_ID}_appstore_profile-name"]
+        }
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

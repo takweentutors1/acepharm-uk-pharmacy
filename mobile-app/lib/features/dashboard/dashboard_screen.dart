@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/curriculum/curriculum_repository.dart';
+import '../../core/offline/offline_answer_queue.dart';
+import '../../core/offline/offline_answer_sync_service.dart';
+import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/user/user_profile.dart';
 import '../../core/widgets/widgets.dart';
@@ -27,7 +30,12 @@ import 'widgets/weekly_insight_card.dart';
 /// The signed-in home screen, shown once [OnboardingGate] has confirmed
 /// onboarding is complete (or failed open). Wires Build a session →
 /// answer every question → back to the dashboard as one connected flow.
-class DashboardScreen extends StatelessWidget {
+///
+/// Also hosts the offline-answer sync listener for the whole authenticated
+/// session: this screen stays mounted (just not visible) under everything
+/// pushed on top of it, so a connectivity change is caught here and
+/// flushed regardless of which screen the user is actually looking at.
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({
     super.key,
     required this.profile,
@@ -41,6 +49,8 @@ class DashboardScreen extends StatelessWidget {
     required this.progressRepository,
     required this.subscriptionRepository,
     required this.accountRepository,
+    this.offlineAnswerQueue,
+    this.offlineAnswerSyncService,
   });
 
   /// Resolved once upstream by `OnboardingGate`. Null only if that
@@ -57,23 +67,51 @@ class DashboardScreen extends StatelessWidget {
   final ProgressRepository progressRepository;
   final SubscriptionRepository subscriptionRepository;
   final AccountRepository accountRepository;
+  final OfflineAnswerQueue? offlineAnswerQueue;
+  final OfflineAnswerSyncService? offlineAnswerSyncService;
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  late final OfflineAnswerQueue _offlineAnswerQueue =
+      widget.offlineAnswerQueue ?? OfflineAnswerQueue();
+  late final OfflineAnswerSyncService _syncService =
+      widget.offlineAnswerSyncService ??
+      OfflineAnswerSyncService(
+        queue: _offlineAnswerQueue,
+        sessionRepository: widget.sessionRepository,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _syncService.start();
+  }
+
+  @override
+  void dispose() {
+    _syncService.dispose();
+    super.dispose();
+  }
 
   void _openSessionBuilder(BuildContext context) {
-    final userId = profile?.id;
+    final userId = widget.profile?.id;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SessionBuilderScreen(
-          curriculumRepository: curriculumRepository,
-          sessionRepository: sessionRepository,
+          curriculumRepository: widget.curriculumRepository,
+          sessionRepository: widget.sessionRepository,
           onSessionCreated: (session) {
             Navigator.of(context).pop();
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => PracticeSessionPlayer(
                   session: session,
-                  sessionRepository: sessionRepository,
-                  questionRepository: questionRepository,
-                  aceRepository: aceRepository,
+                  sessionRepository: widget.sessionRepository,
+                  questionRepository: widget.questionRepository,
+                  aceRepository: widget.aceRepository,
                   userId: userId,
                   onSessionComplete: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +130,7 @@ class DashboardScreen extends StatelessWidget {
   void _openProgress(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ProgressScreen(repository: progressRepository),
+        builder: (_) => ProgressScreen(repository: widget.progressRepository),
       ),
     );
   }
@@ -101,7 +139,7 @@ class DashboardScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
-            SubscriptionStatusScreen(repository: subscriptionRepository),
+            SubscriptionStatusScreen(repository: widget.subscriptionRepository),
       ),
     );
   }
@@ -111,7 +149,7 @@ class DashboardScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => SettingsScreen(
           authRepository: AuthRepository(),
-          accountRepository: accountRepository,
+          accountRepository: widget.accountRepository,
         ),
       ),
     );
@@ -147,24 +185,61 @@ class DashboardScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(AceSpacing.lg),
         children: [
-          Center(child: DailyGoalRing(repository: dailyGoalRepository)),
+          StreamBuilder<int>(
+            stream: _offlineAnswerQueue.watchCount(),
+            builder: (context, snapshot) {
+              final pendingCount = snapshot.data ?? 0;
+              if (pendingCount == 0) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AceSpacing.lg),
+                child: _PendingSyncBanner(count: pendingCount),
+              );
+            },
+          ),
+          Center(child: DailyGoalRing(repository: widget.dailyGoalRepository)),
           const SizedBox(height: AceSpacing.lg),
-          ExamCountdownTicker(assessmentDate: profile?.assessmentDate),
-          if (profile?.assessmentDate != null)
+          ExamCountdownTicker(assessmentDate: widget.profile?.assessmentDate),
+          if (widget.profile?.assessmentDate != null)
             const SizedBox(height: AceSpacing.lg),
           WeeklyInsightCard(
-            repository: weeklyInsightRepository,
-            userId: profile?.id,
+            repository: widget.weeklyInsightRepository,
+            userId: widget.profile?.id,
           ),
           const SizedBox(height: AceSpacing.lg),
           RecommendationCard(
-            repository: recommendationRepository,
+            repository: widget.recommendationRepository,
             onStartSession: (_) => _openSessionBuilder(context),
           ),
           const SizedBox(height: AceSpacing.lg),
           AceButton(
             label: 'Build a session',
             onPressed: () => _openSessionBuilder(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PendingSyncBanner extends StatelessWidget {
+  const _PendingSyncBanner({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return AceCard(
+      child: Row(
+        children: [
+          const Icon(Icons.cloud_sync_outlined, color: AceColors.slate),
+          const SizedBox(width: AceSpacing.sm),
+          Expanded(
+            child: Text(
+              count == 1
+                  ? '1 answer will sync once you\'re back online'
+                  : '$count answers will sync once you\'re back online',
+              style: const TextStyle(color: AceColors.slate),
+            ),
           ),
         ],
       ),

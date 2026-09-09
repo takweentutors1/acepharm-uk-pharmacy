@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/widgets/widgets.dart';
@@ -18,12 +21,14 @@ class SubscriptionStatusScreen extends StatefulWidget {
     super.key,
     required this.repository,
     this.urlOpener = _defaultUrlOpener,
+    this.analyticsService,
   });
 
   final SubscriptionRepository repository;
 
   /// Injectable for tests — defaults to the real `launchUrl`.
   final Future<bool> Function(Uri url) urlOpener;
+  final AnalyticsService? analyticsService;
 
   @override
   State<SubscriptionStatusScreen> createState() =>
@@ -32,6 +37,8 @@ class SubscriptionStatusScreen extends StatefulWidget {
 
 class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
   late Future<SubscriptionStatus> _future = widget.repository.fetchStatus();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
 
   bool _isOpeningPortal = false;
   String? _portalError;
@@ -49,6 +56,7 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
     });
     try {
       final url = await widget.repository.createCustomerPortalSession();
+      unawaited(_analyticsService.logSubscriptionPortalOpened());
       final opened = await widget.urlOpener(Uri.parse(url));
       if (!opened && mounted) {
         setState(() => _portalError = "Couldn't open the billing portal.");

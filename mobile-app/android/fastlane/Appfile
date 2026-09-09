@@ -1,0 +1,2 @@
+package_name("com.acepharm.app")
+json_key_file(ENV["PLAY_STORE_JSON_KEY_PATH"] || "fastlane/play-store-service-account.json")

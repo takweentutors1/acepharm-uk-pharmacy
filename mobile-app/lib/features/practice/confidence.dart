@@ -17,4 +17,11 @@ enum Confidence {
     Confidence.medium => 'Medium',
     Confidence.high => 'High',
   };
+
+  static Confidence? fromApiValue(String? value) => switch (value) {
+    'low' => Confidence.low,
+    'medium' => Confidence.medium,
+    'high' => Confidence.high,
+    _ => null,
+  };
 }

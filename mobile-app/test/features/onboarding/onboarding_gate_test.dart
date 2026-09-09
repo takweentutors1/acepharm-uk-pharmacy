@@ -1,12 +1,27 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
 import 'package:mobile_app/core/user/university.dart';
 import 'package:mobile_app/core/user/user_profile.dart';
 import 'package:mobile_app/core/user/user_repository.dart';
 import 'package:mobile_app/features/onboarding/onboarding_gate.dart';
 import 'package:mobile_app/features/onboarding/onboarding_repository.dart';
 import 'package:mobile_app/features/onboarding/training_stage.dart';
+
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logOnboardingStepViewed({
+    required String step,
+    required int stepIndex,
+  }) async {}
+
+  @override
+  Future<void> logOnboardingCompleted({
+    required String stage,
+    String? primaryGoal,
+  }) async {}
+}
 
 class _FakeUserRepository extends UserRepository {
   _FakeUserRepository(this._profile) : super(Dio());
@@ -59,6 +74,7 @@ void main() {
         home: OnboardingGate(
           userRepository: users,
           onboardingRepository: _FakeOnboardingRepository(),
+          analyticsService: _FakeAnalyticsService(),
           builder: (context, profile) =>
               const Scaffold(body: Text('DASHBOARD')),
         ),
@@ -86,6 +102,7 @@ void main() {
         home: OnboardingGate(
           userRepository: users,
           onboardingRepository: _FakeOnboardingRepository(),
+          analyticsService: _FakeAnalyticsService(),
           builder: (context, profile) =>
               Scaffold(body: Text('DASHBOARD for ${profile?.id}')),
         ),
@@ -107,6 +124,7 @@ void main() {
           home: OnboardingGate(
             userRepository: users,
             onboardingRepository: _FakeOnboardingRepository(),
+            analyticsService: _FakeAnalyticsService(),
             builder: (context, profile) => Text('BUILDER ${profile == null}'),
           ),
         ),
@@ -130,6 +148,7 @@ void main() {
         home: OnboardingGate(
           userRepository: users,
           onboardingRepository: _FakeOnboardingRepository(),
+          analyticsService: _FakeAnalyticsService(),
           builder: (context, profile) =>
               const Scaffold(body: Text('DASHBOARD')),
         ),

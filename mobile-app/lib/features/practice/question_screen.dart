@@ -1,5 +1,11 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
+import '../../core/offline/offline_answer_queue.dart';
+import '../../core/offline/pending_answer.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/theme/ace_typography.dart';
@@ -32,6 +38,8 @@ class QuestionScreen extends StatefulWidget {
     this.sessionId,
     this.userId,
     this.onNext,
+    this.analyticsService,
+    this.offlineAnswerQueue,
   });
 
   final PracticeQuestion question;
@@ -42,6 +50,8 @@ class QuestionScreen extends StatefulWidget {
   final String? sessionId;
   final String? userId;
   final VoidCallback? onNext;
+  final AnalyticsService? analyticsService;
+  final OfflineAnswerQueue? offlineAnswerQueue;
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
@@ -58,13 +68,31 @@ class _QuestionScreenState extends State<QuestionScreen> {
   bool _isBookmarking = false;
   bool? _isBookmarked;
   AnswerResult? _result;
+  bool _isQueuedOffline = false;
   String? _submitError;
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
+  late final OfflineAnswerQueue _offlineAnswerQueue =
+      widget.offlineAnswerQueue ?? OfflineAnswerQueue();
+
+  /// True once this question has either a real result or a queued-offline
+  /// answer — both end the "still answering" phase (option/confidence
+  /// pickers lock, footer switches to Next).
+  bool get _isAnswered => _result != null || _isQueuedOffline;
 
   bool get _canSubmit =>
       !_isSubmitting &&
-      _result == null &&
+      !_isAnswered &&
       _selectedOptionId != null &&
       _confidence != null;
+
+  static bool _isConnectivityError(Object error) {
+    if (error is! DioException) return false;
+    return error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout;
+  }
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
@@ -85,9 +113,36 @@ class _QuestionScreenState extends State<QuestionScreen> {
       );
       if (!mounted) return;
       setState(() => _result = result);
-    } catch (_) {
+      unawaited(
+        _analyticsService.logQuestionAnswered(
+          isCorrect: result.isCorrect,
+          mode: widget.mode.apiValue,
+          confidence: _confidence?.apiValue,
+        ),
+      );
+    } catch (error) {
       if (!mounted) return;
-      setState(() => _submitError = "Couldn't submit your answer. Try again.");
+      if (_isConnectivityError(error)) {
+        await _offlineAnswerQueue.enqueue(
+          PendingAnswer(
+            id: '${widget.question.id}-${DateTime.now().microsecondsSinceEpoch}',
+            sessionId: widget.sessionId,
+            questionId: widget.question.id,
+            questionVersion: widget.question.version,
+            selectedOptionId: _selectedOptionId!,
+            confidence: _confidence?.apiValue,
+            timeTakenSeconds: elapsed,
+            mode: widget.mode.apiValue,
+            queuedAt: DateTime.now(),
+          ),
+        );
+        if (!mounted) return;
+        setState(() => _isQueuedOffline = true);
+      } else {
+        setState(
+          () => _submitError = "Couldn't submit your answer. Try again.",
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -122,6 +177,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       aceRepository: widget.aceRepository,
       questionId: widget.question.id,
       userId: widget.userId,
+      analyticsService: _analyticsService,
     );
   }
 
@@ -185,7 +241,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ),
                     Switch(
                       value: _isCovered,
-                      onChanged: _result != null
+                      onChanged: _isAnswered
                           ? null
                           : (value) => setState(() => _isCovered = value),
                     ),
@@ -195,13 +251,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 QuestionOptionList(
                   options: question.options,
                   selectedOptionId: _selectedOptionId,
-                  onSelect: _result != null
+                  onSelect: _isAnswered
                       ? null
                       : (id) => setState(() => _selectedOptionId = id),
                   result: _result,
-                  isCovered: _isCovered && _result == null,
+                  isCovered: _isCovered && !_isAnswered,
                   onRevealCovered: () => setState(() => _isCovered = false),
                 ),
+                if (_isQueuedOffline) ...[
+                  const SizedBox(height: AceSpacing.lg),
+                  const _OfflineQueuedNotice(),
+                ],
                 if (_result?.explanation case final explanation?) ...[
                   const SizedBox(height: AceSpacing.lg),
                   _ExplanationCard(explanation: explanation),
@@ -213,7 +273,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     onPressed: _openAskAce,
                   ),
                 ],
-                if (_result == null) ...[
+                if (!_isAnswered) ...[
                   const SizedBox(height: AceSpacing.xl),
                   const Text(
                     'How confident are you?',
@@ -243,7 +303,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
           ),
           _QuestionFooter(
-            hasResult: _result != null,
+            hasResult: _isAnswered,
             canSubmit: _canSubmit,
             isSubmitting: _isSubmitting,
             onSubmit: _submit,
@@ -287,6 +347,33 @@ class _QuestionFooter extends StatelessWidget {
                 isLoading: isSubmitting,
                 onPressed: canSubmit ? onSubmit : null,
               ),
+      ),
+    );
+  }
+}
+
+/// Shown instead of correctness feedback when the submission was queued
+/// offline — deliberately neutral (no green/red), since there's no way to
+/// know whether the answer was correct until it actually reaches the
+/// server.
+class _OfflineQueuedNotice extends StatelessWidget {
+  const _OfflineQueuedNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return AceCard(
+      child: Row(
+        children: [
+          const Icon(Icons.cloud_off_outlined, color: AceColors.slate),
+          const SizedBox(width: AceSpacing.sm),
+          Expanded(
+            child: Text(
+              "Saved — you're offline. This will be graded once you're "
+              'back online.',
+              style: const TextStyle(color: AceColors.slate),
+            ),
+          ),
+        ],
       ),
     );
   }

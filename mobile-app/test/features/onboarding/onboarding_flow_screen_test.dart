@@ -1,10 +1,25 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
 import 'package:mobile_app/core/user/university.dart';
 import 'package:mobile_app/features/onboarding/onboarding_flow_screen.dart';
 import 'package:mobile_app/features/onboarding/onboarding_repository.dart';
 import 'package:mobile_app/features/onboarding/training_stage.dart';
+
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logOnboardingStepViewed({
+    required String step,
+    required int stepIndex,
+  }) async {}
+
+  @override
+  Future<void> logOnboardingCompleted({
+    required String stage,
+    String? primaryGoal,
+  }) async {}
+}
 
 class _FakeOnboardingRepository extends OnboardingRepository {
   _FakeOnboardingRepository({this.fail = false}) : super(Dio());
@@ -42,6 +57,7 @@ Future<void> _pumpFlow(
       home: OnboardingFlowScreen(
         onboardingRepository: repository,
         onComplete: onComplete ?? () {},
+        analyticsService: _FakeAnalyticsService(),
       ),
     ),
   );

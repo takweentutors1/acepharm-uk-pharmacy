@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/widgets/widgets.dart';
@@ -9,9 +12,10 @@ import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, this.authRepository});
+  const LoginScreen({super.key, this.authRepository, this.analyticsService});
 
   final AuthRepository? authRepository;
+  final AnalyticsService? analyticsService;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -20,6 +24,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late final AuthRepository _authRepository =
       widget.authRepository ?? AuthRepository();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -45,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+      unawaited(_analyticsService.logLogin());
     } catch (error) {
       if (!mounted) return;
       setState(() => _errorText = describeAuthError(error));

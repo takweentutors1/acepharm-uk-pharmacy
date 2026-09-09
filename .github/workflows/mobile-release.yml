@@ -1,0 +1,98 @@
+name: Mobile - Fastlane Release (TestFlight & Play Internal Testing)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Which store(s) to release to"
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - android
+          - ios
+
+jobs:
+  android-internal:
+    name: Android - Play Console Internal Testing
+    if: ${{ inputs.platform == 'both' || inputs.platform == 'android' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile-app
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Setup Ruby & bundle fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: mobile-app/android
+          bundler-cache: true
+
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          cat > android/key.properties <<EOF
+          storeFile=release.keystore
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Decode Play Console service account key
+        run: echo '${{ secrets.PLAY_STORE_JSON_KEY }}' > android/fastlane/play-store-service-account.json
+
+      - name: Build & upload to Internal Testing
+        working-directory: mobile-app/android
+        run: bundle exec fastlane internal
+
+      - name: Clean up secrets
+        if: always()
+        run: |
+          rm -f android/app/release.keystore android/key.properties android/fastlane/play-store-service-account.json
+
+  ios-testflight:
+    name: iOS - TestFlight
+    if: ${{ inputs.platform == 'both' || inputs.platform == 'ios' }}
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile-app
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Setup Ruby & bundle fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: mobile-app/ios
+          bundler-cache: true
+
+      - name: Build & upload to TestFlight
+        working-directory: mobile-app/ios
+        env:
+          CI: "true"
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ITC_TEAM_ID: ${{ secrets.APPLE_ITC_TEAM_ID }}
+        run: bundle exec fastlane beta

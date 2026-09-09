@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build the release App Bundle and push it to the Play Console Internal Testing track"
+  lane :internal do
+    sh("flutter", "build", "appbundle", "--release", chdir: "../..")
+
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: "draft"
+    )
+  end
+
+  desc "Build the release App Bundle only, without uploading (smoke-tests signing config)"
+  lane :build do
+    sh("flutter", "build", "appbundle", "--release", chdir: "../..")
+  end
+end

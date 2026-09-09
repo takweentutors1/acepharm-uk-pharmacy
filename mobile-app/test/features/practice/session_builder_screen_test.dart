@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
 import 'package:mobile_app/core/curriculum/category.dart';
 import 'package:mobile_app/core/curriculum/curriculum_repository.dart';
 import 'package:mobile_app/core/widgets/widgets.dart';
@@ -9,6 +10,14 @@ import 'package:mobile_app/features/practice/session_builder_query.dart';
 import 'package:mobile_app/features/practice/session_builder_screen.dart';
 import 'package:mobile_app/features/practice/session_mode.dart';
 import 'package:mobile_app/features/practice/session_repository.dart';
+
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logSessionCreated({
+    required String mode,
+    required int questionCount,
+  }) async {}
+}
 
 class _FakeCurriculumRepository extends CurriculumRepository {
   _FakeCurriculumRepository(this._categories) : super(Dio());
@@ -180,6 +189,7 @@ void main() {
           curriculumRepository: curriculum,
           sessionRepository: sessions,
           onSessionCreated: (s) => created = s,
+          analyticsService: _FakeAnalyticsService(),
         ),
       ),
     );

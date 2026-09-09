@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/user/user_profile.dart';
 import '../../core/user/user_repository.dart';
 import 'onboarding_flow_screen.dart';
@@ -18,11 +19,13 @@ class OnboardingGate extends StatefulWidget {
     required this.userRepository,
     required this.onboardingRepository,
     required this.builder,
+    this.analyticsService,
   });
 
   final UserRepository userRepository;
   final OnboardingRepository onboardingRepository;
   final Widget Function(BuildContext context, UserProfile? profile) builder;
+  final AnalyticsService? analyticsService;
 
   @override
   State<OnboardingGate> createState() => _OnboardingGateState();
@@ -53,6 +56,7 @@ class _OnboardingGateState extends State<OnboardingGate> {
           return OnboardingFlowScreen(
             onboardingRepository: widget.onboardingRepository,
             onComplete: _onOnboardingComplete,
+            analyticsService: widget.analyticsService,
           );
         }
 

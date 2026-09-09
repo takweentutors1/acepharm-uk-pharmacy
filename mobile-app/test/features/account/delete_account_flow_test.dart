@@ -1,9 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_app/core/analytics/analytics_service.dart';
 import 'package:mobile_app/features/account/account_repository.dart';
 import 'package:mobile_app/features/account/delete_account_flow.dart';
 import 'package:mobile_app/features/auth/auth_repository.dart';
+
+class _FakeAnalyticsService extends AnalyticsService {
+  @override
+  Future<void> logAccountDeleted() async {}
+}
 
 class _FakeAuthRepository extends AuthRepository {
   _FakeAuthRepository();
@@ -54,6 +60,7 @@ Widget _harness({
             context,
             authRepository: authRepository,
             accountRepository: accountRepository,
+            analyticsService: _FakeAnalyticsService(),
           ),
           child: const Text('start'),
         ),

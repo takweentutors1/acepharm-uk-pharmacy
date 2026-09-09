@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/ace_colors.dart';
 import '../../../core/theme/ace_spacing.dart';
 import '../../../core/widgets/widgets.dart';
@@ -15,6 +18,7 @@ Future<void> showAskAceSheet({
   required AceRepository aceRepository,
   required String questionId,
   String? userId,
+  AnalyticsService? analyticsService,
 }) {
   return AceModalSheet.show(
     context: context,
@@ -23,6 +27,7 @@ Future<void> showAskAceSheet({
       aceRepository: aceRepository,
       questionId: questionId,
       userId: userId,
+      analyticsService: analyticsService,
     ),
   );
 }
@@ -32,11 +37,13 @@ class _AskAceBody extends StatefulWidget {
     required this.aceRepository,
     required this.questionId,
     required this.userId,
+    this.analyticsService,
   });
 
   final AceRepository aceRepository;
   final String questionId;
   final String? userId;
+  final AnalyticsService? analyticsService;
 
   @override
   State<_AskAceBody> createState() => _AskAceBodyState();
@@ -45,6 +52,8 @@ class _AskAceBody extends StatefulWidget {
 class _AskAceBodyState extends State<_AskAceBody> {
   final _controller = TextEditingController();
   final List<AceChatMessage> _messages = [];
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
   String? _threadId;
   bool _isSending = false;
   String? _error;
@@ -65,6 +74,7 @@ class _AskAceBodyState extends State<_AskAceBody> {
       _isSending = true;
       _error = null;
     });
+    unawaited(_analyticsService.logAskAceMessageSent());
 
     try {
       final result = await widget.aceRepository.sendMessage(

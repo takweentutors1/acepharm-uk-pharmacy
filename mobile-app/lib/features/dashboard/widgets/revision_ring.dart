@@ -36,89 +36,98 @@ class RevisionRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final isComplete = target > 0 && completed >= target;
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: _progress),
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeOutCubic,
-        builder: (context, animatedProgress, _) {
-          return CustomPaint(
-            painter: _RingPainter(
-              progress: animatedProgress,
-              strokeWidth: strokeWidth,
-              trackColor: AceColors.border,
-              progressColor: isComplete ? AceColors.teal : AceColors.aceIndigo,
-            ),
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: strokeWidth),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '$completed',
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              color: AceColors.ink,
-                              height: 1,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '/$target',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: AceColors.slate,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (isComplete)
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+    return Semantics(
+      label: isComplete
+          ? '$completed of $target completed today — goal complete'
+          : '$completed of $target $label',
+      excludeSemantics: true,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: _progress),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, animatedProgress, _) {
+            return CustomPaint(
+              painter: _RingPainter(
+                progress: animatedProgress,
+                strokeWidth: strokeWidth,
+                trackColor: AceColors.border,
+                progressColor: isComplete
+                    ? AceColors.teal
+                    : AceColors.aceIndigo,
+              ),
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: strokeWidth),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text.rich(
+                        TextSpan(
                           children: [
-                            const Icon(
-                              Icons.check_circle,
-                              size: 12,
-                              color: AceColors.teal,
+                            TextSpan(
+                              text: '$completed',
+                              style: const TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                                color: AceColors.ink,
+                                height: 1,
+                              ),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Goal complete',
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: AceColors.teal,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                            TextSpan(
+                              text: '/$target',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: AceColors.slate,
+                              ),
                             ),
                           ],
                         ),
-                      )
-                    else
-                      Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AceColors.slateLight,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
-                  ],
+                      const SizedBox(height: 4),
+                      if (isComplete)
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.check_circle,
+                                size: 12,
+                                color: AceColors.teal,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Goal complete',
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: AceColors.teal,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: AceColors.slateLight,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

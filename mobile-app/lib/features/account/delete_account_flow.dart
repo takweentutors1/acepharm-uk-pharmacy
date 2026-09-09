@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/widgets/widgets.dart';
@@ -17,6 +20,7 @@ Future<void> startAccountDeletion(
   BuildContext context, {
   required AuthRepository authRepository,
   required AccountRepository accountRepository,
+  AnalyticsService? analyticsService,
 }) async {
   final proceeded = await AceModalSheet.show<bool>(
     context: context,
@@ -35,6 +39,7 @@ Future<void> startAccountDeletion(
     builder: (sheetContext) => _ConfirmStep(
       authRepository: authRepository,
       accountRepository: accountRepository,
+      analyticsService: analyticsService,
     ),
   );
 }
@@ -109,10 +114,12 @@ class _ConfirmStep extends StatefulWidget {
   const _ConfirmStep({
     required this.authRepository,
     required this.accountRepository,
+    this.analyticsService,
   });
 
   final AuthRepository authRepository;
   final AccountRepository accountRepository;
+  final AnalyticsService? analyticsService;
 
   @override
   State<_ConfirmStep> createState() => _ConfirmStepState();
@@ -120,6 +127,8 @@ class _ConfirmStep extends StatefulWidget {
 
 class _ConfirmStepState extends State<_ConfirmStep> {
   final _passwordController = TextEditingController();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -145,6 +154,7 @@ class _ConfirmStepState extends State<_ConfirmStep> {
       await widget.authRepository.reauthenticateWithPassword(password);
       await widget.accountRepository.deleteAccount();
       await widget.authRepository.deleteAccount();
+      unawaited(_analyticsService.logAccountDeleted());
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;

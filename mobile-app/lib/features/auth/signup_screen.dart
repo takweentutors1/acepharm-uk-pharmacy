@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/widgets/widgets.dart';
@@ -8,9 +11,10 @@ import 'auth_repository.dart';
 import 'widgets/password_strength_meter.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key, this.authRepository});
+  const SignUpScreen({super.key, this.authRepository, this.analyticsService});
 
   final AuthRepository? authRepository;
+  final AnalyticsService? analyticsService;
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -19,6 +23,8 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   late final AuthRepository _authRepository =
       widget.authRepository ?? AuthRepository();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -47,6 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+      unawaited(_analyticsService.logSignUp());
     } catch (error) {
       if (!mounted) return;
       setState(() => _errorText = describeAuthError(error));

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_service.dart';
 import '../../core/curriculum/category.dart';
 import '../../core/curriculum/curriculum_repository.dart';
 import '../../core/theme/ace_colors.dart';
@@ -23,11 +24,13 @@ class SessionBuilderScreen extends StatefulWidget {
     required this.curriculumRepository,
     required this.sessionRepository,
     this.onSessionCreated,
+    this.analyticsService,
   });
 
   final CurriculumRepository curriculumRepository;
   final SessionRepository sessionRepository;
   final ValueChanged<PracticeSession>? onSessionCreated;
+  final AnalyticsService? analyticsService;
 
   @override
   State<SessionBuilderScreen> createState() => _SessionBuilderScreenState();
@@ -37,6 +40,8 @@ class _SessionBuilderScreenState extends State<SessionBuilderScreen> {
   late final Future<List<Category>> _categoriesFuture = widget
       .curriculumRepository
       .fetchCategories();
+  late final AnalyticsService _analyticsService =
+      widget.analyticsService ?? AnalyticsService();
 
   SessionMode _mode = SessionMode.learn;
   bool _hasInitializedSelection = false;
@@ -141,6 +146,12 @@ class _SessionBuilderScreenState extends State<SessionBuilderScreen> {
     try {
       final session = await widget.sessionRepository.create(_buildQuery());
       if (!mounted) return;
+      unawaited(
+        _analyticsService.logSessionCreated(
+          mode: session.mode.apiValue,
+          questionCount: session.questions.length,
+        ),
+      );
       widget.onSessionCreated?.call(session);
     } catch (_) {
       if (!mounted) return;
