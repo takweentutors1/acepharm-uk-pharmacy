@@ -1,20 +1,21 @@
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-/// Attaches the current Firebase ID token as a Bearer credential to every
-/// outgoing request. On a 401 — rejected by the API's JWKS-backed
-/// `requireAuth` middleware — it force-refreshes the token and retries
-/// once before giving up and notifying [onUnauthenticated].
+import '../../features/auth/auth_repository.dart';
+
+/// Attaches the current access token as a Bearer credential to every
+/// outgoing request. On a 401 — rejected by the API's `requireAuth`
+/// middleware — it force-refreshes the token via the stored refresh token
+/// and retries once before giving up and notifying [onUnauthenticated].
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
     required this.dio,
-    FirebaseAuth? firebaseAuth,
+    AuthRepository? authRepository,
     this.onUnauthenticated,
-  }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+  }) : _authRepository = authRepository ?? AuthRepository();
 
   final Dio dio;
-  final FirebaseAuth _firebaseAuth;
+  final AuthRepository _authRepository;
   final VoidCallback? onUnauthenticated;
 
   static const _retriedKey = 'ace_auth_retried';
@@ -24,9 +25,8 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      final token = await user.getIdToken();
+    final token = await _authRepository.getAccessToken();
+    if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
@@ -37,11 +37,10 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final user = _firebaseAuth.currentUser;
     final isUnauthorized = err.response?.statusCode == 401;
     final alreadyRetried = err.requestOptions.extra[_retriedKey] == true;
 
-    if (!isUnauthorized || user == null) {
+    if (!isUnauthorized) {
       return handler.next(err);
     }
 
@@ -51,7 +50,11 @@ class AuthInterceptor extends Interceptor {
     }
 
     try {
-      final freshToken = await user.getIdToken(true);
+      final freshToken = await _authRepository.getAccessToken(forceRefresh: true);
+      if (freshToken == null) {
+        onUnauthenticated?.call();
+        return handler.next(err);
+      }
       final retryOptions = err.requestOptions
         ..headers['Authorization'] = 'Bearer $freshToken'
         ..extra[_retriedKey] = true;

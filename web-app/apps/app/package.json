@@ -15,7 +15,6 @@
     "@acepharm/preferences": "workspace:*",
     "@acepharm/ui": "workspace:*",
     "clsx": "^2.1.1",
-    "firebase": "^12.18.0",
     "lucide-react": "^0.441.0",
     "next": "^14.2.11",
     "react": "^18.3.1",

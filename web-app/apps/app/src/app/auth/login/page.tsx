@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Card, Button, Badge } from '@acepharm/ui';
 import { Mail, Lock, Loader2, ArrowRight, ShieldCheck, KeyRound, CheckCircle2, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { sendCustomPasswordResetEmail } from '@/lib/firebase';
+import { apiRequestPasswordReset } from '@/lib/auth-client';
+import { ApiError } from '@/lib/api-client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,9 +42,15 @@ export default function LoginPage() {
       router.push('/');
     } catch (err: any) {
       console.error('Login error:', err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+      const code = err instanceof ApiError ? err.data?.error : undefined;
+      const migrationCode = err instanceof ApiError ? err.data?.code : undefined;
+      if (migrationCode === 'MIGRATION_RESET_REQUIRED') {
+        setError("We've upgraded our login system for extra security. We've sent a link to your email so you can set a new password — check your inbox.");
+      } else if (code === 'invalid_credentials') {
         setError('Invalid email or password. Please try again or request a reset link.');
-      } else if (err.code === 'auth/too-many-requests') {
+      } else if (code === 'account_suspended') {
+        setError('This account has been disabled. Please contact support.');
+      } else if (err instanceof ApiError && err.status === 429) {
         setError('Too many failed attempts. Please wait a few minutes before trying again.');
       } else {
         setError(err.message || 'Unable to sign in. Please verify your details.');
@@ -70,7 +77,7 @@ export default function LoginPage() {
     setForgotError(null);
 
     try {
-      await sendCustomPasswordResetEmail(forgotEmail);
+      await apiRequestPasswordReset(forgotEmail);
       setForgotSuccess(true);
       setResendCountdown(60);
     } catch (err: any) {

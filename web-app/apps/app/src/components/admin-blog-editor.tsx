@@ -55,13 +55,8 @@ export function AdminBlogEditor({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const fetchPosts = async () => {
     try {
-      let token: string | null = null;
-      if (typeof window !== 'undefined') {
-        const { auth } = await import('@/lib/firebase');
-        if (auth.currentUser) {
-          token = await auth.currentUser.getIdToken();
-        }
-      }
+      const { getAccessToken } = await import('@/lib/auth-client');
+      const token = getAccessToken() || null;
 
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -110,13 +105,8 @@ export function AdminBlogEditor({ apiBaseUrl }: { apiBaseUrl: string }) {
     setSavedStatus(null);
 
     try {
-      let token: string | null = null;
-      if (typeof window !== 'undefined') {
-        const { auth } = await import('@/lib/firebase');
-        if (auth.currentUser) {
-          token = await auth.currentUser.getIdToken();
-        }
-      }
+      const { getAccessToken } = await import('@/lib/auth-client');
+      const token = getAccessToken() || null;
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;

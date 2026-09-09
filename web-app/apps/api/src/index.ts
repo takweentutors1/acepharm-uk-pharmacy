@@ -11,6 +11,7 @@ export type Bindings = {
   CACHE: KVNamespace;
   ASSETS: R2Bucket;
   FIREBASE_ADMIN_KEY?: string;
+  AUTH_JWT_SECRET?: string;
   ZEN_API_KEY?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
@@ -56,8 +57,8 @@ app.use('*', cors({
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
-// Apply Rate Limiting to sensitive Auth, User, and Contact endpoints
-app.use('/api/v1/auth/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_auth' }));
+// Apply Rate Limiting to sensitive User and Contact endpoints.
+// /api/v1/auth/* has its own per-route limits mounted directly on authRouter (see routes/auth.ts).
 app.use('/api/v1/user/*', rateLimiter({ limit: 60, windowSeconds: 60, keyPrefix: 'rl_user' }));
 app.use('/api/v1/contact/*', rateLimiter({ limit: 5, windowSeconds: 60, keyPrefix: 'rl_contact' }));
 
@@ -328,6 +329,7 @@ import { blogRoutes } from './routes/blog';
 import { stripeRoutes } from './routes/stripe';
 import { contactRouter } from './routes/contact';
 import { authEmailsRouter } from './routes/auth-emails';
+import { authRouter } from './routes/auth';
 
 admin.route('/curriculum', curriculumRouter);
 admin.route('/questions', questionsRouter);
@@ -343,6 +345,7 @@ app.route('/api/v1/blog', blogRoutes);
 app.route('/api/v1/stripe', stripeRoutes);
 app.route('/api/v1/contact', contactRouter);
 app.route('/api/v1/auth', authEmailsRouter);
+app.route('/api/v1/auth', authRouter);
 
 import { runWeeklyInsightCron, generateSingleWeeklyInsight } from './lib/weekly-insight-generator';
 

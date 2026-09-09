@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button, Skeleton } from '@acepharm/ui';
 import { useAuth } from '@/lib/auth-context';
+import { getAccessToken } from '@/lib/auth-client';
 import { AppHeader } from '@/components/app-header';
 import { SubscriptionModal } from '@/components/subscription-modal';
 import { CancellationFlowModal } from '@/components/cancellation-flow-modal';
@@ -136,7 +137,7 @@ export default function ProgressPage() {
         return;
       }
       try {
-        const token = await user.getIdToken();
+        const token = getAccessToken();
         const res = await fetch(`${API_URL}/api/v1/analytics/metrics`, {
           headers: { Authorization: `Bearer ${token}` },
         });

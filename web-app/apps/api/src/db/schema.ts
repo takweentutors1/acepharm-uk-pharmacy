@@ -13,7 +13,8 @@ import {
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(), // crypto.randomUUID()
-  firebaseUid: text('firebase_uid').notNull().unique(),
+  firebaseUid: text('firebase_uid').unique(), // legacy Firebase identity, nullable during/after migration to custom auth
+  passwordHash: text('password_hash'), // pbkdf2$<iterations>$<saltB64>$<hashB64>; null = not yet migrated off Firebase
   email: text('email').notNull().unique(), // lower-cased
   emailVerifiedAt: integer('email_verified_at', { mode: 'timestamp' }),
   firstName: text('first_name'),
@@ -44,6 +45,49 @@ export const users = sqliteTable('users', {
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+// Rotating opaque refresh tokens (custom auth). Only the sha256 hash of the raw token is stored.
+export const authRefreshTokens = sqliteTable('auth_refresh_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  familyId: text('family_id').notNull(),
+  userAgent: text('user_agent'),
+  ip: text('ip'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  revokedAt: integer('revoked_at', { mode: 'timestamp' }),
+  replacedByTokenHash: text('replaced_by_token_hash'),
+}, (table) => ({
+  userIdx: index('auth_refresh_tokens_user_idx').on(table.userId),
+  familyIdx: index('auth_refresh_tokens_family_idx').on(table.familyId),
+}));
+
+// Single-use email verification tokens. Only the sha256 hash of the raw token is stored.
+export const authEmailVerificationTokens = sqliteTable('auth_email_verification_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  consumedAt: integer('consumed_at', { mode: 'timestamp' }),
+}, (table) => ({
+  userIdx: index('auth_evt_user_idx').on(table.userId),
+}));
+
+// Single-use password reset tokens. Only the sha256 hash of the raw token is stored.
+export const authPasswordResetTokens = sqliteTable('auth_password_reset_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  consumedAt: integer('consumed_at', { mode: 'timestamp' }),
+  requestIp: text('request_ip'),
+  isMigration: integer('is_migration', { mode: 'boolean' }).notNull().default(false),
+}, (table) => ({
+  userIdx: index('auth_prt_user_idx').on(table.userId),
+}));
 
 export const universities = sqliteTable('universities', {
   id: text('id').primaryKey(),

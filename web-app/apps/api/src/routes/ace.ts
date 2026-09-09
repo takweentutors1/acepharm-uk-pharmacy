@@ -31,16 +31,15 @@ aceRouter.post('/message', async (c) => {
     // 1. Resolve or provision valid user
     let userId = authUser?.id || body.userId;
     if (!userId || userId === 'guest-learner') {
-      const guestUid = 'guest-learner-uid';
-      const [existingGuest] = await db.select().from(users).where(eq(users.firebaseUid, guestUid)).limit(1);
+      const guestEmail = 'guest@acepharm.co.uk';
+      const [existingGuest] = await db.select().from(users).where(eq(users.email, guestEmail)).limit(1);
       if (existingGuest) {
         userId = existingGuest.id;
       } else {
         userId = crypto.randomUUID();
         await db.insert(users).values({
           id: userId,
-          firebaseUid: guestUid,
-          email: 'guest@acepharm.co.uk',
+          email: guestEmail,
           firstName: 'Guest Learner',
           role: 'student',
           status: 'active',

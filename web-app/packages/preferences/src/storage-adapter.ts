@@ -49,7 +49,11 @@ export const AuthStorage = {
   getToken: (): string => SafeStorage.getItem(StorageKeys.AUTH_TOKEN) || '',
   setToken: (token: string): void => SafeStorage.setItem(StorageKeys.AUTH_TOKEN, token),
   removeToken: (): void => SafeStorage.removeItem(StorageKeys.AUTH_TOKEN),
-  
+
+  getRefreshToken: (): string => SafeStorage.getItem(StorageKeys.REFRESH_TOKEN) || '',
+  setRefreshToken: (token: string): void => SafeStorage.setItem(StorageKeys.REFRESH_TOKEN, token),
+  removeRefreshToken: (): void => SafeStorage.removeItem(StorageKeys.REFRESH_TOKEN),
+
   getSavedProfile: <T>(): T | null => SafeStorage.getJSON<T | null>(StorageKeys.USER_PROFILE, null),
   setSavedProfile: <T>(profile: T): void => SafeStorage.setJSON(StorageKeys.USER_PROFILE, profile),
   removeSavedProfile: (): void => SafeStorage.removeItem(StorageKeys.USER_PROFILE),

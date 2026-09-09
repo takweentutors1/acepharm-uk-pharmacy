@@ -17,6 +17,7 @@ import { SubscriptionModal } from '@/components/subscription-modal';
 import { AppHeader } from '@/components/app-header';
 import { useAuth } from '@/lib/auth-context';
 import { apiClient } from '@/lib/api-client';
+import { getAccessToken } from '@/lib/auth-client';
 import { 
   Play, 
   Target, 
@@ -116,7 +117,7 @@ export default function StudentDashboardPage() {
 
         // 2. Fetch live user streak metrics, daily goal & progress metrics if authenticated
         if (user) {
-          const token = await user.getIdToken();
+          const token = getAccessToken();
 
           // Fetch Live Progress Metrics & Coverage Map
           try {

@@ -16,6 +16,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { getAccessToken } from '@/lib/auth-client';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     setLoadingPlan(plan);
     setFeedback(null);
     try {
-      const token = user ? await user.getIdToken() : '';
+      const token = user ? getAccessToken() : '';
       const res = await fetch(`${API_URL}/api/v1/stripe/checkout`, {
         method: 'POST',
         headers: {

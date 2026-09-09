@@ -1,14 +1,14 @@
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../features/auth/auth_repository.dart';
 import 'api_config.dart';
 import 'auth_interceptor.dart';
 
 /// The app's single [Dio] instance, pre-wired with the base URL and the
-/// Firebase-ID-token [AuthInterceptor] every authenticated endpoint needs.
+/// access-token [AuthInterceptor] every authenticated endpoint needs.
 class ApiClient {
-  ApiClient({FirebaseAuth? firebaseAuth, VoidCallback? onUnauthenticated})
+  ApiClient({AuthRepository? authRepository, VoidCallback? onUnauthenticated})
     : dio = Dio(
         BaseOptions(
           baseUrl: ApiConfig.baseUrl,
@@ -20,7 +20,7 @@ class ApiClient {
     dio.interceptors.add(
       AuthInterceptor(
         dio: dio,
-        firebaseAuth: firebaseAuth,
+        authRepository: authRepository,
         onUnauthenticated: onUnauthenticated,
       ),
     );

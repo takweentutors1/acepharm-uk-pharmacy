@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, Button, Badge } from '@acepharm/ui';
 import { Mail, Lock, User, GraduationCap, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { ApiError } from '@/lib/api-client';
 
 function RegisterForm() {
   const router = useRouter();
@@ -39,9 +40,12 @@ function RegisterForm() {
       }
     } catch (err: any) {
       console.error('Registration error:', err);
-      if (err.code === 'auth/email-already-in-use') {
+      const code = err instanceof ApiError ? err.data?.error : undefined;
+      if (code === 'email_already_exists') {
         setError('An account with this email address already exists. Please log in.');
-      } else if (err.code === 'auth/invalid-email') {
+      } else if (code === 'weak_password') {
+        setError('Please choose a stronger password (at least 8 characters).');
+      } else if (err instanceof ApiError && err.status === 400) {
         setError('Please enter a valid email address.');
       } else {
         setError(err.message || 'Could not complete registration. Please check your details.');

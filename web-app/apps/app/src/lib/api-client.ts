@@ -1,5 +1,4 @@
 import { AuthStorage } from '@acepharm/preferences';
-import { auth } from './firebase';
 
 export interface ApiClientOptions extends RequestInit {
   token?: string | null;
@@ -20,35 +19,56 @@ export class ApiError extends Error {
 
 const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
 
-/**
- * Resolves the active user token:
- * 1. Checks manually provided token in options
- * 2. Checks cached token in AuthStorage
- * 3. Falls back to active Firebase current user getIdToken()
- */
-async function resolveAuthToken(explicitToken?: string | null): Promise<string | null> {
+// Auth routes that must never trigger the refresh-and-retry path — retrying against
+// /refresh itself would loop, and /login|/signup are unauthenticated by definition.
+const NO_REFRESH_RETRY_PATHS = ['/api/v1/auth/refresh', '/api/v1/auth/login', '/api/v1/auth/signup', '/api/v1/auth/logout'];
+
+function resolveAuthToken(explicitToken?: string | null): string | null {
   if (explicitToken !== undefined) {
     return explicitToken;
   }
+  return AuthStorage.getToken() || null;
+}
 
-  const cachedToken = AuthStorage.getToken();
-  if (cachedToken) {
-    return cachedToken;
-  }
+// Dedupes concurrent refresh attempts so a burst of 401s only refreshes once.
+let refreshPromise: Promise<string | null> | null = null;
 
-  if (typeof window !== 'undefined' && auth.currentUser) {
+async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = AuthStorage.getRefreshToken();
+    if (!refreshToken) return null;
+
     try {
-      const freshToken = await auth.currentUser.getIdToken();
-      if (freshToken) {
-        AuthStorage.setToken(freshToken);
-        return freshToken;
-      }
-    } catch {
-      // Ignored if unauthenticated
-    }
-  }
+      const baseUrl = DEFAULT_API_URL.replace(/\/$/, '');
+      const res = await fetch(`${baseUrl}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
 
-  return null;
+      if (!res.ok) {
+        AuthStorage.removeToken();
+        AuthStorage.removeRefreshToken();
+        AuthStorage.removeSavedProfile();
+        return null;
+      }
+
+      const data = await res.json();
+      AuthStorage.setToken(data.accessToken);
+      AuthStorage.setRefreshToken(data.refreshToken);
+      return data.accessToken as string;
+    } catch {
+      return null;
+    }
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
 }
 
 /**
@@ -56,7 +76,8 @@ async function resolveAuthToken(explicitToken?: string | null): Promise<string |
  */
 async function request<T = any>(
   path: string,
-  options: ApiClientOptions = {}
+  options: ApiClientOptions = {},
+  _isRetry = false
 ): Promise<T> {
   const { token, params, headers = {}, ...restOptions } = options;
 
@@ -77,7 +98,7 @@ async function request<T = any>(
     ...(headers as Record<string, string>),
   };
 
-  const authToken = await resolveAuthToken(token);
+  const authToken = resolveAuthToken(token);
   if (authToken) {
     resolvedHeaders['Authorization'] = `Bearer ${authToken}`;
   }
@@ -104,6 +125,18 @@ async function request<T = any>(
   }
 
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      !_isRetry &&
+      authToken &&
+      !NO_REFRESH_RETRY_PATHS.includes(cleanPath)
+    ) {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        return request<T>(path, options, true);
+      }
+    }
+
     const errorMessage =
       data?.error ||
       data?.message ||
