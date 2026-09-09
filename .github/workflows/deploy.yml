@@ -181,7 +181,10 @@ jobs:
       - name: Build Next.js Learner App
         run: pnpm --filter @acepharm/app build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://acepharm-api.takweencentreuk.workers.dev' }}
+          # Public production API URL — not a secret, deliberately not sourced from
+          # `secrets.NEXT_PUBLIC_API_URL` (was pointed at a stale/wrong domain and
+          # silently overwrote correct manual deploys on every push to main).
+          NEXT_PUBLIC_API_URL: https://api.acepharmexams.co.uk
 
       - name: Deploy to Cloudflare Pages (App)
         run: npx --yes wrangler@3.90.0 pages deploy apps/app/out --project-name=acepharm-app --branch=main
