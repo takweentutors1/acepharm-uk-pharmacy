@@ -23,6 +23,8 @@ export type Bindings = {
   SMTP_PASS?: string;
   SMTP_FROM?: string;
   SUPPORT_INBOX_EMAIL?: string;
+  HOSTINGER_MAIL_API_TOKEN?: string;
+  HOSTINGER_MAILBOX_RESOURCE_ID?: string;
 };
 
 import { rateLimiter } from './middleware/rate-limit';

@@ -59,6 +59,7 @@ SMTP_PORT = "465"
 SMTP_USER = "info@acepharmexams.co.uk"
 SMTP_FROM = "AcePharm <info@acepharmexams.co.uk>"
 SUPPORT_INBOX_EMAIL = "info@acepharmexams.co.uk"
+HOSTINGER_MAILBOX_RESOURCE_ID = "ACb63b589718015e4a9076ff64fd47"
 
 # ==========================================
 # Staging Environment Configuration

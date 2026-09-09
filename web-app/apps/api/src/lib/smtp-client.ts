@@ -179,6 +179,7 @@ export async function sendHostingerSmtpEmail(options: SmtpOptions): Promise<Smtp
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     let socket: any = null;
+    let step = 'connect';
     try {
       if (attempt > 0) {
         console.warn(`[Hostinger SMTP Retry] Retrying email dispatch to ${to} (Attempt ${attempt + 1}/${maxRetries + 1})...`);
@@ -186,42 +187,65 @@ export async function sendHostingerSmtpEmail(options: SmtpOptions): Promise<Smtp
       }
 
       // Open direct TLS connection on Port 465
+      console.log(`[Hostinger SMTP] Connecting to ${host}:${port} (attempt ${attempt + 1})...`);
       socket = connectFn(
         { hostname: host, port: port },
         { secureTransport: 'on', allowHalfOpen: false }
       );
+      socket.closed
+        .then(() => console.log(`[Hostinger SMTP] socket.closed resolved (attempt ${attempt + 1})`))
+        .catch((closeErr: any) =>
+          console.log(`[Hostinger SMTP] socket.closed rejected (attempt ${attempt + 1}):`, closeErr?.message || closeErr)
+        );
 
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
       const writer = socket.writable.getWriter();
       const reader = socket.readable.getReader();
 
+      step = 'greeting';
       try {
         // 1. Initial Greeting (Expect 220)
         await sendSmtpCommand(writer, reader, encoder, decoder, '', /^220/);
+        console.log('[Hostinger SMTP] step ok: greeting');
 
         // 2. EHLO Handshake (Expect 250)
+        step = 'ehlo';
         await sendSmtpCommand(writer, reader, encoder, decoder, 'EHLO acepharmexams.co.uk', /^250/);
+        console.log('[Hostinger SMTP] step ok: ehlo');
 
         // 3. AUTH LOGIN (Expect 334)
+        step = 'auth-login';
         await sendSmtpCommand(writer, reader, encoder, decoder, 'AUTH LOGIN', /^334/);
+        console.log('[Hostinger SMTP] step ok: auth-login');
 
         // 4. Send Base64 Username (Expect 334)
+        step = 'auth-username';
         await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(user), /^334/);
+        console.log('[Hostinger SMTP] step ok: auth-username');
 
         // 5. Send Base64 Password (Expect 235 Authentication Successful)
+        step = 'auth-password';
         await sendSmtpCommand(writer, reader, encoder, decoder, toBase64(pass), /^235/);
+        console.log('[Hostinger SMTP] step ok: auth-password');
 
         // 6. MAIL FROM (Expect 250)
+        step = 'mail-from';
         await sendSmtpCommand(writer, reader, encoder, decoder, `MAIL FROM:<${senderEmail}>`, /^250/);
+        console.log('[Hostinger SMTP] step ok: mail-from');
 
         // 7. RCPT TO (Expect 250)
+        step = 'rcpt-to';
         await sendSmtpCommand(writer, reader, encoder, decoder, `RCPT TO:<${recipientEmail}>`, /^250/);
+        console.log('[Hostinger SMTP] step ok: rcpt-to');
 
         // 8. DATA (Expect 354)
+        step = 'data';
         await sendSmtpCommand(writer, reader, encoder, decoder, 'DATA', /^354/);
+        console.log('[Hostinger SMTP] step ok: data');
 
         // 9. Send MIME message body followed by \r\n.\r\n (Expect 250 OK)
+        step = 'message-body';
         const mimePayload = buildMimeMessage({
           from,
           to,
@@ -233,8 +257,10 @@ export async function sendHostingerSmtpEmail(options: SmtpOptions): Promise<Smtp
         });
 
         await sendSmtpCommand(writer, reader, encoder, decoder, `${mimePayload}\r\n.`, /^250/);
+        console.log('[Hostinger SMTP] step ok: message-body');
 
         // 10. QUIT
+        step = 'quit';
         try {
           await sendSmtpCommand(writer, reader, encoder, decoder, 'QUIT', /^221/);
         } catch {
@@ -255,7 +281,10 @@ export async function sendHostingerSmtpEmail(options: SmtpOptions): Promise<Smtp
       }
     } catch (error: any) {
       lastError = error;
-      console.error(`[Hostinger SMTP Error] Attempt ${attempt + 1} failed for recipient ${to}:`, error?.message || error);
+      console.error(
+        `[Hostinger SMTP Error] Attempt ${attempt + 1} failed for recipient ${to} at step "${step}": ` +
+          `name=${error?.name} message=${error?.message} cause=${JSON.stringify(error?.cause) ?? 'n/a'}`
+      );
     } finally {
       if (socket) {
         try {

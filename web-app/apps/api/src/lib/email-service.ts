@@ -1,7 +1,8 @@
 import { sendHostingerSmtpEmail, type SmtpResult } from './smtp-client';
+import { sendViaHostingerMailApi } from './hostinger-mail-client';
 
 /**
- * Hostinger SMTP Transactional Email Dispatcher for AcePharm
+ * Hostinger Transactional Email Dispatcher for AcePharm
  * Built with AcePharm Design System Tokens:
  * Primary Indigo (#4F46E5), Deep Indigo (#3730A3), Indigo Wash (#F1F2FC),
  * Ink (#111827), Slate (#64748B), Canvas (#F8FAFC), Surface (#FFFFFF), Border (#E2E8F0), Emerald (#10B981), Amber (#F59E0B), Crimson (#EF4444)
@@ -24,6 +25,8 @@ export interface EmailEnvironment {
   SMTP_FROM?: string;
   SUPPORT_INBOX_EMAIL?: string;
   RESEND_API_KEY?: string;
+  HOSTINGER_MAIL_API_TOKEN?: string;
+  HOSTINGER_MAILBOX_RESOURCE_ID?: string;
 }
 
 export async function sendTransactionalEmail(
@@ -42,11 +45,36 @@ export async function sendTransactionalEmail(
         }
       : envOrApiKey || {};
 
+  const user = env.SMTP_USER || 'info@acepharmexams.co.uk';
+  const from = options.from || env.SMTP_FROM || `AcePharm <${user}>`;
+
+  // Primary path: Hostinger's Mail HTTP API. Raw SMTP-over-TCP from Cloudflare
+  // Workers is rejected at the network level by Hostinger (confirmed by their
+  // support) and cannot be fixed from our side — the HTTPS API is their
+  // documented alternative and works from any fetch-capable runtime.
+  if (env.HOSTINGER_MAIL_API_TOKEN && env.HOSTINGER_MAILBOX_RESOURCE_ID) {
+    const apiResult = await sendViaHostingerMailApi({
+      token: env.HOSTINGER_MAIL_API_TOKEN,
+      mailboxResourceId: env.HOSTINGER_MAILBOX_RESOURCE_ID,
+      from,
+      to: options.to,
+      replyTo: options.replyTo,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+
+    if (apiResult.success) {
+      return { success: true };
+    }
+    console.error('[Hostinger Mail API] send failed, falling back to raw SMTP:', apiResult.error);
+  }
+
+  // Fallback: raw SMTP (kept for environments without the API token configured,
+  // e.g. local dev — has its own mock-mode fallback when SMTP_PASS is unset).
   const host = env.SMTP_HOST || 'smtp.hostinger.com';
   const port = Number(env.SMTP_PORT || 465);
-  const user = env.SMTP_USER || 'info@acepharmexams.co.uk';
   const pass = env.SMTP_PASS;
-  const from = options.from || env.SMTP_FROM || `AcePharm <${user}>`;
 
   const result = await sendHostingerSmtpEmail({
     host,
