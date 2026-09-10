@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ctaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8FAFC;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#F1F2FC;stop-opacity:0.4" />
+    </linearGradient>
+    <radialGradient id="ctaGlow" cx="50%" cy="60%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="400" fill="#F8FAFC"/>
+  <rect width="1440" height="400" fill="url(#ctaGrad)"/>
+  <rect width="1440" height="400" fill="url(#ctaGlow)"/>
+  <!-- Upward arrows suggesting momentum -->
+  <g opacity="0.04" fill="#4F46E5">
+    <polygon points="720,80 730,60 740,80"/>
+    <polygon points="700,100 710,80 720,100"/>
+    <polygon points="740,100 750,80 760,100"/>
+  </g>
+  <!-- Radiating lines from center -->
+  <g opacity="0.025" stroke="#4F46E5" stroke-width="0.5">
+    <line x1="720" y1="200" x2="300" y2="100"/>
+    <line x1="720" y1="200" x2="500" y2="80"/>
+    <line x1="720" y1="200" x2="940" y2="80"/>
+    <line x1="720" y1="200" x2="1140" y2="100"/>
+  </g>
+  <!-- Subtle dots -->
+  <g opacity="0.05" fill="#0F766E">
+    <circle cx="300" cy="100" r="2"/>
+    <circle cx="500" cy="80" r="2"/>
+    <circle cx="940" cy="80" r="2"/>
+    <circle cx="1140" cy="100" r="2"/>
+  </g>
+</svg>

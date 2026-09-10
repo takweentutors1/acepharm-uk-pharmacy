@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="priceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0" />
+    </linearGradient>
+    <radialGradient id="priceGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.04" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="500" fill="#F8FAFC"/>
+  <rect width="1440" height="500" fill="url(#priceGrad)"/>
+  <rect width="1440" height="500" fill="url(#priceGlow)"/>
+  <!-- Subtle star/sparkle accents -->
+  <g opacity="0.05" fill="#4F46E5">
+    <path d="M300,100 L305,115 L320,115 L308,125 L312,140 L300,130 L288,140 L292,125 L280,115 L295,115 Z"/>
+    <path d="M1140,120 L1143,130 L1153,130 L1145,136 L1148,146 L1140,140 L1132,146 L1135,136 L1127,130 L1137,130 Z" transform="scale(0.7) translate(500,50)"/>
+  </g>
+  <!-- Subtle upward trending line -->
+  <path d="M200,400 Q500,350 720,300 T1200,200" stroke="#4F46E5" stroke-width="1" fill="none" opacity="0.04"/>
+  <path d="M200,410 Q500,360 720,310 T1200,210" stroke="#0F766E" stroke-width="0.5" fill="none" opacity="0.03"/>
+  <!-- Value dots -->
+  <g opacity="0.05" fill="#0F766E">
+    <circle cx="720" cy="300" r="3"/>
+    <circle cx="1200" cy="200" r="3"/>
+  </g>
+</svg>

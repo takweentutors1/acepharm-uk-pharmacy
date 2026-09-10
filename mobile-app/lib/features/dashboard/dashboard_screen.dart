@@ -6,6 +6,7 @@ import '../../core/offline/offline_answer_sync_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/user/user_profile.dart';
+import '../../core/widgets/ace_background.dart';
 import '../../core/widgets/widgets.dart';
 import '../account/account_repository.dart';
 import '../account/settings_screen.dart';
@@ -182,40 +183,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AceSpacing.lg),
-        children: [
-          StreamBuilder<int>(
-            stream: _offlineAnswerQueue.watchCount(),
-            builder: (context, snapshot) {
-              final pendingCount = snapshot.data ?? 0;
-              if (pendingCount == 0) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AceSpacing.lg),
-                child: _PendingSyncBanner(count: pendingCount),
-              );
-            },
-          ),
-          Center(child: DailyGoalRing(repository: widget.dailyGoalRepository)),
-          const SizedBox(height: AceSpacing.lg),
-          ExamCountdownTicker(assessmentDate: widget.profile?.assessmentDate),
-          if (widget.profile?.assessmentDate != null)
+      body: AceBackground(
+        assetPath: 'assets/backgrounds/dashboard.svg',
+        child: ListView(
+          padding: const EdgeInsets.all(AceSpacing.lg),
+          children: [
+            StreamBuilder<int>(
+              stream: _offlineAnswerQueue.watchCount(),
+              builder: (context, snapshot) {
+                final pendingCount = snapshot.data ?? 0;
+                if (pendingCount == 0) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AceSpacing.lg),
+                  child: _PendingSyncBanner(count: pendingCount),
+                );
+              },
+            ),
+            Center(child: DailyGoalRing(repository: widget.dailyGoalRepository)),
             const SizedBox(height: AceSpacing.lg),
-          WeeklyInsightCard(
-            repository: widget.weeklyInsightRepository,
-            userId: widget.profile?.id,
-          ),
-          const SizedBox(height: AceSpacing.lg),
-          RecommendationCard(
-            repository: widget.recommendationRepository,
-            onStartSession: (_) => _openSessionBuilder(context),
-          ),
-          const SizedBox(height: AceSpacing.lg),
-          AceButton(
-            label: 'Build a session',
-            onPressed: () => _openSessionBuilder(context),
-          ),
-        ],
+            ExamCountdownTicker(assessmentDate: widget.profile?.assessmentDate),
+            if (widget.profile?.assessmentDate != null)
+              const SizedBox(height: AceSpacing.lg),
+            WeeklyInsightCard(
+              repository: widget.weeklyInsightRepository,
+              userId: widget.profile?.id,
+            ),
+            const SizedBox(height: AceSpacing.lg),
+            RecommendationCard(
+              repository: widget.recommendationRepository,
+              onStartSession: (_) => _openSessionBuilder(context),
+            ),
+            const SizedBox(height: AceSpacing.lg),
+            AceButton(
+              label: 'Build a session',
+              onPressed: () => _openSessionBuilder(context),
+            ),
+          ],
+        ),
       ),
     );
   }

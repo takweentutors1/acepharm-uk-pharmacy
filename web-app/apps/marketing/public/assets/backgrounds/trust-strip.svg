@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#F8FAFC;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#F1F2FC;stop-opacity:0.3" />
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="200" fill="#F8FAFC"/>
+  <rect width="1440" height="200" fill="url(#trustGrad)"/>
+  <!-- Subtle shield pattern -->
+  <g opacity="0.03" fill="#4F46E5">
+    <path d="M360,40 L380,30 L400,40 L400,65 C400,80 380,90 380,90 C380,90 360,80 360,65 Z"/>
+    <path d="M720,40 L740,30 L760,40 L760,65 C760,80 740,90 740,90 C740,90 720,80 720,65 Z"/>
+    <path d="M1080,40 L1100,30 L1120,40 L1120,65 C1120,80 1100,90 1100,90 C1100,90 1080,80 1080,65 Z"/>
+  </g>
+  <!-- Horizontal dotted line -->
+  <line x1="0" y1="100" x2="1440" y2="100" stroke="#4F46E5" stroke-width="0.5" stroke-dasharray="4,8" opacity="0.04"/>
+</svg>

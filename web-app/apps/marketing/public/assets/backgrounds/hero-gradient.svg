@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.6" />
+      <stop offset="50%" style="stop-color:#F8FAFC;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="orbGrad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="orbGrad2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#0F766E;stop-opacity:0.06" />
+      <stop offset="100%" style="stop-color:#0F766E;stop-opacity:0" />
+    </linearGradient>
+    <radialGradient id="glow1" cx="25%" cy="30%" r="40%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.07" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+    <radialGradient id="glow2" cx="75%" cy="60%" r="35%">
+      <stop offset="0%" style="stop-color:#0F766E;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#0F766E;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="600" fill="url(#heroGrad)"/>
+  <rect width="1440" height="600" fill="url(#glow1)"/>
+  <rect width="1440" height="600" fill="url(#glow2)"/>
+  <!-- Abstract pharmacy hexagons -->
+  <g opacity="0.04" fill="#4F46E5">
+    <polygon points="200,120 230,103 260,120 260,154 230,171 200,154"/>
+    <polygon points="260,120 290,103 320,120 320,154 290,171 260,154"/>
+    <polygon points="230,171 260,154 290,171 290,205 260,222 230,205"/>
+  </g>
+  <g opacity="0.03" fill="#0F766E">
+    <polygon points="1100,180 1130,163 1160,180 1160,214 1130,231 1100,214"/>
+    <polygon points="1160,180 1190,163 1220,180 1220,214 1190,231 1160,214"/>
+    <polygon points="1130,231 1160,214 1190,231 1190,265 1160,282 1130,265"/>
+  </g>
+  <!-- Subtle flowing curves -->
+  <path d="M0,400 Q360,350 720,380 T1440,360" stroke="#4F46E5" stroke-width="1" fill="none" opacity="0.06"/>
+  <path d="M0,420 Q360,370 720,400 T1440,380" stroke="#0F766E" stroke-width="1" fill="none" opacity="0.04"/>
+  <!-- Floating dots -->
+  <circle cx="150" cy="200" r="3" fill="#4F46E5" opacity="0.08"/>
+  <circle cx="400" cy="150" r="2" fill="#4F46E5" opacity="0.06"/>
+  <circle cx="650" cy="250" r="4" fill="#0F766E" opacity="0.05"/>
+  <circle cx="900" cy="180" r="2.5" fill="#4F46E5" opacity="0.07"/>
+  <circle cx="1150" cy="300" r="3" fill="#0F766E" opacity="0.06"/>
+  <circle cx="1300" cy="150" r="2" fill="#4F46E5" opacity="0.05"/>
+</svg>

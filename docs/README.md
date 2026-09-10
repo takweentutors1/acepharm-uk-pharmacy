@@ -9,6 +9,7 @@ Welcome to the central documentation index for **AcePharm** — an evidence-led 
 | Document | Format | Authority & Status | Description |
 | :--- | :--- | :--- | :--- |
 | **[IMPLEMENTATION-PLAN.md](file:///Users/pc/acepharm-web-app/docs/IMPLEMENTATION-PLAN.md)** | Markdown | **Active Canonical (v3.0)** | Authoritative technical build reference re-platformed onto Firebase (Auth) + Cloudflare (D1, Vectorize, Workers, Pages), with an Astro + Next.js frontend split. |
+| **[AcePharm-Mobile-App-Implementation-Plan.md](file:///Users/pc/acepharm-web-app/docs/AcePharm-Mobile-App-Implementation-Plan.md)** | Markdown | **Active Canonical (Mobile)** | Cross-platform iOS & Android companion app blueprint (Flutter / Dart 3.x) — architecture, design-token bridge, milestone roadmap, and QA matrix for `mobile-app/`. |
 | **[AcePharm-Implementation-Plan-v3.0-Firebase-Cloudflare.pdf](file:///Users/pc/acepharm-web-app/docs/AcePharm-Implementation-Plan-v3.0-Firebase-Cloudflare.pdf)** | PDF | Canonical Reference | Styled PDF distribution of the v3.0 Implementation Plan. |
 | **[WEBSITE-COPY-EXTRACTED.md](file:///Users/pc/acepharm-web-app/docs/WEBSITE-COPY-EXTRACTED.md)** | Markdown | **Active Verbatim (v2.0)** | Complete copy dictionary, tone of voice rules, banned phrases, and marketing strings. |
 | **[AcePharm-Developer-Brief-v2.1.docx](file:///Users/pc/acepharm-web-app/docs/AcePharm-Developer-Brief-v2.1.docx)** | DOCX | Foundational Brief | Product specifications, 26 Non-Negotiables, clinical data rules, and acceptance criteria. |

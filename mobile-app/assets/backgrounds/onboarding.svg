@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <linearGradient id="onboardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:#F8FAFC;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0" />
+    </linearGradient>
+    <radialGradient id="onboardGlow" cx="50%" cy="25%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#onboardGrad)"/>
+  <rect width="400" height="800" fill="url(#onboardGlow)"/>
+  <!-- Step indicator dots -->
+  <g opacity="0.06" fill="#4F46E5">
+    <circle cx="160" cy="100" r="4"/>
+    <circle cx="180" cy="100" r="4"/>
+    <circle cx="200" cy="100" r="4"/>
+    <circle cx="220" cy="100" r="4"/>
+    <circle cx="240" cy="100" r="4"/>
+  </g>
+  <!-- Abstract learning path -->
+  <path d="M100,200 Q200,180 300,200 Q350,220 300,260 Q200,300 100,260 Q50,240 100,200" stroke="#4F46E5" stroke-width="0.8" fill="none" opacity="0.04" stroke-dasharray="4,6"/>
+  <!-- Floating elements -->
+  <circle cx="80" cy="300" r="2" fill="#4F46E5" opacity="0.05"/>
+  <circle cx="320" cy="250" r="1.5" fill="#0F766E" opacity="0.04"/>
+  <circle cx="200" cy="400" r="2.5" fill="#4F46E5" opacity="0.04"/>
+</svg>

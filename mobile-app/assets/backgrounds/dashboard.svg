@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <linearGradient id="dashGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.25" />
+      <stop offset="50%" style="stop-color:#F8FAFC;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0" />
+    </linearGradient>
+    <radialGradient id="dashGlow" cx="50%" cy="15%" r="45%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.04" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#dashGrad)"/>
+  <rect width="400" height="800" fill="url(#dashGlow)"/>
+  <!-- Circular progress hint -->
+  <g opacity="0.04" stroke="#4F46E5" stroke-width="1.5" fill="none">
+    <circle cx="200" cy="120" r="50" stroke-dasharray="8,6"/>
+    <circle cx="200" cy="120" r="35" stroke-dasharray="6,8"/>
+  </g>
+  <!-- Subtle grid dots -->
+  <g opacity="0.03" fill="#4F46E5">
+    <circle cx="50" cy="200" r="1"/>
+    <circle cx="100" cy="200" r="1"/>
+    <circle cx="150" cy="200" r="1"/>
+    <circle cx="250" cy="200" r="1"/>
+    <circle cx="300" cy="200" r="1"/>
+    <circle cx="350" cy="200" r="1"/>
+  </g>
+  <!-- Flowing line -->
+  <path d="M0,400 Q100,380 200,390 T400,380" stroke="#0F766E" stroke-width="0.5" fill="none" opacity="0.04"/>
+</svg>

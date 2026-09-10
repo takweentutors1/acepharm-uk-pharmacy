@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
+import '../../core/widgets/ace_background.dart';
 import 'progress_metrics.dart';
 import 'progress_repository.dart';
 import 'widgets/accuracy_pillar_card.dart';
@@ -60,52 +61,55 @@ class _ProgressScreenState extends State<ProgressScreen> {
           }
 
           final metrics = snapshot.data!;
-          return ListView(
-            padding: const EdgeInsets.all(AceSpacing.lg),
-            children: [
-              AccuracyPillarCard(
-                title: 'First-Attempt Accuracy',
-                bucket: metrics.firstAttempt,
-                prominent: true,
-              ),
-              const SizedBox(height: AceSpacing.lg),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: AccuracyPillarCard(
-                      title: 'Practice Accuracy',
-                      bucket: metrics.practice,
-                      subtitle: 'Includes every attempt',
+          return AceBackground(
+            assetPath: 'assets/backgrounds/progress.svg',
+            child: ListView(
+              padding: const EdgeInsets.all(AceSpacing.lg),
+              children: [
+                AccuracyPillarCard(
+                  title: 'First-Attempt Accuracy',
+                  bucket: metrics.firstAttempt,
+                  prominent: true,
+                ),
+                const SizedBox(height: AceSpacing.lg),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AccuracyPillarCard(
+                        title: 'Practice Accuracy',
+                        bucket: metrics.practice,
+                        subtitle: 'Includes every attempt',
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AceSpacing.md),
-                  Expanded(
-                    child: AccuracyPillarCard(
-                      title: 'Repeat Accuracy',
-                      bucket: metrics.repeat,
-                      subtitle: 'From 2nd attempts on',
+                    const SizedBox(width: AceSpacing.md),
+                    Expanded(
+                      child: AccuracyPillarCard(
+                        title: 'Repeat Accuracy',
+                        bucket: metrics.repeat,
+                        subtitle: 'From 2nd attempts on',
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AceSpacing.lg),
-              CalibrationGrid(
-                low: metrics.lowConfidence,
-                medium: metrics.mediumConfidence,
-                high: metrics.highConfidence,
-                summary: metrics.calibrationSummary,
-              ),
-              const SizedBox(height: AceSpacing.lg),
-              AccuracyPillarCard(
-                title: 'Curriculum Coverage',
-                bucket: metrics.coverageBucket,
-                unitLabel: 'questions attempted',
-                subtitle: 'No questions in the curriculum yet',
-              ),
-              const SizedBox(height: AceSpacing.xl),
-              MasteryGrid(categories: metrics.categoryCoverage),
-            ],
+                  ],
+                ),
+                const SizedBox(height: AceSpacing.lg),
+                CalibrationGrid(
+                  low: metrics.lowConfidence,
+                  medium: metrics.mediumConfidence,
+                  high: metrics.highConfidence,
+                  summary: metrics.calibrationSummary,
+                ),
+                const SizedBox(height: AceSpacing.lg),
+                AccuracyPillarCard(
+                  title: 'Curriculum Coverage',
+                  bucket: metrics.coverageBucket,
+                  unitLabel: 'questions attempted',
+                  subtitle: 'No questions in the curriculum yet',
+                ),
+                const SizedBox(height: AceSpacing.xl),
+                MasteryGrid(categories: metrics.categoryCoverage),
+              ],
+            ),
           );
         },
       ),

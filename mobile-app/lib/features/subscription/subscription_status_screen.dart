@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/analytics/analytics_service.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
+import '../../core/widgets/ace_background.dart';
 import '../../core/widgets/widgets.dart';
 import 'subscription_plan.dart';
 import 'subscription_repository.dart';
@@ -99,34 +100,37 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
           }
 
           final status = snapshot.data!;
-          return ListView(
-            padding: const EdgeInsets.all(AceSpacing.lg),
-            children: [
-              _PlanCard(status: status),
-              const SizedBox(height: AceSpacing.lg),
-              if (status.isPaid) ...[
-                AceButton(
-                  label: 'Manage billing',
-                  isLoading: _isOpeningPortal,
-                  onPressed: _manageBilling,
-                ),
-                if (_portalError != null) ...[
-                  const SizedBox(height: AceSpacing.sm),
-                  Text(
-                    _portalError!,
-                    style: const TextStyle(
-                      color: AceColors.dangerRose,
-                      fontSize: 13,
-                    ),
+          return AceBackground(
+            assetPath: 'assets/backgrounds/subscription.svg',
+            child: ListView(
+              padding: const EdgeInsets.all(AceSpacing.lg),
+              children: [
+                _PlanCard(status: status),
+                const SizedBox(height: AceSpacing.lg),
+                if (status.isPaid) ...[
+                  AceButton(
+                    label: 'Manage billing',
+                    isLoading: _isOpeningPortal,
+                    onPressed: _manageBilling,
                   ),
-                ],
-              ] else
-                const Text(
-                  "You're on the free Explorer plan — upgrade to a paid "
-                  'plan to manage billing here.',
-                  style: TextStyle(color: AceColors.slate),
-                ),
-            ],
+                  if (_portalError != null) ...[
+                    const SizedBox(height: AceSpacing.sm),
+                    Text(
+                      _portalError!,
+                      style: const TextStyle(
+                        color: AceColors.dangerRose,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ] else
+                  const Text(
+                    "You're on the free Explorer plan — upgrade to a paid "
+                    'plan to manage billing here.',
+                    style: TextStyle(color: AceColors.slate),
+                  ),
+              ],
+            ),
           );
         },
       ),

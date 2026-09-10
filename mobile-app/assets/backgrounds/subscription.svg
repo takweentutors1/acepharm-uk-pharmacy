@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <linearGradient id="subGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#F8FAFC;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0" />
+    </linearGradient>
+    <radialGradient id="subGlow" cx="50%" cy="20%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.04" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#subGrad)"/>
+  <rect width="400" height="800" fill="url(#subGlow)"/>
+  <!-- Star/sparkle accent -->
+  <g opacity="0.05" fill="#4F46E5">
+    <path d="M200,150 L205,170 L225,170 L210,182 L215,202 L200,190 L185,202 L190,182 L175,170 L195,170 Z"/>
+  </g>
+  <!-- Price card hints -->
+  <g opacity="0.03" stroke="#4F46E5" stroke-width="1">
+    <rect x="40" y="250" width="140" height="180" rx="8"/>
+    <rect x="220" y="250" width="140" height="180" rx="8"/>
+  </g>
+  <!-- Checkmarks -->
+  <g opacity="0.04" stroke="#0F766E" stroke-width="1.5" fill="none">
+    <polyline points="235,320 245,330 260,310"/>
+    <polyline points="235,350 245,360 260,340"/>
+    <polyline points="235,380 245,390 260,370"/>
+  </g>
+</svg>

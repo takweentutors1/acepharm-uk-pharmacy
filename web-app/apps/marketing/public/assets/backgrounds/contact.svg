@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="contactGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.04" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="400" fill="#F8FAFC"/>
+  <rect width="1440" height="400" fill="url(#contactGlow)"/>
+  <!-- Abstract envelope/mail icon -->
+  <g opacity="0.03" fill="none" stroke="#4F46E5" stroke-width="1.5">
+    <rect x="660" y="120" width="120" height="80" rx="4"/>
+    <polyline points="660,120 720,170 780,120"/>
+  </g>
+  <!-- Communication wave lines -->
+  <g opacity="0.03" stroke="#0F766E" stroke-width="1" fill="none">
+    <path d="M300,250 Q350,230 400,250 Q450,270 500,250"/>
+    <path d="M940,250 Q990,230 1040,250 Q1090,270 1140,250"/>
+  </g>
+  <!-- Subtle dots pattern -->
+  <g opacity="0.04" fill="#4F46E5">
+    <circle cx="200" cy="150" r="1.5"/>
+    <circle cx="300" cy="150" r="1.5"/>
+    <circle cx="400" cy="150" r="1.5"/>
+    <circle cx="1040" cy="150" r="1.5"/>
+    <circle cx="1140" cy="150" r="1.5"/>
+    <circle cx="1240" cy="150" r="1.5"/>
+  </g>
+</svg>

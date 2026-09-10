@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="featGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F1F2FC;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#EFFAF8;stop-opacity:0.15" />
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="500" fill="#F8FAFC"/>
+  <rect width="1440" height="500" fill="url(#featGrad)"/>
+  <!-- Abstract feature grid -->
+  <g opacity="0.03" stroke="#4F46E5" stroke-width="0.5" fill="none">
+    <rect x="100" y="80" width="200" height="140" rx="8"/>
+    <rect x="340" y="80" width="200" height="140" rx="8"/>
+    <rect x="580" y="80" width="200" height="140" rx="8"/>
+    <rect x="820" y="80" width="200" height="140" rx="8"/>
+    <rect x="1060" y="80" width="200" height="140" rx="8"/>
+  </g>
+  <!-- Subtle checkmarks in grid -->
+  <g opacity="0.04" stroke="#0F766E" stroke-width="1.5" fill="none">
+    <polyline points="160,150 175,165 200,135"/>
+    <polyline points="400,150 415,165 440,135"/>
+    <polyline points="640,150 655,165 680,135"/>
+    <polyline points="880,150 895,165 920,135"/>
+    <polyline points="1120,150 1135,165 1160,135"/>
+  </g>
+  <!-- Connecting flow line -->
+  <path d="M200,220 Q720,280 1240,220" stroke="#4F46E5" stroke-width="0.5" fill="none" opacity="0.04" stroke-dasharray="4,6"/>
+</svg>

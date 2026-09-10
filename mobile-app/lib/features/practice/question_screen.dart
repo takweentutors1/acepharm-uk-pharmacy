@@ -9,6 +9,7 @@ import '../../core/offline/pending_answer.dart';
 import '../../core/theme/ace_colors.dart';
 import '../../core/theme/ace_spacing.dart';
 import '../../core/theme/ace_typography.dart';
+import '../../core/widgets/ace_background.dart';
 import '../../core/widgets/widgets.dart';
 import 'ace_repository.dart';
 import 'answer_result.dart';
@@ -204,112 +205,115 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(AceSpacing.lg),
-              children: [
-                if (_result != null) ...[
-                  FirstAttemptBadge(
-                    isFirstEverAttempt: _result!.isFirstEverAttempt,
+      body: AceBackground(
+        assetPath: 'assets/backgrounds/question.svg',
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(AceSpacing.lg),
+                children: [
+                  if (_result != null) ...[
+                    FirstAttemptBadge(
+                      isFirstEverAttempt: _result!.isFirstEverAttempt,
+                    ),
+                    const SizedBox(height: AceSpacing.md),
+                  ],
+                  Text(
+                    question.content.stem,
+                    style: const TextStyle(color: AceColors.ink, height: 1.4),
                   ),
-                  const SizedBox(height: AceSpacing.md),
-                ],
-                Text(
-                  question.content.stem,
-                  style: const TextStyle(color: AceColors.ink, height: 1.4),
-                ),
-                const SizedBox(height: AceSpacing.sm),
-                Text(
-                  question.content.leadIn,
-                  style: const TextStyle(
-                    color: AceColors.ink,
-                    fontWeight: FontWeight.w700,
+                  const SizedBox(height: AceSpacing.sm),
+                  Text(
+                    question.content.leadIn,
+                    style: const TextStyle(
+                      color: AceColors.ink,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AceSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  const SizedBox(height: AceSpacing.lg),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Cover options',
+                        style: TextStyle(
+                          color: AceColors.slate,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Switch(
+                        value: _isCovered,
+                        onChanged: _isAnswered
+                            ? null
+                            : (value) => setState(() => _isCovered = value),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AceSpacing.sm),
+                  QuestionOptionList(
+                    options: question.options,
+                    selectedOptionId: _selectedOptionId,
+                    onSelect: _isAnswered
+                        ? null
+                        : (id) => setState(() => _selectedOptionId = id),
+                    result: _result,
+                    isCovered: _isCovered && !_isAnswered,
+                    onRevealCovered: () => setState(() => _isCovered = false),
+                  ),
+                  if (_isQueuedOffline) ...[
+                    const SizedBox(height: AceSpacing.lg),
+                    const _OfflineQueuedNotice(),
+                  ],
+                  if (_result?.explanation case final explanation?) ...[
+                    const SizedBox(height: AceSpacing.lg),
+                    _ExplanationCard(explanation: explanation),
+                    const SizedBox(height: AceSpacing.sm),
+                    AceButton(
+                      label: 'Ask Ace about this question',
+                      variant: AceButtonVariant.secondary,
+                      icon: Icons.auto_awesome,
+                      onPressed: _openAskAce,
+                    ),
+                  ],
+                  if (!_isAnswered) ...[
+                    const SizedBox(height: AceSpacing.xl),
                     const Text(
-                      'Cover options',
+                      'How confident are you?',
                       style: TextStyle(
                         color: AceColors.slate,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Switch(
-                      value: _isCovered,
-                      onChanged: _isAnswered
-                          ? null
-                          : (value) => setState(() => _isCovered = value),
+                    const SizedBox(height: AceSpacing.sm),
+                    ConfidenceSelector(
+                      value: _confidence,
+                      onChanged: (confidence) =>
+                          setState(() => _confidence = confidence),
                     ),
                   ],
-                ),
-                const SizedBox(height: AceSpacing.sm),
-                QuestionOptionList(
-                  options: question.options,
-                  selectedOptionId: _selectedOptionId,
-                  onSelect: _isAnswered
-                      ? null
-                      : (id) => setState(() => _selectedOptionId = id),
-                  result: _result,
-                  isCovered: _isCovered && !_isAnswered,
-                  onRevealCovered: () => setState(() => _isCovered = false),
-                ),
-                if (_isQueuedOffline) ...[
-                  const SizedBox(height: AceSpacing.lg),
-                  const _OfflineQueuedNotice(),
-                ],
-                if (_result?.explanation case final explanation?) ...[
-                  const SizedBox(height: AceSpacing.lg),
-                  _ExplanationCard(explanation: explanation),
-                  const SizedBox(height: AceSpacing.sm),
-                  AceButton(
-                    label: 'Ask Ace about this question',
-                    variant: AceButtonVariant.secondary,
-                    icon: Icons.auto_awesome,
-                    onPressed: _openAskAce,
-                  ),
-                ],
-                if (!_isAnswered) ...[
-                  const SizedBox(height: AceSpacing.xl),
-                  const Text(
-                    'How confident are you?',
-                    style: TextStyle(
-                      color: AceColors.slate,
-                      fontWeight: FontWeight.w600,
+                  if (_submitError != null) ...[
+                    const SizedBox(height: AceSpacing.sm),
+                    Text(
+                      _submitError!,
+                      style: const TextStyle(
+                        color: AceColors.dangerRose,
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AceSpacing.sm),
-                  ConfidenceSelector(
-                    value: _confidence,
-                    onChanged: (confidence) =>
-                        setState(() => _confidence = confidence),
-                  ),
+                  ],
                 ],
-                if (_submitError != null) ...[
-                  const SizedBox(height: AceSpacing.sm),
-                  Text(
-                    _submitError!,
-                    style: const TextStyle(
-                      color: AceColors.dangerRose,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
-          ),
-          _QuestionFooter(
-            hasResult: _isAnswered,
-            canSubmit: _canSubmit,
-            isSubmitting: _isSubmitting,
-            onSubmit: _submit,
-            onNext: widget.onNext,
-          ),
-        ],
+            _QuestionFooter(
+              hasResult: _isAnswered,
+              canSubmit: _canSubmit,
+              isSubmitting: _isSubmitting,
+              onSubmit: _submit,
+              onNext: widget.onNext,
+            ),
+          ],
+        ),
       ),
     );
   }

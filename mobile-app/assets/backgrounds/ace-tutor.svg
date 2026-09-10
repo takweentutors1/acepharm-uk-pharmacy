@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <radialGradient id="aceGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="800" fill="#F8FAFC"/>
+  <rect width="400" height="800" fill="url(#aceGlow)"/>
+  <!-- Neural network nodes -->
+  <g opacity="0.04" fill="#4F46E5">
+    <circle cx="100" cy="200" r="3"/>
+    <circle cx="100" cy="300" r="3"/>
+    <circle cx="100" cy="400" r="3"/>
+    <circle cx="200" cy="250" r="3"/>
+    <circle cx="200" cy="350" r="3"/>
+    <circle cx="300" cy="300" r="4"/>
+  </g>
+  <!-- Connection lines -->
+  <g opacity="0.03" stroke="#4F46E5" stroke-width="0.5" fill="none">
+    <line x1="100" y1="200" x2="200" y2="250"/>
+    <line x1="100" y1="300" x2="200" y2="250"/>
+    <line x1="100" y1="300" x2="200" y2="350"/>
+    <line x1="100" y1="400" x2="200" y2="350"/>
+    <line x1="200" y1="250" x2="300" y2="300"/>
+    <line x1="200" y1="350" x2="300" y2="300"/>
+  </g>
+  <!-- Pulse ring -->
+  <g opacity="0.03" stroke="#4F46E5" stroke-width="1" fill="none">
+    <circle cx="300" cy="300" r="15"/>
+    <circle cx="300" cy="300" r="25"/>
+  </g>
+  <!-- Chat bubble hint -->
+  <g opacity="0.03" fill="none" stroke="#0F766E" stroke-width="1">
+    <rect x="80" y="500" width="240" height="80" rx="12"/>
+    <polyline points="100,580 120,600 140,580"/>
+  </g>
+</svg>
