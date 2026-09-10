@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { QuestionPlayer } from '@/components/question-player';
+import { ActiveSession } from '@/components/active-session';
 
 export const metadata: Metadata = {
   title: 'Active Revision Session — AcePharm',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function ActiveSessionPage() {
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <QuestionPlayer />
+      <ActiveSession />
     </main>
   );
 }

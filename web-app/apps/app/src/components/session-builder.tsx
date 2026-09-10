@@ -163,12 +163,37 @@ export function SessionBuilder() {
 
   const effectiveCount = Math.min(questionCount, totalAvailableInSelection || 1);
 
-  const handleStartSession = () => {
+  const handleStartSession = async () => {
     setIsStarting(true);
     const catQuery = selectedCategoryIds.join(',');
-    setTimeout(() => {
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
+      const res = await fetch(`${API_URL}/api/v1/sessions/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode,
+          questionCount: effectiveCount,
+          categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
+          statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ error: 'Failed to create session' }));
+        throw new Error(error.error || 'Failed to create session');
+      }
+
+      const data = await res.json();
+      // Store session data in sessionStorage for the active page to consume
+      sessionStorage.setItem('acepharm_active_session', JSON.stringify(data));
       window.location.href = `/session/active?mode=${mode}&count=${effectiveCount}&categories=${encodeURIComponent(catQuery)}&filter=${statusFilter}`;
-    }, 300);
+    } catch (err: any) {
+      console.error('Session creation failed:', err);
+      alert(err.message || 'Failed to create session. Please try again.');
+      setIsStarting(false);
+    }
   };
 
   return (
