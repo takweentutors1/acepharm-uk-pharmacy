@@ -1,8 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { eq, inArray } from 'drizzle-orm';
-import { generateText, streamText } from 'ai';
 import { contentChunks, aceMessages, aceUsage, questions, questionExplanations, subtopics, references } from '../db/schema';
-import { getMimoModel } from './zen-ai-client';
 
 export type AceContextType = 'question' | 'dashboard' | 'planner' | 'calculation' | 'simulator';
 
@@ -153,9 +151,34 @@ export async function retrieveRelevantChunks(
       returnMetadata: true,
     };
 
+    // Add metadata filter to scope search to current question's chunks
+    if (filterContextId) {
+      queryOptions.filter = { sourceId: filterContextId };
+    }
+
     const matches = await vectorize.query(queryVector, queryOptions);
 
     if (!matches || !matches.matches || matches.matches.length === 0) {
+      // D1 fallback: if Vectorize returns empty, try direct SQL lookup
+      if (filterContextId) {
+        const fallbackRows = await db
+          .select()
+          .from(contentChunks)
+          .where(eq(contentChunks.sourceId, filterContextId))
+          .orderBy(contentChunks.chunkIndex)
+          .limit(topK);
+        
+        if (fallbackRows.length > 0) {
+          return fallbackRows.map((r) => ({
+            id: r.id,
+            sourceType: r.sourceType,
+            sourceId: r.sourceId,
+            chunkIndex: r.chunkIndex,
+            contentText: r.contentText,
+            score: 0.5,
+          }));
+        }
+      }
       return [];
     }
 
@@ -217,7 +240,7 @@ export async function generateAceResponse(params: GenerateAceRequest): Promise<G
   } = params;
 
   const startTime = Date.now();
-  const modelIdentifier = 'mimo-v2.5-free';
+  const modelIdentifier = 'llama-3.2-3b';
 
   // 1. Log incoming user message in D1 ace_messages
   const userMessageId = `msg-user-${crypto.randomUUID()}`;
@@ -234,7 +257,7 @@ export async function generateAceResponse(params: GenerateAceRequest): Promise<G
   });
 
   // 2. Perform Vectorize RAG Retrieval
-  const retrievedChunks = await retrieveRelevantChunks(db, userPrompt, ai, vectorize, 4);
+  const retrievedChunks = await retrieveRelevantChunks(db, userPrompt, ai, vectorize, 4, contextId);
   const retrievedChunkIds = retrievedChunks.map((c) => c.id);
 
   const citations: CitationItem[] = await resolveCitationLabels(db, retrievedChunks);
@@ -313,159 +336,101 @@ ${userPrompt.trim()}
 ${contextBlock}
   `.trim();
 
-  // 4. Initialize provider-agnostic model (MiMo-V2.5 via Zen Gateway)
-  const model = getMimoModel(zenApiKey);
+  // 4. Workers AI generation using Llama 3.8B Instruct
   const assistantMessageId = `msg-ast-${crypto.randomUUID()}`;
 
-  // 5. Handle Streaming vs Synchronous Generation
-  if (stream) {
-    const streamResult = streamText({
-      model,
-      system: SYSTEM_PROMPT,
-      prompt: completeUserPrompt,
-      onFinish: async (event) => {
-        const latencyMs = Date.now() - startTime;
-        const promptTokens = (event.usage as any)?.inputTokens ?? (event.usage as any)?.promptTokens ?? Math.ceil(completeUserPrompt.length / 4);
-        const completionTokens = (event.usage as any)?.outputTokens ?? (event.usage as any)?.completionTokens ?? Math.ceil((event.text?.length || 0) / 4);
+  let responseText = '';
+  let promptTokens = Math.ceil(completeUserPrompt.length / 4);
+  let completionTokens = 0;
 
-        // Async log completed assistant message into D1
-        await db.insert(aceMessages).values({
-          id: assistantMessageId,
-          threadId,
-          role: 'assistant',
-          content: event.text || '',
-          intent,
-          retrievedChunkIds: JSON.stringify(retrievedChunkIds),
-          citations: JSON.stringify(citations),
-          model: modelIdentifier,
-          promptTokens,
-          completionTokens,
-          latencyMs,
-          costPence: 0, // Zen gateway free tier
-          createdAt: new Date(),
-        });
-
-        // Update ace_usage daily aggregate
-        const todayStr = new Date().toISOString().split('T')[0];
-        try {
-          const [existingUsage] = await db
-            .select()
-            .from(aceUsage)
-            .where(eq(aceUsage.userId, userId))
-            .limit(1);
-
-          if (existingUsage) {
-            await db
-              .update(aceUsage)
-              .set({
-                messageCount: existingUsage.messageCount + 1,
-                totalTokens: existingUsage.totalTokens + promptTokens + completionTokens,
-                updatedAt: new Date(),
-              })
-              .where(eq(aceUsage.id, existingUsage.id));
-          } else {
-            await db.insert(aceUsage).values({
-              id: `usage-${userId}-${todayStr}`,
-              userId,
-              date: todayStr,
-              messageCount: 1,
-              totalTokens: promptTokens + completionTokens,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            });
-          }
-        } catch (e) {
-          console.warn('ace_usage update error:', e);
-        }
-      },
+  try {
+    const aiResult = await ai!.run('@cf/meta/llama-3.2-3b-instruct', {
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: completeUserPrompt },
+      ],
+      max_tokens: 1024,
     });
 
-    return {
-      messageId: assistantMessageId,
-      content: '',
-      model: modelIdentifier,
-      promptTokens: 0,
-      completionTokens: 0,
-      latencyMs: 0,
-      costPence: 0,
-      retrievedChunkIds,
-      citations,
-      refused: false,
-      streamResult,
-    };
-  } else {
-    // Non-streaming synchronous fallback
-    let responseText = '';
-    let promptTokens = 0;
-    let completionTokens = 0;
-
-    // 20-Second Timeout with Retry & Graceful Degradation (Section 5.3)
-    const executeWithRetryAndTimeout = async (retries = 1, timeoutMs = 20000): Promise<{ text: string; usage: any }> => {
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-          const result = await generateText({
-            model,
-            system: SYSTEM_PROMPT,
-            prompt: completeUserPrompt,
-            abortSignal: controller.signal,
-          });
-
-          clearTimeout(timeoutId);
-          return { text: result.text, usage: result.usage };
-        } catch (err: any) {
-          console.warn(`Zen gateway generation attempt ${attempt + 1} failed:`, err?.message || err);
-          if (attempt === retries) throw err;
-        }
-      }
-      throw new Error('All generation attempts failed');
-    };
-
-    try {
-      const result = await executeWithRetryAndTimeout(1, 20000);
-      responseText = result.text;
-      promptTokens = (result.usage as any)?.inputTokens ?? (result.usage as any)?.promptTokens ?? Math.ceil(completeUserPrompt.length / 4);
-      completionTokens = (result.usage as any)?.outputTokens ?? (result.usage as any)?.completionTokens ?? Math.ceil(responseText.length / 4);
-    } catch (err: any) {
-      console.warn('Zen gateway generation timed out or failed after retry:', err);
-      // Graceful provider failure fallback (Section 5.3 Non-Negotiable)
-      responseText = "I'm having trouble connecting to my clinical AI model right now. Please refer directly to the verified question explanation and BNF references above.";
-      promptTokens = Math.ceil(completeUserPrompt.length / 4);
-      completionTokens = Math.ceil(responseText.length / 4);
-    }
-
-    const latencyMs = Date.now() - startTime;
-
-    // Log assistant message into D1
-    await db.insert(aceMessages).values({
-      id: assistantMessageId,
-      threadId,
-      role: 'assistant',
-      content: responseText,
-      intent,
-      retrievedChunkIds: JSON.stringify(retrievedChunkIds),
-      citations: JSON.stringify(citations),
-      model: modelIdentifier,
-      promptTokens,
-      completionTokens,
-      latencyMs,
-      costPence: 0,
-      createdAt: new Date(),
-    });
-
-    return {
-      messageId: assistantMessageId,
-      content: responseText,
-      model: modelIdentifier,
-      promptTokens,
-      completionTokens,
-      latencyMs,
-      costPence: 0,
-      retrievedChunkIds,
-      citations,
-      refused: false,
-    };
+    const r: any = aiResult;
+    // Workers AI returns different formats depending on model
+    responseText = r?.response?.description
+      || r?.response
+      || r?.result?.response?.description
+      || r?.result?.response
+      || r?.choices?.[0]?.message?.content
+      || r?.result?.choices?.[0]?.message?.content
+      || '';
+    if (typeof responseText !== 'string') responseText = JSON.stringify(responseText);
+    completionTokens = Math.ceil(responseText.length / 4);
+  } catch (err: any) {
+    console.error('Workers AI generation error:', err?.message || err, err?.stack);
+    responseText = "I'm having trouble connecting to my clinical AI model right now. Please refer directly to the verified question explanation and BNF references above.";
+    completionTokens = Math.ceil(responseText.length / 4);
   }
+
+  // Update ace_usage daily aggregate
+  const todayStr = new Date().toISOString().split('T')[0];
+  try {
+    const [existingUsage] = await db
+      .select()
+      .from(aceUsage)
+      .where(eq(aceUsage.userId, userId))
+      .limit(1);
+
+    if (existingUsage) {
+      await db
+        .update(aceUsage)
+        .set({
+          messageCount: existingUsage.messageCount + 1,
+          totalTokens: existingUsage.totalTokens + promptTokens + completionTokens,
+          updatedAt: new Date(),
+        })
+        .where(eq(aceUsage.id, existingUsage.id));
+    } else {
+      await db.insert(aceUsage).values({
+        id: `usage-${userId}-${todayStr}`,
+        userId,
+        date: todayStr,
+        messageCount: 1,
+        totalTokens: promptTokens + completionTokens,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  } catch (e) {
+    console.warn('ace_usage update error:', e);
+  }
+
+  const latencyMs = Date.now() - startTime;
+
+  // Log assistant message into D1
+  await db.insert(aceMessages).values({
+    id: assistantMessageId,
+    threadId,
+    role: 'assistant',
+    content: responseText,
+    intent,
+    retrievedChunkIds: JSON.stringify(retrievedChunkIds),
+    citations: JSON.stringify(citations),
+    model: modelIdentifier,
+    promptTokens,
+    completionTokens,
+    latencyMs,
+    costPence: 0,
+    createdAt: new Date(),
+  });
+
+  return {
+    messageId: assistantMessageId,
+    content: responseText,
+    model: modelIdentifier,
+    promptTokens,
+    completionTokens,
+    latencyMs,
+    costPence: 0,
+    retrievedChunkIds,
+    citations,
+    refused: false,
+  };
 }

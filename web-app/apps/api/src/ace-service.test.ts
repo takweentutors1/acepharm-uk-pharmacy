@@ -44,7 +44,7 @@ describe('generateAceResponse Provider-Agnostic Interface (Section 5.4)', () => 
 
     expect(res).toBeDefined();
     expect(res.messageId).toContain('msg-ast-');
-    expect(res.model).toBe('mimo-v2.5-free');
+    expect(res.model).toBe('llama-3.2-3b');
     expect(res.retrievedChunkIds).toEqual([]);
     expect(res.citations).toEqual([]);
     expect(res.costPence).toBe(0);

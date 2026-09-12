@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@acepharm/ui';
 import { Badge } from '@acepharm/ui';
+import { apiClient } from '@/lib/api-client';
 
 interface Citation {
   id: string;
@@ -107,24 +108,13 @@ export function AskAcePanel({ questionId, questionPublicId, isCalculation, highl
     ]);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
-      const res = await fetch(`${apiBase}/api/v1/ace/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          threadId,
-          contextType: 'question',
-          contextId: questionId,
-          prompt: promptText.trim(),
-          intent,
-        }),
+      const data = await apiClient.post('/api/v1/ace/message', {
+        threadId,
+        contextType: 'question',
+        contextId: questionId,
+        prompt: promptText.trim(),
+        intent,
       });
-
-      if (!res.ok) {
-        throw new Error(`Ace request failed: ${res.statusText}`);
-      }
-
-      const data = await res.json();
       if (data.threadId) {
         setThreadId(data.threadId);
       }

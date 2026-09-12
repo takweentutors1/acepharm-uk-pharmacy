@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Card } from '@acepharm/ui';
+import { apiClient } from '@/lib/api-client';
 import { 
   Play, 
   Timer, 
@@ -168,25 +169,13 @@ export function SessionBuilder() {
     const catQuery = selectedCategoryIds.join(',');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.acepharmexams.co.uk';
-      const res = await fetch(`${API_URL}/api/v1/sessions/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode,
-          questionCount: effectiveCount,
-          categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
-          statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
-        }),
+      const data = await apiClient.post('/api/v1/sessions/create', {
+        mode,
+        questionCount: effectiveCount,
+        categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
+        statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
       });
 
-      if (!res.ok) {
-        const error = await res.json().catch(() => ({ error: 'Failed to create session' }));
-        throw new Error(error.error || 'Failed to create session');
-      }
-
-      const data = await res.json();
-      // Store session data in sessionStorage for the active page to consume
       sessionStorage.setItem('acepharm_active_session', JSON.stringify(data));
       window.location.href = `/session/active?mode=${mode}&count=${effectiveCount}&categories=${encodeURIComponent(catQuery)}&filter=${statusFilter}`;
     } catch (err: any) {
